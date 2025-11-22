@@ -1,0 +1,341 @@
+<mat-drawer-container class="flex-auto h-full">
+    <!-- Drawer -->
+    <mat-drawer class="w-90" [mode]="'over'" #matDrawer autoFocus="false">
+        <!-- Header -->
+        <div class="flex items-center justify-between m-4 mr-3 sm:my-5">
+            <!-- Title -->
+            <div class="text-3xl font-semibold tracking-tight leading-8">Filtrar por:</div>
+            <!-- Close Drawer -->
+            <div>
+                <button mat-icon-button (click)="matDrawer.close()">
+                    <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                </button>
+            </div>
+        </div>
+        <div class="flex flex-col flex-auto h-full dark:bg-default">
+            <!-- Filtros -->
+            <div class="flex flex-col flex-auto shrink-0 pt-6 bg-card dark:bg-transparent">
+                <form class="flex flex-col px-6" [formGroup]="filtroUsuarioForm">
+
+                    <!-- Tipos de Documento -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Tipos de Documento</mat-label>
+                        <mat-select [formControlName]="'tiposDocumento'" multiple #selectTipoDocumentoItem>
+                            <mat-select-trigger>
+                                <ng-container>
+                                    <span *ngFor="let tiposDocumento of selectTipoDocumentoItem.value; let i = index">
+                                        {{ tiposDocumento.descripcion || '' }}<ng-container
+                                            *ngIf="i < selectTipoDocumentoItem.value.length - 1">, </ng-container>
+                                    </span>
+                                </ng-container>
+                            </mat-select-trigger>
+                            <app-selectAll [model]="filtroUsuarioForm.get('tiposDocumento')"
+                                [values]="allTipoDocumento">
+                            </app-selectAll>
+                            <mat-option *ngFor="let option of allTipoDocumento" [value]="option">
+
+                                {{option.descripcion }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Número de Documento -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Número de Documento</mat-label>
+                        <input autocomplete="off" matInput formControlName="numeroDocumento" maxlength="50">
+                    </mat-form-field>
+
+                    <!-- Géneros -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Géneros</mat-label>
+                        <mat-select [formControlName]="'generos'" multiple #selectGenerosItem>
+                            <mat-select-trigger>
+                                <ng-container>
+                                    <span *ngFor="let genero of selectGenerosItem.value; let i = index">
+                                        {{ genero.descripcion || '' }}<ng-container
+                                            *ngIf="i < selectGenerosItem.value.length - 1">, </ng-container>
+                                    </span>
+                                </ng-container>
+                            </mat-select-trigger>
+                            <app-selectAll [model]="filtroUsuarioForm.get('generos')" [values]="allGeneros">
+                            </app-selectAll>
+                            <mat-option *ngFor="let option of allGeneros" [value]="option">
+
+                                {{option.descripcion }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Nombres -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Nombres</mat-label>
+                        <input autocomplete="off" matInput formControlName="nombres" maxlength="50">
+                    </mat-form-field>
+
+                    <!-- Apellidos -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Apellidos</mat-label>
+                        <input autocomplete="off" matInput formControlName="apellidos" maxlength="50">
+                    </mat-form-field>
+
+                    <!-- Correo Electrónico -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Correo Electrónico</mat-label>
+                        <input autocomplete="off" matInput formControlName="correoElectronico" maxlength="50">
+                    </mat-form-field>
+
+                    <!-- Fecha Registro Inicio -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Fecha Registro Inicio</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off" matInput
+                            [matDatepicker]="pickerInicio" [formControlName]="'fechaRegistroInicio'">
+                        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerInicio></mat-datepicker>
+                    </mat-form-field>
+
+                    <!-- Fecha Registro Fin -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Fecha Registro Fin</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off" matInput
+                            [matDatepicker]="pickerFin" [formControlName]="'fechaRegistroFin'">
+                        <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerFin></mat-datepicker>
+                    </mat-form-field>
+
+                    <button class="mt-4 mb-8" mat-flat-button [color]="'primary'" (click)="btnBuscar()"
+                        [disabled]="filtroUsuarioForm.invalid || disabledBuscar">
+                        <mat-icon *ngIf="!disabledBuscar" class="icon-size-2"
+                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                        <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
+                        <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24" [mode]="'indeterminate'">
+                        </mat-progress-spinner>
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+    </mat-drawer>
+    <!-- Content -->
+    <mat-drawer-content class="flex flex-col">
+        <div class="flex flex-col flex-auto w-full">
+            <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+                <!-- Title and action buttons -->
+                <div class="flex items-center justify-between w-full">
+
+                    <div class="flex-1 min-w-0">
+                        <!-- Title -->
+                        <div class="mt-2">
+                            <h2 class="text-2xl md:text-2xl font-semibold tracking-tight leading-8">Lista de Usuarios
+                            </h2>
+                        </div>
+                        <!-- Breadcrumbs -->
+                        <div class="flex flex-wrap items-center font-medium">
+                            <div>
+                                <a class="whitespace-nowrap text-primary-500">Usuarios</a>
+                            </div>
+                            <div class="flex items-center ml-1 whitespace-nowrap">
+                                <mat-icon class="icon-size-5 text-secondary"
+                                    [svgIcon]="'heroicons_mini:chevron-right'"></mat-icon>
+                                <a class="ml-1 text-primary-500">Lista de Usuarios</a>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="flex items-center ml-6">
+                        @if (isMobilSize()) {
+                        <!-- Actions menu (visible on xs) -->
+                        <button [matMenuTriggerFor]="actionsMenu" mat-icon-button>
+                            <mat-icon [svgIcon]="'heroicons_mini:ellipsis-vertical'"></mat-icon>
+                        </button>
+                        <mat-menu #actionsMenu="matMenu">
+                            <button mat-menu-item (click)="onShowFormRegistrarUsuario()">
+                                <mat-icon [svgIcon]="'heroicons_solid:plus'"></mat-icon>
+                                <span class="ml-1">Nuevo</span>
+                            </button>
+                            <button mat-menu-item (click)="matDrawer.open()">
+                                <mat-icon [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                                <span class="ml-1">Filtrar</span>
+                            </button>
+                            <button mat-menu-item [disabled]="disabledExportar" (click)="onExportar()">
+                                <mat-icon [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
+                                <span class="ml-1">Exportar</span>
+                            </button>
+                        </mat-menu>
+                        } @else {
+                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                            mat-flat-button [color]="'primary'" (click)="onShowFormRegistrarUsuario()"
+                            [color]="'primary'">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:plus'"></mat-icon>
+                            <span class="ml-2">Nuevo</span>
+                        </button>
+                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                            mat-stroked-button (click)="matDrawer.open()">
+                            <mat-icon class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                            <span class="ml-2">Filtrar</span>
+                        </button>
+                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                            mat-stroked-button [disabled]="disabledExportar" (click)="onExportar()">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
+                            <span class="ml-2">Exportar</span>
+                        </button>
+                        }
+
+                    </div>
+                </div>
+                <div class="w-full mt-4">
+
+                    <div class="skeleton-default  bg-card shadow rounded-2xl overflow-hidden " *ngIf="skeleton">
+                        <ngx-skeleton-loader [count]="skeletonNumber"
+                            [theme]="{ 'border-radius': '0', height: '50px' }"></ngx-skeleton-loader>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-1 gap-8 w-full mt-6">
+
+                        <!-- Tabla -->
+                        <div class="xl:col-span-1 flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden"
+                            *ngIf="!skeleton">
+                            <div class="overflow-x-auto mx-6">
+                                <table class="w-full bg-transparent mb-3" mat-table matSort [dataSource]="pageSlice"
+                                    [trackBy]="trackByFn" #usuariosTable>
+
+                                    <!-- Nombres -->
+                                    <ng-container matColumnDef="nombres">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Nombres
+                                        </th>
+                                        <td mat-cell *matCellDef="let usuario" class="min-w-50">
+                                            <span class="flex items-center">
+                                                <span class="ml-3 leading-4">{{usuario.nombres}}</span>
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Apellidos -->
+                                    <ng-container matColumnDef="apellidos">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Apellidos
+                                        </th>
+                                        <td mat-cell *matCellDef="let usuario" class="min-w-50">
+                                            <span class="flex items-center">
+                                                <span class="ml-3 leading-4">{{usuario.apellidos}}</span>
+                                            </span>
+
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Rol -->
+                                    <ng-container matColumnDef="rol">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Rol
+                                        </th>
+                                        <td mat-cell *matCellDef="let usuario">
+                                            <span class="pr-6 whitespace-nowrap">
+                                                {{usuario.rol.nombre}}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Correo -->
+                                    <ng-container matColumnDef="correo">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Correo
+                                        </th>
+                                        <td mat-cell *matCellDef="let usuario">
+                                            <span class="pr-6 whitespace-nowrap">
+                                                <a [href]="'mailto:' + usuario.correoElectronico"
+                                                    class="text-blue-500 hover:underline">
+                                                    {{ usuario.correoElectronico | lowercase }}
+                                                </a>
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+
+                                    <!-- Celular -->
+                                    <ng-container matColumnDef="celular">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Celular
+                                        </th>
+                                        <td mat-cell *matCellDef="let usuario">
+                                            <span class="pr-6 whitespace-nowrap">
+                                                {{usuario.celular}}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Fecha Registro -->
+                                    <ng-container matColumnDef="fechaRegistro">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Fecha Registro
+                                        </th>
+                                        <td mat-cell *matCellDef="let usuario" style="min-width: 180px">
+                                            <span class="pr-6 whitespace-nowrap">
+                                                {{usuario.fechaRegistro | date:'dd/MM/yyyy HH:mm'}}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Activar/Desactivar -->
+                                    <ng-container matColumnDef="activarDesactivar">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Activo</th>
+                                        <td mat-cell *matCellDef="let usuario">
+                                            <mat-slide-toggle [checked]="usuario.activo" color="primary"
+                                                (change)="UpdateActivoUsuarioAsync(usuario, $event.checked)"
+                                                [disabled]="disabledAcciones">
+                                            </mat-slide-toggle>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Acciones -->
+                                    <ng-container matColumnDef="acciones">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </th>
+                                        <td mat-cell *matCellDef="let element">
+                                            <div class="flex">
+                                                <button mat-icon-button color="accent"
+                                                    (click)="onShowFormDetalleUsuario(element)" class="p-1"
+                                                    [disabled]="disabledAcciones">
+                                                    <mat-icon svgIcon="feather:eye"></mat-icon>
+                                                </button>
+                                                <button mat-icon-button color="primary"
+                                                    (click)="onShowFormModificaUsuario(element)" class="p-1"
+                                                    [disabled]="disabledAcciones">
+                                                    <mat-icon svgIcon="feather:edit-2"></mat-icon>
+                                                </button>
+                                                <button mat-icon-button color="warn" (click)="DeleteAsync(element)"
+                                                    class="p-1" [disabled]="disabledAcciones">
+                                                    <mat-icon svgIcon="feather:trash-2"></mat-icon>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="usuariosTableColumns"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: usuariosTableColumns;"></tr>
+                                </table>
+                            </div>
+
+                            <div class="paginator" *ngIf="allUsuariosDataSource.data.length > 0">
+                                <mat-paginator #paginator [length]="allUsuariosDataSource.data.length" [pageSize]="10"
+                                    [pageSizeOptions]="[10, 15, 20]" aria-label="Seleccione página"
+                                    (page)="onPageChange($event)">
+                                </mat-paginator>
+                            </div>
+                            <div class="paginator" *ngIf="allUsuariosDataSource.data.length === 0">
+                                <img [src]="imgNoDataUltimosRegistros" alt="No hay datos disponibles"
+                                    class="w-72 mx-auto mt-2" />
+                                <div
+                                    class="mt-4 sm:mt-8 text-2xl md:text-2xl font-semibold tracking-tight leading-tight md:leading-none text-center">
+                                    {{textoResultadoTable}}</div>
+                                <div>
+                                    <p class="mt-2 text-gray-500 text-center">Aplique otros filtros de búsqueda</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

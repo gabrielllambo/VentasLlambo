@@ -1,0 +1,154 @@
+<div class="flex flex-col max-w-3xl md:min-w-200 max -m-6 height-dialog">
+
+    <!-- Header -->
+    <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+        <div class="text-lg font-medium">Detalle marca</div>
+        <button mat-icon-button [tabIndex]="-1" (click)="cerrarVentanaEmergente()">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Compose form -->
+    <form class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto" [formGroup]="detalleMarcaForm">
+        @if (isMobilSize()) {
+        <div class="flex flex-wrap space-y-2">
+            <div class="w-full">
+                <!-- Nombre -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Nombre</mat-label>
+                    <input matInput formControlName="nombre" autocomplete="off">
+                </mat-form-field>
+            </div>
+ 
+            <div class="w-full">
+                <!-- Descripción -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Descripción</mat-label>
+                    <textarea class="no-resize-text-area" matInput formControlName="descripcion"></textarea>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Color -->
+                <mat-form-field class="w-full">
+                    <input matInput disabled placeholder="Color" autocomplete="off">
+                    <ngx-colors [formControlName]="'color'" ngx-colors-trigger acceptLabel="Aceptar"
+                        cancelLabel="Cancelar">
+                    </ngx-colors>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Activo -->
+                <mat-form-field class="w-full">
+                    <input matInput readonly>
+                    <mat-checkbox [color]="'primary'" [formControlName]="'activo'">
+                        Activo
+                    </mat-checkbox>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Fecha Registro -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Fecha registro</mat-label>
+                    <input autocomplete="off" matInput [formControlName]="'fechaRegistro'"
+                        [matDatetimepicker]="fechaRegistro" autocomplete="false" placeholder="Fecha registro"
+                        class="text-sm h-8 p-1" />
+                    <mat-datetimepicker-toggle matSuffix [for]="fechaRegistro"></mat-datetimepicker-toggle>
+                    <mat-datetimepicker #fechaRegistro type="datetime" openOnFocus="false"
+                        timeInterval="5"></mat-datetimepicker>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Última Fecha Modificación   -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Última fecha modificación</mat-label>
+                    <input matInput [formControlName]="'fechaActualizacion'" [matDatetimepicker]="fechaActualizacion"
+                        autocomplete="false" placeholder="Última fecha modificación" class="text-sm h-8 p-1" />
+                    <mat-datetimepicker-toggle matSuffix [for]="fechaActualizacion"></mat-datetimepicker-toggle>
+                    <mat-datetimepicker #fechaActualizacion type="datetime" openOnFocus="false"
+                        timeInterval="5"></mat-datetimepicker>
+                </mat-form-field>
+            </div>
+
+            <!-- Botones -->
+            <div class="w-full flex justify-between">
+                <button class="mobil-btn" mat-flat-button color="primary" type="button"
+                    (click)="cerrarVentanaEmergente()">
+                    <span>Cerrar</span>
+                </button>
+            </div>
+
+        </div>
+
+        } @else {
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Nombre -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Nombre</mat-label>
+                <input autocomplete="off" matInput [formControlName]="'nombre'" [placeholder]="'Nombre'" readonly>
+            </mat-form-field>
+        </div>
+ 
+        <div class="flex justify-between gap-4">
+            <!-- Descripcion -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Descripción</mat-label>
+                <textarea matInput [formControlName]="'descripcion'" [placeholder]="'Descripción'"></textarea>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4">
+            <!-- Color -->
+            <mat-form-field class="flex-1">
+                <input autocomplete="off" matInput disabled placeholder="Color">
+                <ngx-colors [formControlName]="'color'" ngx-colors-trigger acceptLabel="Aceptar" cancelLabel="Cancelar">
+                </ngx-colors>
+            </mat-form-field>
+
+            <!-- Activo -->
+            <mat-form-field class="flex-1">
+                <input matInput readonly>
+                <mat-checkbox [color]="'primary'" matSuffix [formControlName]="'activo'">Activo</mat-checkbox>
+            </mat-form-field>
+
+        </div>
+
+        <div class="flex justify-between gap-4">
+            <!-- Fecha Registro -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Fecha registro</mat-label>
+                <input autocomplete="off" matInput [formControlName]="'fechaRegistro'"
+                    [matDatetimepicker]="fechaRegistro" autocomplete="false" placeholder="Fecha registro"
+                    class="text-sm h-8 p-1" />
+                <mat-datetimepicker-toggle matSuffix [for]="fechaRegistro"></mat-datetimepicker-toggle>
+                <mat-datetimepicker #fechaRegistro type="datetime" openOnFocus="false"
+                    timeInterval="5"></mat-datetimepicker>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4">
+            <!-- Última Fecha Modificación   -->
+            <mat-form-field class="flex-1 " [appearance]="'outline'">
+                <mat-label>Última fecha modificación</mat-label>
+                <input matInput [formControlName]="'fechaActualizacion'" [matDatetimepicker]="fechaActualizacion"
+                    autocomplete="false" placeholder="Última fecha modificación" class="text-sm h-8 p-1" />
+                <mat-datetimepicker-toggle matSuffix [for]="fechaActualizacion"></mat-datetimepicker-toggle>
+                <mat-datetimepicker #fechaActualizacion type="datetime" openOnFocus="false"
+                    timeInterval="5"></mat-datetimepicker>
+            </mat-form-field>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end mt-2">
+            <button class="px-8" mat-flat-button [color]="'primary'" type="button" (click)="cerrarVentanaEmergente()">
+                <span> Cerrar </span>
+            </button>
+            <span class="w-2"></span>
+        </div>
+        }
+    </form>
+</div>

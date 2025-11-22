@@ -1,0 +1,126 @@
+<div class="w-full max-w-3xl">
+    <!-- Form -->
+    <form [formGroup]="informacionForm">
+
+        <!-- Section -->
+        <div class="w-full mt-6">
+            <div class="text-xl">Información Empresarial</div>
+            <div class="text-secondary">Después de cambiar su información, necesitarás iniciar sesión nuevamente</div>
+        </div>
+
+        <!-- Alert -->
+        <fuse-alert class="mt-8" *ngIf="showAlert" [appearance]="'outline'" [showIcon]="false" [type]="alert.type"
+            [type]="alert.type" [@shake]="alert.type === 'error'">
+            <div [innerHTML]="alert.message"></div>
+        </fuse-alert>
+
+        <div class="grid sm:grid-cols-4 gap-6 w-full mt-8">
+
+            <!-- Razón Social -->
+            <div class="sm:col-span-2">
+                <mat-form-field class="w-full" [subscriptSizing]="'dynamic'" appearance="outline">
+                    <mat-label>Razón Social</mat-label>
+                    <input [formControlName]="'razonSocial'" matInput>
+                    <mat-error *ngIf="informacionForm.get('razonSocial').hasError('required')">
+                        Razón Social es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <!-- RUC -->
+            <div class="sm:col-span-2">
+                <mat-form-field class="w-full" [subscriptSizing]="'dynamic'" appearance="outline">
+                    <mat-label>RUC</mat-label>
+                    <input [formControlName]="'ruc'" matInput>
+                    <mat-error *ngIf="informacionForm.get('ruc').hasError('required')">
+                        RUC es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <!-- Celular -->
+            <div class="sm:col-span-2">
+                <mat-form-field class="w-full" [subscriptSizing]="'dynamic'" appearance="outline">
+                    <mat-label>Celular</mat-label>
+                    <input [formControlName]="'celular'" matInput>
+                </mat-form-field>
+                <mat-error *ngIf="informacionForm.get('celular')?.hasError('onlyPhoneNumbersForm')">
+                    Ingrese un celular válido.
+                </mat-error>
+            </div>
+
+            <!-- Correo-->
+            <div class="sm:col-span-2">
+                <mat-form-field class="w-full" [subscriptSizing]="'dynamic'" appearance="outline">
+                    <mat-label>Correo</mat-label>
+                    <input [formControlName]="'correo'" matInput>
+                </mat-form-field>
+                <mat-error *ngIf="informacionForm.get('correo').hasError('required')">
+                    Correo es requerido
+                </mat-error>
+                <mat-error *ngIf="informacionForm.get('correo')?.hasError('invalidEmail')">
+                    Ingrese un correo válido.
+                </mat-error>
+            </div>
+
+            <!-- Moneda -->
+            <div class="sm:col-span-2">
+                <mat-form-field class="w-full" [subscriptSizing]="'dynamic'" appearance="outline">
+                    <mat-label>Moneda</mat-label>
+                    <mat-select formControlName="moneda" required [compareWith]="compareObjects">
+                        <mat-option *ngFor="let moneda of moendas" [value]="moneda">
+                            {{ moneda.descripcion }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <!-- Fecha de Registro -->
+            <div class="sm:col-span-2">
+                <mat-form-field class="w-full" [subscriptSizing]="'dynamic'" appearance="outline">
+                    <mat-label>Fecha de Registro </mat-label>
+                    <input matInput [matDatepicker]="fechaRegistroPicker" [formControlName]="'fechaRegistro'">
+                    <mat-datepicker-toggle matSuffix [for]="fechaRegistroPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #fechaRegistroPicker></mat-datepicker>
+                </mat-form-field>
+            </div>
+
+            <!-- Dirección -->
+            <div class="sm:col-span-4">
+                <mat-form-field class="w-full" [subscriptSizing]="'dynamic'" appearance="outline">
+                    <mat-label>Dirección</mat-label>
+                    <textarea [formControlName]="'direccion'" matInput></textarea>
+                </mat-form-field>
+            </div>
+
+        </div>
+
+        <!-- Divider -->
+        <div class="mt-10 mb-5"></div>
+
+        <!-- Contenido para pantallas pequeñas -->
+        <div class="w-full flex justify-between lg:hidden">
+            <span class="w-4"></span>
+            <button class="mobil-btn w-40 flex justify-center items-center" mat-flat-button color="primary"
+                type="button" [disabled]="informacionForm.invalid || isCallingService"
+                (click)="UpdateInformacionNegocioAsync()">
+                <span *ngIf="!informacionForm.disabled">Guardar</span>
+                <mat-progress-spinner *ngIf="informacionForm.disabled" [diameter]="24"
+                    mode="indeterminate"></mat-progress-spinner>
+            </button>
+        </div>
+
+        <!-- Contenido para pantallas grandes -->
+        <div class="hidden lg:flex justify-end mt-2">
+            <button class="ml-3 w-40 h-10 flex items-center justify-center" mat-flat-button [color]="'primary'"
+                type="button" [disabled]="informacionForm.invalid || isCallingService"
+                (click)="UpdateInformacionNegocioAsync()">
+                <span *ngIf="!informacionForm.disabled">
+                    Guardar
+                </span>
+                <mat-progress-spinner *ngIf="informacionForm.disabled" [diameter]="24" [mode]="'indeterminate'">
+                </mat-progress-spinner>
+            </button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,106 @@
+<div class="flex flex-col max-w-3xl md:min-w-200 max -m-6 height-dialog">
+
+    <!-- Header -->
+    <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+        <div class="text-lg font-medium">Nueva marca</div>
+        <button mat-icon-button [tabIndex]="-1" (click)="cerrarVentanaEmergente()">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Compose form -->
+    <form class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto" [formGroup]="registroMarcaForm">
+        @if (isMobilSize()) {
+        <div class="flex flex-wrap space-y-2">
+            <div class="w-full">
+                <!-- Nombre -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Nombre</mat-label>
+                    <input autocomplete="off" matInput formControlName="nombre" maxlength="50" required>
+                    <mat-error *ngIf="registroMarcaForm.get('nombre').hasError('required')">
+                        Nombre es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+ 
+            <div class="w-full">
+                <!-- Descripción -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Descripción</mat-label>
+                    <textarea matInput formControlName="descripcion"></textarea>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Color -->
+                <mat-form-field class="w-full">
+                    <input autocomplete="off" matInput readonly placeholder="Color">
+                    <ngx-colors formControlName="color" ngx-colors-trigger required [(ngModel)]="colorSelected"
+                        acceptLabel="Aceptar" cancelLabel="Cancelar"></ngx-colors>
+                </mat-form-field>
+            </div>
+
+            <!-- Botones -->
+            <div class="w-full flex justify-between">
+                <button class="mobil-btn" mat-stroked-button color="accent" type="button"
+                    (click)="cerrarVentanaEmergente()">
+                    <span>Cancelar</span>
+                </button>
+                <span class="w-4"></span>
+
+                <button class="mobil-btn" mat-flat-button color="primary" type="button" (click)="AddMarcaAsync()"
+                    [disabled]="registroMarcaForm.invalid || isCallingService">
+                    <span *ngIf="!registroMarcaForm.disabled">Guardar</span>
+                    <mat-progress-spinner *ngIf="registroMarcaForm.disabled" [diameter]="24"
+                        mode="indeterminate"></mat-progress-spinner>
+                </button>
+            </div>
+
+        </div>
+
+        }@else {
+        <!-- Nombre -->
+        <mat-form-field class="mb-2" [appearance]="'outline'">
+            <mat-label>Nombre</mat-label>
+            <input autocomplete="off" matInput [formControlName]="'nombre'" maxlength="50" [placeholder]="'Nombre'"
+                required>
+            <mat-error *ngIf="registroMarcaForm.get('nombre').hasError('required')">
+                Nombre es requerido
+            </mat-error>
+        </mat-form-field>
+ 
+
+        <!-- Descripcion -->
+        <mat-form-field [appearance]="'outline'">
+            <mat-label>Descripción</mat-label>
+            <textarea matInput [formControlName]="'descripcion'" maxlength="250"
+                [placeholder]="'Descripción'"></textarea>
+        </mat-form-field>
+
+        <!-- Color -->
+        <mat-form-field>
+            <input autocomplete="off" matInput readonly placeholder="Color">
+            <ngx-colors [formControlName]="'color'" ngx-colors-trigger required [(ngModel)]="colorSelected"
+                acceptLabel="Aceptar" cancelLabel="Cancelar">
+            </ngx-colors>
+        </mat-form-field>
+
+        <!-- Actions -->
+        <div class="flex justify-end mt-2">
+            <button class="px-8" mat-stroked-button [color]="'accent'" type="button" (click)="cerrarVentanaEmergente()">
+                <span> Cancelar </span>
+            </button>
+            <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center" mat-flat-button
+                [color]="'primary'" type="button" [disabled]="registroMarcaForm.invalid || isCallingService"
+                (click)="AddMarcaAsync()">
+                <span *ngIf="!registroMarcaForm.disabled">
+                    Guardar
+                </span>
+                <mat-progress-spinner *ngIf="registroMarcaForm.disabled" [diameter]="24"
+                    [mode]="'indeterminate'"></mat-progress-spinner>
+            </button>
+        </div>
+        }
+
+    </form>
+</div>

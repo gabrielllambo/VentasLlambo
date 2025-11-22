@@ -1,0 +1,5 @@
+{
+    "angular.enable-strict-mode-prompt": false,
+    "appService.defaultWebAppToDeploy": "/subscriptions/91e047ee-82e6-4600-a10d-5fa2a693a812/resourceGroups/ventas/providers/Microsoft.Web/sites/ventasweb",
+    "appService.deploySubpath": "dist\\ventasPlatform"
+}

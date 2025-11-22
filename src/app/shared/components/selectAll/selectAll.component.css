@@ -1,0 +1,4 @@
+app-lap-selectAll .mat-checkbox-layout,
+app-lap-selectAll .mat-checkbox-label {
+  width:100% !important;
+}

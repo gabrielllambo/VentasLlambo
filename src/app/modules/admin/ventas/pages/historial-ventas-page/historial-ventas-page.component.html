@@ -1,0 +1,295 @@
+<mat-drawer-container class="flex-auto h-full">
+    <!-- Drawer -->
+    <mat-drawer class="w-90" [mode]="'over'" #matDrawer autoFocus="false">
+        <!-- Header -->
+        <div class="flex items-center justify-between m-4 mr-3 sm:my-5">
+            <!-- Title -->
+            <div class="text-3xl font-semibold tracking-tight leading-8">Filtrar por:</div>
+            <!-- Close Drawer -->
+            <div>
+                <button mat-icon-button (click)="matDrawer.close()">
+                    <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                </button>
+            </div>
+        </div>
+        <div class="flex flex-col flex-auto h-full dark:bg-default">
+            <!-- Filtros -->
+            <div class="flex flex-col flex-auto shrink-0 pt-6 bg-card dark:bg-transparent">
+
+                <form class="flex flex-col px-6" [formGroup]="filtroVentaForm">
+
+                    <!-- Usuarios -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Usuarios</mat-label>
+                        <mat-select [formControlName]="'usuarios'" multiple #selectUsuarioItem>
+                            <mat-select-trigger>
+                                <ng-container *ngIf="selectUsuarioItem.value?.length > 0">
+                                    <span *ngFor="let usuario of selectUsuarioItem.value; let i = index">
+                                        {{ usuario.correoElectronico || '' }}<ng-container
+                                            *ngIf="i < selectUsuarioItem.value.length - 1">, </ng-container>
+                                    </span>
+                                </ng-container>
+                            </mat-select-trigger>
+                            <app-selectAll [model]="filtroVentaForm.get('usuarios')" [values]="allUsuarioSource">
+                            </app-selectAll>
+                            <mat-option *ngFor="let option of allUsuarioSource" [value]="option">
+                                {{option.correoElectronico }}</mat-option>
+
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Número de Venta -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Número de Venta</mat-label>
+                        <input matInput formControlName="numeroVenta" maxlength="50" autocomplete="off">
+                    </mat-form-field>
+
+                    <!-- Fecha Venta Inicio -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Fecha Venta Inicio</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off" matInput
+                            [matDatepicker]="pickerInicio" [formControlName]="'fechaVentaInicio'">
+                        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerInicio></mat-datepicker>
+                    </mat-form-field>
+
+                    <!-- Fecha Venta Fin -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Fecha Venta Fin</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off" matInput
+                            [matDatepicker]="pickerFin" [formControlName]="'fechaVentaFin'">
+                        <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerFin></mat-datepicker>
+                    </mat-form-field>
+
+                    <!-- Monto Venta Inicio -->
+                    <mat-form-field class="w-full " [appearance]="'outline'">
+                        <mat-label>Monto Venta Inicio</mat-label>
+                        <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="montoVentaInicio">
+                    </mat-form-field>
+
+                    <!-- Monto Venta Fin -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Monto Venta Fin</mat-label>
+                        <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="montoVentaFin">
+                    </mat-form-field>
+
+                    <button class="mt-4 mb-8" mat-flat-button [color]="'primary'" (click)="btnBuscar()"
+                        [disabled]="filtroVentaForm.invalid || disabledBuscar">
+                        <mat-icon *ngIf="!disabledBuscar" class="icon-size-2"
+                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                        <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
+                        <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24" [mode]="'indeterminate'">
+                        </mat-progress-spinner>
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </mat-drawer>
+    <!-- Content -->
+    <mat-drawer-content class="flex flex-col">
+        <div class="flex flex-col flex-auto w-full">
+            <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+                <!-- Title and action buttons -->
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex-1 min-w-0">
+                        <!-- Title -->
+                        <div class="mt-2">
+                            <h2 class="text-2xl md:text-2xl font-semibold tracking-tight leading-8">Historial
+                            </h2>
+                        </div>
+                        <!-- Breadcrumbs -->
+                        <div class="flex flex-wrap items-center font-medium">
+                            <div>
+                                <a class="whitespace-nowrap text-primary-500">Ventas</a>
+                            </div>
+                            <div class="flex items-center ml-1 whitespace-nowrap">
+                                <mat-icon class="icon-size-5 text-secondary"
+                                    [svgIcon]="'heroicons_mini:chevron-right'"></mat-icon>
+                                <a class="ml-1 text-primary-500">Historial</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center ml-6">
+                        @if (isMobilSize()) {
+                        <!-- Actions menu (visible on xs) -->
+                        <button [matMenuTriggerFor]="actionsMenu" mat-icon-button>
+                            <mat-icon [svgIcon]="'heroicons_mini:ellipsis-vertical'"></mat-icon>
+                        </button>
+                        <mat-menu #actionsMenu="matMenu">
+                            <button mat-menu-item (click)="onExportar()">
+                                <mat-icon [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
+                                <span class="ml-1">Exportar</span>
+                            </button>
+                            <button mat-menu-item (click)="matDrawer.open()">
+                                <mat-icon [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                                <span class="ml-1">Filtrar</span>
+                            </button>
+
+                        </mat-menu>
+                        } @else {
+                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                            mat-flat-button [color]="'primary'" [color]="'primary'" (click)="onExportar()">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
+                            <span class="ml-2">Exportar</span>
+                        </button>
+                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                            mat-stroked-button (click)="matDrawer.open()">
+                            <mat-icon class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                            <span class="ml-2">Filtrar</span>
+                        </button>
+                        }
+
+                    </div>
+                </div>
+                <div class="w-full ">
+
+                    <div class="skeleton-default  bg-card shadow rounded-2xl overflow-hidden " *ngIf="skeleton">
+                        <ngx-skeleton-loader [count]="skeletonNumber"
+                            [theme]="{ 'border-radius': '0', height: '50px' }"></ngx-skeleton-loader>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-1 gap-8 w-full mt-6">
+
+                        <!-- Tabla -->
+                        <div class="xl:col-span-1 flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden"
+                            *ngIf="!skeleton">
+                            <div class="overflow-x-auto mx-6">
+                                <table class="w-full bg-transparent mb-3" mat-table matSort [dataSource]="pageSlice"
+                                    [trackBy]="trackByFn" #historialVentaTable>
+
+                                    <!-- Número de Venta -->
+                                    <ng-container matColumnDef="numeroVenta">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Número de Venta
+                                        </th>
+                                        <td mat-cell *matCellDef="let venta" class="min-w-40">
+                                            <span class="flex items-center">
+                                                <span class="ml-3 leading-4">{{venta.numeroVenta}}</span>
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Nombre Cliente -->
+                                    <ng-container matColumnDef="nombreCliente" class="min-w-50">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Nombre Cliente
+                                        </th>
+                                        <td mat-cell *matCellDef="let venta">
+                                            <span class="pr-6 whitespace-nowrap">
+                                                {{venta.nombreCliente}}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Correo Usuario -->
+                                    <ng-container matColumnDef="correoUsuario">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Correo Usuario
+                                        </th>
+                                        <td mat-cell *matCellDef="let venta">
+                                            <span class="pr-6 whitespace-nowrap">
+                                                <a [href]="'mailto:' + venta.correoUsuario"
+                                                    class="text-blue-500 hover:underline">
+                                                    {{ venta.correoUsuario | lowercase }}
+                                                </a>
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Fecha Venta -->
+                                    <ng-container matColumnDef="fechaVenta">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Fecha Venta
+                                        </th>
+                                        <td mat-cell *matCellDef="let venta" style="min-width: 180px">
+                                            <span class="pr-6 whitespace-nowrap">
+                                                {{venta.fechaVenta | date:'dd/MM/yyyy HH:mm'}}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Total Venta -->
+                                    <ng-container matColumnDef="totalVenta">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef class="min-w-10"> Total
+                                            Venta
+                                        </th>
+                                        <td mat-cell *matCellDef="let venta">
+                                            <span style="color: #056DB6;" class="pr-6 w-auto h-auto rounded-full">
+                                                {{ venta.totalVenta |
+                                                currency:monedaInfo.codigoMoneda:'code':'':
+                                                monedaInfo.cultureInfo }}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Estado -->
+                                    <ng-container matColumnDef="estado">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef class="min-w-10"> Estado
+                                        </th>
+                                        <td mat-cell *matCellDef="let producto" class="min-w-10 text-center">
+                                            <span
+                                                class="inline-flex items-center font-bold text-xs px-2.5 py-0.5 rounded-full tracking-wide uppercase"
+                                                [ngClass]="{
+                                                                'bg-red-200 text-red-800 dark:bg-red-600 dark:text-red-50': producto?.estado === false,
+                                                                'bg-green-200 text-green-800 dark:bg-green-600 dark:text-green-50': producto?.estado === true
+                                                            }">
+                                                <span class="leading-relaxed whitespace-nowrap">
+                                                    {{ producto?.estado === true ? 'Completado' : 'Anulado' }}
+                                                </span>
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Acciones -->
+                                    <ng-container matColumnDef="acciones">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </th>
+                                        <td mat-cell *matCellDef="let element">
+                                            <button mat-icon-button [matMenuTriggerFor]="menu"
+                                                [disabled]="disabledAcciones">
+                                                <mat-icon>more_vert</mat-icon>
+                                            </button>
+                                            <mat-menu #menu="matMenu">
+                                                <button mat-menu-item (click)="showFormDetalleVentaDialog(element)">
+                                                    <mat-icon svgIcon="feather:eye"></mat-icon> Ver
+                                                </button>
+                                                <button mat-menu-item (click)="verComprobante(element)">
+                                                    <mat-icon [svgIcon]="'feather:file'"></mat-icon> Ver PDF
+                                                </button>
+                                                <button mat-menu-item (click)="AnulaAsync(element)" *ngIf="element.estado === true">
+                                                    <mat-icon svgIcon="feather:trash-2"></mat-icon> Anular
+                                                </button>
+                                            </mat-menu>
+                                        </td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="historialVentaTableColumns"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: historialVentaTableColumns;"></tr>
+                                </table>
+                            </div>
+
+                            <div class="paginator" *ngIf="allHistorialVentaDataSource.data.length > 0">
+                                <mat-paginator #paginator [length]="allHistorialVentaDataSource.data.length"
+                                    [pageSize]="5" [pageSizeOptions]="[10, 15, 20]" aria-label="Seleccione página"
+                                    (page)="onPageChange($event)">
+                                </mat-paginator>
+                            </div>
+                            <div class="paginator" *ngIf="allHistorialVentaDataSource.data.length === 0">
+                                <img [src]="imgNoDataUltimosRegistros" alt="No hay datos disponibles"
+                                    class="w-72 mx-auto mt-2" />
+                                <div
+                                    class="mt-4 sm:mt-8 text-2xl md:text-2xl font-semibold tracking-tight leading-tight md:leading-none text-center">
+                                    {{textoResultadoTable}}</div>
+                                <div>
+                                    <p class="mt-2 text-gray-500 text-center">Aplique otros filtros de búsqueda</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

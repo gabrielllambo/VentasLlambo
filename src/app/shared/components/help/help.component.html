@@ -1,0 +1,23 @@
+<mat-dialog-content class="modal-helper flex flex-col max-w-3xl md:min-w-200 max -m-6 height-dialog"
+  style="overflow: hidden;  ">
+
+  <!-- Header -->
+  <div class="close">
+    <button mat-dialog-close class="modal-close" type="submit">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <swiper-container style="width: 100%;" autoplay="true" navigation="false" pagination="true"
+    pagination-clickable="true" speed="500" loop="true">
+    @for (src of lstSrc; track src) {
+      <swiper-slide>
+        <img style="width: 100%" alt=""
+          [src]="src" />
+      </swiper-slide>
+      }
+    
+ 
+  </swiper-container>
+
+</mat-dialog-content>

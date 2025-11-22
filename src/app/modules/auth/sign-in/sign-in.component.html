@@ -1,0 +1,75 @@
+<div class="flex flex-col flex-auto items-center sm:justify-center min-w-0 bg-card sm:bg-transparent">
+    <div class="w-full sm:w-auto py-8 px-4 sm:p-12 sm:rounded-2xl sm:shadow sm:bg-card">
+        <div class="w-full max-w-80 sm:w-80 mx-auto sm:mx-0">
+            <!-- Logo -->
+            <div class="w-20">
+                <!-- <img src="assets/images/logo/logo.svg"> -->
+            </div>
+
+            <!-- Title -->
+            <div class="mt-8 text-4xl font-extrabold tracking-tight leading-tight">Iniciar sesión</div>
+     
+            <!-- Alert -->
+            <fuse-alert class="mt-8" *ngIf="showAlert" [appearance]="'outline'" [showIcon]="false" [type]="alert.type"
+                [@shake]="alert.type === 'error'">
+                {{alert.message}}
+            </fuse-alert>
+
+            <!-- Sign in form -->
+            <form class="mt-8" [formGroup]="signInForm" #signInNgForm="ngForm">
+
+                <!-- Email field -->
+                <mat-form-field class="w-full mb-2" appearance="outline">
+                    <mat-label>Correo electrónico</mat-label>
+                    <input autocomplete="off" id="correo" matInput [formControlName]="'correo'">
+
+                    <mat-error
+                        *ngIf="signInForm.get('correo').hasError('required') && signInForm.get('correo').touched">
+                        Correo electrónico es requerido
+                    </mat-error>
+                    <mat-error *ngIf="signInForm.get('correo')?.hasError('invalidEmail')">
+                        Ingrese un correo válido.
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Password field -->
+                <mat-form-field class="w-full mb-2" appearance="outline">
+                    <mat-label>Contraseña</mat-label>
+                    <input autocomplete="off" id="password" matInput type="password" [formControlName]="'password'" #passwordField>
+                    <button mat-icon-button type="button"
+                        (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'"
+                        matSuffix>
+                        <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'password'"
+                            [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                        <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'text'"
+                            [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+                    </button>
+                    <mat-error>
+                        Contraseña es requerido
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Actions -->
+                <div class="inline-flex items-center justify-between w-full mt-1.5">
+                    <mat-checkbox class="-ml-2" [color]="'primary'" [formControlName]="'rememberMe'">
+
+                        Recuérdame
+                    </mat-checkbox>
+                    <a class="text-md font-medium text-primary-500 hover:underline"
+                        [routerLink]="['/forgot-password']">¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+
+                <!-- Submit button -->
+                <button class="fuse-mat-button-large w-full mt-6" mat-flat-button [color]="'primary'"
+                    [disabled]="signInForm.invalid || isCallingService" (click)="signIn()">
+                    <span *ngIf="!signInForm.disabled">
+                        Iniciar sesión
+                    </span>
+                    <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24"
+                        [mode]="'indeterminate'"></mat-progress-spinner>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

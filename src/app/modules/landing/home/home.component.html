@@ -1,0 +1,628 @@
+<div class="relative flex flex-col flex-auto min-w-0 overflow-hidden">
+    <!-- Header mejorado con menú hamburguesa -->
+    <header class="sticky top-0 z-30 border-b border-[#E1E1E1] dark:bg-gray-800">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <div class="flex items-center gap-2">
+                    <a href="https://perfisoft.com/" target="_blank"
+                        class="flex flex-shrink-0 items-center space-x-2 duration-300 md:hover:scale-95">
+                        <span class="sr-only">Inicio</span>
+                        <img src="/assets/images/logo/logo.svg" alt="CARNICERIA DON LLAMBO" class="h-10 w-auto md:h-12"
+                            width="35" height="35" />
+                    </a>
+                </div>
+                <!-- Botón hamburguesa -->
+                <div class="md:hidden">
+                    <button (click)="toggleMobileMenu()"
+                        class="text-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary p-2 rounded">
+                        <svg *ngIf="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" class="w-7 h-7">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg *ngIf="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" class="w-7 h-7">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <!-- Navegación de escritorio -->
+                <!-- <div class="hidden md:flex items-center gap-8 xl:gap-12">
+                    <a href="https://perfisoft.com/" target="_blank"
+                        class="text-gray-800 dark:text-gray-100 hover:text-white hover:bg-primary focus:ring-2 focus:ring-primary rounded-lg px-5 py-3 font-semibold text-lg transition duration-300 ease-in-out transition duration-200 transform hover:scale-105">
+                        Acerca de Nosotros
+                    </a>
+                    <a href="https://perfisoft.com/contacto" target="_blank"
+                        class="text-gray-800 dark:text-gray-100 hover:text-white hover:bg-primary focus:ring-2 focus:ring-primary rounded-lg px-5 py-3 font-semibold text-lg transition duration-300 ease-in-out transition duration-200 transform hover:scale-105">
+                        Sistema Personalizado
+                    </a>
+                </div> -->
+                <!-- Acción de usuario escritorio -->
+                <div class="hidden md:flex items-center gap-4">
+                    <!-- <a (click)="scrollToPrecio()"
+                        class="text-white bg-primary focus:outline-none focus:ring-2 focus:ring-primary rounded-lg px-5 py-3 font-semibold text-lg transition duration-300 ease-in-out transition duration-200 transform hover:scale-105">
+                        ¡Conocer Precio!
+                    </a> -->
+                    <a class="text-white bg-primary focus:outline-none focus:ring-2 focus:ring-primary rounded-lg px-12 py-3 font-semibold text-lg transition duration-300 ease-in-out transition duration-200 transform hover:scale-105"
+                        [routerLink]="['/inicio']">Ingresar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Menú móvil -->
+            <div *ngIf="mobileMenuOpen" class="md:hidden flex flex-col gap-4 py-4">
+                <a href="https://perfisoft.com/" target="_blank"
+                    class="block text-gray-800 dark:text-gray-100 hover:bg-primary hover:text-white rounded-lg px-4 py-2 font-semibold transition">
+                    Acerca de Nosotros
+                </a>
+                <a href="https://perfisoft.com/contacto/" target="_blank"
+                    class="block text-gray-800 dark:text-gray-100 hover:bg-primary hover:text-white rounded-lg px-4 py-2 font-semibold transition">
+                    Sistema Personalizado
+                </a>
+                <a href="https://wa.link/0yghxs" target="_blank"
+                    class="block text-gray-800 dark:text-gray-100 hover:bg-primary hover:text-white rounded-lg px-4 py-2 font-semibold transition duration-200 transform hover:scale-105">
+                    ¡Comprar ahora!
+                </a>
+            </div>
+        </div>
+    </header>
+    <!-- Hero Section (Encabezado principal) -->
+    <div class="bg-white relative pt-16 pb-12 sm:pt-20 sm:pb-20 px-6 sm:px-16 overflow-hidden">
+        <div class="flex flex-col sm:flex-row items-center justify-between">
+            <!-- Contenedor de título y descripción -->
+            <div class="w-full sm:w-1/2">
+                <!-- Título principal -->
+                <h1 class="text-5xl sm:text-7xl font-extrabold tracking-tight leading-tight text-left">
+                    Carnicería Don Llambo – Frescura y Sabor en Cada Corte
+                </h1>
+
+                <!-- Descripción -->
+                <p class="text-lg sm:text-xl text-gray-600 mt-6 sm:mt-8 text-left">
+                    Especialistas en cortes de res, cerdo y pollo. Calidad garantizada, atención cercana y productos
+                    frescos todos los días.
+                </p>
+
+                <!-- Call to action -->
+                <!-- <div class="mt-8 sm:mt-12 text-left flex flex-col sm:flex-row gap-4">
+                    <a (click)="scrollToPrecio()"
+                        class="transition duration-150 ease-in-out transform hover:scale-105 px-7 py-6 text-xl"
+                        mat-flat-button color="primary" type="button">
+                        Ver catálogo
+                    </a>
+                    <a href="https://ventas.perfisoft.com/sign-in" target="_blank"
+                        class="transition duration-200 transform hover:scale-105 ease-in-out px-7 py-6 text-xl"
+                        mat-stroked-button [color]="'accent'" type="button">
+                        Hacer pedido
+                    </a>
+                </div> -->
+            </div>
+
+            <!-- Imagen representativa a la derecha -->
+            <div class="w-full sm:w-1/2 ml-0 sm:ml-10 mt-10 sm:mt-0">
+                <swiper-container class="object-cover rounded-lg" style="width: 85%;" autoplay="true" navigation="false"
+                    pagination="true" pagination-clickable="true" speed="500" loop="true">
+
+                    <swiper-slide>
+                        <img style="width: 100%" class="object-cover rounded-lg shadow-lg" alt="Cortes de carne fresca"
+                            src="https://res.cloudinary.com/dvzkgpiv3/image/upload/v1744479552/VentasPlatformDemo/Landing/xur32uwav3xxx6e0qtcu.jpg" />
+                    </swiper-slide>
+
+                    <swiper-slide>
+                        <img style="width: 100%" alt="Carnicería Don Llambo"
+                            src="https://res.cloudinary.com/dvzkgpiv3/image/upload/v1747607065/VentasPlatformDemo/Landing/npmtkpf1qpm6jjdyugep.png" />
+                    </swiper-slide>
+
+                    <swiper-slide>
+                        <img style="width: 100%" alt="Cortes premium"
+                            src="https://res.cloudinary.com/dvzkgpiv3/image/upload/v1744479552/VentasPlatformDemo/Landing/c5khqxmtrpohbsshukd2.png" />
+                    </swiper-slide>
+                </swiper-container>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Características -->
+    <div class="dark:bg-gray-900 flex flex-col items-center px-6 py-10 sm:px-16 sm:pt-18 sm:pb-20">
+        <div class="w-full max-w-7xl">
+            <div>
+                <div class="text-5xl font-extrabold tracking-tight leading-tight">
+                    Nuestros Productos
+                </div>
+                <div class="mt-6 text-xl text-gray-600 text-secondary">
+                    En Carnicería Don Llambo ofrecemos una selección completa de carnes frescas de res, cerdo, pollo y
+                    embutidos. Llevamos calidad, higiene y sabor a cada hogar y negocio.
+                </div>
+            </div>
+
+            <!-- Grid de características -->
+            <div
+                class="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-16 w-full mt-12 sm:mt-16">
+
+                <!-- Feature 1 - Res -->
+                <!-- Feature 1 - Res -->
+                <div>
+                    <span class="flex items-center justify-center w-12 h-12 rounded-full bg-gray-200">
+                        <span class="text-3xl">🥩</span>
+                    </span>
+                    <div class="mt-4 text-xl font-medium">Carne de Res</div>
+                    <div class="mt-2 leading-6 text-gray-600">
+                        Cortes frescos todos los días: lomo fino, posta, bola de pierna, costilla, bife ancho,
+                        carne molida y más. Ideal para el hogar o restaurantes.
+                    </div>
+                </div>
+
+                <!-- Feature 2 - Cerdo -->
+                <div>
+                    <span class="flex items-center justify-center w-12 h-12 rounded-full bg-gray-200">
+                        <span class="text-3xl">🐖</span>
+                    </span>
+                    <div class="mt-4 text-xl font-medium">Carne de Cerdo</div>
+                    <div class="mt-2 leading-6 text-gray-600">
+                        Chuletas, costillas, pierna, lomo, tocino y cortes especiales. Perfectos para parrillas,
+                        asados y menús diarios.
+                    </div>
+                </div>
+
+
+                <!-- Feature 3 - Pollo -->
+                <div>
+                    <span class="flex items-center justify-center w-12 h-12 rounded-full bg-gray-200">
+                        <span class="text-white text-3xl">🐔</span>
+                    </span>
+                    <div class="mt-4 text-xl font-medium">Pollo</div>
+                    <div class="mt-2 leading-6 text-gray-600">
+                        Pollo entero, pechugas, alas, piernas y filetes. Producto fresco, limpio y listo para preparar.
+                    </div>
+                </div>
+
+
+                <!-- Feature 4 - Embutidos -->
+                <!-- <div>
+                    <span class="flex items-center justify-center w-12 h-12 rounded bg-primary">
+                        <mat-icon class="text-white" [svgIcon]="'heroicons_outline:cube'"></mat-icon>
+                    </span>
+                    <div class="mt-4 text-xl font-medium">Embutidos y Otros</div>
+                    <div class="mt-2 leading-6 text-gray-600">
+                        Chorizos, longanizas, salchichas y morcillas. Perfectos para parrilladas, desayunos y comidas
+                        rápidas.
+                    </div>
+                </div> -->
+
+            </div>
+        </div>
+    </div>
+
+
+    <section class="bg-white py-16 px-6 sm:px-16">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-10 text-center">🚀 ¡Ya Están Disfrutando Del
+                Sistema! 🥳
+            </h2>
+
+            <!-- Contenedor de cards -->
+            <div class="flex justify-center">
+
+                <!-- Imagen representativa a la derecha -->
+                <div class="w-full sm:w-1/2 mt-10 sm:mt-0 flex justify-center">
+
+                    <swiper-container class="object-cover rounded-lg shadow-lg" style="width: 85%;" autoplay="true"
+                        navigation="false" pagination="true" pagination-clickable="true" speed="500" loop="true">
+
+                        <swiper-slide style="background-color: transparent;">
+                            <img style="width: 100%" class="object-cover rounded-lg shadow-lg" alt=""
+                                src="https://res.cloudinary.com/dvzkgpiv3/image/upload/v1744479552/VentasPlatformDemo/Landing/xj59cxsyw0yizdspatme.jpg" />
+                        </swiper-slide>
+
+                        <swiper-slide style="background-color: transparent;">
+                            <img style="width: 100%" alt=""
+                                src="https://res.cloudinary.com/dvzkgpiv3/image/upload/v1744479552/VentasPlatformDemo/Landing/riylqzu12naewypkdavh.png" />
+                        </swiper-slide>
+
+                        <swiper-slide style="background-color: transparent;">
+                            <img style="width: 100%" alt=""
+                                src="https://res.cloudinary.com/dvzkgpiv3/image/upload/v1744479553/VentasPlatformDemo/Landing/onvya4hlglvxjohooshv.png" />
+                        </swiper-slide>
+                        <swiper-slide style="background-color: transparent;">
+                            <img style="width: 100%" alt=""
+                                src="https://res.cloudinary.com/dvzkgpiv3/image/upload/v1744479553/VentasPlatformDemo/Landing/xscjjgbaqjjmsoa4rwjo.png" />
+                        </swiper-slide>
+                        <swiper-slide style="background-color: transparent;">
+                            <img style="width: 100%" alt=""
+                                src="https://res.cloudinary.com/dvzkgpiv3/image/upload/v1746251008/VentasPlatformDemo/Landing/zdslfdllmpjfsjge6tvc.png" />
+                        </swiper-slide>
+                        <swiper-slide style="background-color: transparent;">
+                            <img style="width: 100%" alt=""
+                                src="https://res.cloudinary.com/dvzkgpiv3/image/upload/v1746251008/VentasPlatformDemo/Landing/asstplqgo4oanltrdnyu.png" />
+                        </swiper-slide>
+                    </swiper-container>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Beneficios -->
+    <section class="dark:bg-gray-900 py-16 px-6 sm:px-16">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-10 text-center">
+                Servicios
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- Servicio 1 -->
+                <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition">
+                    <h3 class="text-xl font-semibold text-blue-600 mb-4">Ventas al por mayor y al por menor</h3>
+                    <p class="text-gray-600">
+                        Abastecemos hogares, restaurantes y negocios con carne fresca todos los días. Precios
+                        competitivos
+                        y cortes a medida según cada necesidad.
+                    </p>
+                </div>
+
+                <!-- Servicio 2 -->
+                <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition">
+                    <h3 class="text-xl font-semibold text-blue-600 mb-4">Cortes personalizados</h3>
+                    <p class="text-gray-600">
+                        Realizamos cortes especiales de res, cerdo y pollo según tus preferencias: parrilla, asado,
+                        bistec,
+                        filetes, molido y más.
+                    </p>
+                </div>
+
+                <!-- Servicio 3 -->
+                <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition">
+                    <h3 class="text-xl font-semibold text-blue-600 mb-4">Pedidos y entregas a domicilio</h3>
+                    <p class="text-gray-600">
+                        Haz tu pedido por WhatsApp y nosotros lo preparamos y enviamos con higiene, rapidez y empaque
+                        seguro
+                        para que llegue fresco a tu hogar.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Proceso de compra / Promociones -->
+    <div id="precio" class="flex flex-col items-center px-6 py-10 sm:px-16 sm:pt-9 sm:pb-20 bg-white dark:bg-gray-800">
+        <div class="flex justify-center mt-2 sm:mt-10">
+            <fuse-card class="flex flex-col lg:flex-row max-w-sm border border-primary lg:max-w-240 shadow-md">
+
+                <!-- Contenido principal -->
+                <div class="p-6 sm:p-8 lg:p-10">
+                    <h2 class="text-7xl font-bold">Promociones</h2>
+
+                    <div class="mt-2 leading-relaxed dark:bg-gray-900">
+                        Aprovecha nuestros combos y descuentos especiales durante toda la semana.
+                    </div>
+
+                    <div class="flex items-center mt-5">
+                        <div class="text-2xl dark:bg-gray-900">Incluye</div>
+                        <div class="flex-auto ml-2 border-b-2"></div>
+                    </div>
+
+                    <!-- Features -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 mt-6">
+                        <div class="flex items-center">
+                            <mat-icon class="icon-size-5 text-primary"
+                                [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                            <div class="ml-2">Combo Parrillero (res, cerdo y pollo)</div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <mat-icon class="icon-size-5 text-primary"
+                                [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                            <div class="ml-2">Descuentos por kilo</div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <mat-icon class="icon-size-5 text-primary"
+                                [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                            <div class="ml-2">Promos de fin de semana</div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <mat-icon class="icon-size-5 text-primary"
+                                [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                            <div class="ml-2">Cortes especiales sin costo extra</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Price -->
+                <div
+                    class="flex flex-col items-center p-8 lg:px-10 lg:py-12 lg:min-w-80 bg-gray-100 dark:bg-black dark:bg-opacity-10">
+
+                    <div class="flex items-center whitespace-nowrap">
+                        <div class="text-9xl font-extrabold tracking-tight">24</div>
+                        <div class="ml-2 text-3xl font-semibold text-secondary">USD</div>
+                    </div>
+
+                    <div class="font-medium text-center text-secondary">
+                        <div>Combo Parrillero desde <strong>24 USD</strong></div>
+                    </div>
+
+                    <!-- Botón de acción -->
+                    <button (click)="mostrarFormulario = !mostrarFormulario"
+                        class="w-full mt-4 inline-flex items-center justify-center gap-2 px-6 py-2 text-white 
+                    {{ mostrarFormulario ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600' }} 
+                    rounded-xl text-base sm:text-lg font-semibold shadow-md transition duration-200 transform hover:scale-105">
+                        {{ mostrarFormulario ? 'Cancelar' : 'Reservar Promoción' }}
+                    </button>
+
+                    <!-- Mensaje si abre el formulario -->
+                    <div *ngIf="mostrarFormulario"
+                        class="mt-4 text-center text-lg font-medium text-gray-700 dark:text-gray-300">
+                        🥩👇 ¡Completa tus datos para reservar tu combo! 👇
+                    </div>
+
+                    <!-- Formulario -->
+                    <div *ngIf="mostrarFormulario" class="mt-6 w-full flex flex-col items-center">
+                        <div class="w-full max-w-md space-y-4">
+                            <div>
+                                <label for="nombre"
+                                    class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
+                                <input [disabled]="disabledInputs" id="nombre" type="text" [(ngModel)]="nombre"
+                                    placeholder="Ingresa tu nombre"
+                                    [ngClass]="{'border-red-600': nombreInvalido, 'border-gray-300': !nombreInvalido}"
+                                    class="w-full px-5 py-3 rounded-lg border bg-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary transition duration-200">
+                            </div>
+
+                            <div>
+                                <label for="correo"
+                                    class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Número de
+                                    WhatsApp</label>
+                                <input [disabled]="disabledInputs" id="correo" type="email" [(ngModel)]="correo"
+                                    placeholder="Ej: 0987654321"
+                                    [ngClass]="{'border-red-600': correoInvalido, 'border-gray-300': !correoInvalido}"
+                                    class="w-full px-5 py-3 rounded-lg border bg-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary transition duration-200">
+                            </div>
+
+                            <button [disabled]="isCallingService" (click)="solicitarSistema()"
+                                class="sm:inline-flex items-center justify-center w-full px-6 py-2 rounded-xl mt-2 hover:scale-105 font-semibold shadow-md"
+                                mat-flat-button [color]="'primary'" type="button">
+                                <span *ngIf="!isCallingService">Reservar Combo</span>
+                                <mat-progress-spinner *ngIf="isCallingService" [diameter]="24"
+                                    [mode]="'indeterminate'"></mat-progress-spinner>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </fuse-card>
+        </div>
+    </div>
+
+
+    <!-- Frequently Asked Questions (FAQ) - Acordeón -->
+    <div class="py-12 sm:py-16 bg-gray-100 dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-6 sm:px-16">
+            <div class="text-center">
+                <h2 class="text-4xl font-extrabold tracking-tight leading-tight text-gray-900 dark:text-white">
+                    Preguntas Frecuentes
+                </h2>
+                <p class="mt-2 text-lg text-gray-600 dark:text-gray-300">
+                    Encuentra respuestas a las preguntas más comunes de nuestros clientes.
+                </p>
+            </div>
+
+            <div class="mt-10 space-y-4">
+
+                <!-- FAQ 1 -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <button
+                        class="w-full text-left text-xl font-semibold text-gray-900 dark:text-white focus:outline-none flex items-center"
+                        (click)="toggleAccordion(1)">
+                        <svg *ngIf="openFaq !== 1" xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-gray-500 dark:text-gray-300 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <svg *ngIf="openFaq === 1" xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-gray-500 dark:text-gray-300 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6" />
+                        </svg>
+                        ¿Qué tipos de carne ofrecen?
+                    </button>
+                    <div *ngIf="openFaq === 1" class="mt-2 text-gray-600 dark:text-gray-300">
+                        <p>En Don Llambo ofrecemos carne de res, cerdo, pollo y productos especiales como chorizos,
+                            cortes premium y carne molida fresca del día.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <button
+                        class="w-full text-left text-xl font-semibold text-gray-900 dark:text-white focus:outline-none flex items-center"
+                        (click)="toggleAccordion(2)">
+                        <svg *ngIf="openFaq !== 2" xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-gray-500 dark:text-gray-300 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <svg *ngIf="openFaq === 2" xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-gray-500 dark:text-gray-300 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6" />
+                        </svg>
+                        ¿Realizan cortes personalizados?
+                    </button>
+                    <div *ngIf="openFaq === 2" class="mt-2 text-gray-600 dark:text-gray-300">
+                        <p>Sí. Podemos preparar cortes especiales según tu gusto: delgados, gruesos, para parrilla,
+                            asado,
+                            bistec, guisado o cualquier preparación que necesites.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <button
+                        class="w-full text-left text-xl font-semibold text-gray-900 dark:text-white focus:outline-none flex items-center"
+                        (click)="toggleAccordion(3)">
+                        <svg *ngIf="openFaq !== 3" xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-gray-500 dark:text-gray-300 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <svg *ngIf="openFaq === 3" xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-gray-500 dark:text-gray-300 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6" />
+                        </svg>
+                        ¿Hacen entregas a domicilio?
+                    </button>
+                    <div *ngIf="openFaq === 3" class="mt-2 text-gray-600 dark:text-gray-300">
+                        <p>Sí, contamos con servicio de entrega a domicilio. Puedes solicitar por WhatsApp o vía
+                            telefónica.
+                            Entregamos en paquetes sellados y refrigerados para mantener la calidad.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <button
+                        class="w-full text-left text-xl font-semibold text-gray-900 dark:text-white focus:outline-none flex items-center"
+                        (click)="toggleAccordion(4)">
+                        <svg *ngIf="openFaq !== 4" xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-gray-500 dark:text-gray-300 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <svg *ngIf="openFaq === 4" xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-gray-500 dark:text-gray-300 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6" />
+                        </svg>
+                        ¿Tienen promociones o combos?
+                    </button>
+                    <div *ngIf="openFaq === 4" class="mt-2 text-gray-600 dark:text-gray-300">
+                        <p>Sí, cada semana manejamos combos familiares, parrilleros y descuentos por compras al por
+                            mayor.
+                            Las ofertas se anuncian en la página y redes sociales.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 5 -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <button
+                        class="w-full text-left text-xl font-semibold text-gray-900 dark:text-white focus:outline-none flex items-center"
+                        (click)="toggleAccordion(5)">
+                        <svg *ngIf="openFaq !== 5" xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-gray-500 dark:text-gray-300 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <svg *ngIf="openFaq === 5" xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-gray-500 dark:text-gray-300 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6" />
+                        </svg>
+                        ¿El producto es fresco?
+                    </button>
+                    <div *ngIf="openFaq === 5" class="mt-2 text-gray-600 dark:text-gray-300">
+                        <p>Toda nuestra carne es fresca, de proveedores certificados y almacenada bajo estrictos
+                            controles
+                            de refrigeración para garantizar calidad y seguridad alimentaria.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 6 -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                    <button
+                        class="w-full text-left text-xl font-semibold text-gray-900 dark:text-white focus:outline-none flex items-center"
+                        (click)="toggleAccordion(6)">
+                        <svg *ngIf="openFaq !== 6" xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-gray-500 dark:text-gray-300 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <svg *ngIf="openFaq === 6" xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-gray-500 dark:text-gray-300 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6" />
+                        </svg>
+                        ¿Puedo hacer pedidos por WhatsApp?
+                    </button>
+                    <div *ngIf="openFaq === 6" class="mt-2 text-gray-600 dark:text-gray-300">
+                        <p>Sí, atendemos pedidos por WhatsApp. Solo envía el listado de productos y tu dirección, y
+                            prepararemos tu pedido para retiro o envío.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-16">
+        <div class="max-w-7xl mx-auto px-6 sm:px-16">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+
+                <!-- ENLACES RÁPIDOS -->
+                <div>
+                    <h3 class="text-xl font-extrabold mb-4">Enlaces rápidos</h3>
+                    <ul class="space-y-4">
+                        <li><a href="#inicio" class="text-gray-400 hover:text-white transition-all">Inicio</a></li>
+                        <li><a href="#catalogo" class="text-gray-400 hover:text-white transition-all">Catálogo</a></li>
+                        <li><a href="#servicios" class="text-gray-400 hover:text-white transition-all">Servicios</a>
+                        </li>
+                        <li><a href="#contacto" class="text-gray-400 hover:text-white transition-all">Contacto</a></li>
+                    </ul>
+                </div>
+
+                <!-- REDES SOCIALES -->
+                <div>
+                    <h3 class="text-xl font-extrabold mb-4">Síguenos</h3>
+                    <ul class="space-y-4">
+                        <li><a href="#" target="_blank"
+                                class="text-gray-400 hover:text-white transition-all">Facebook</a></li>
+                        <li><a href="#" target="_blank"
+                                class="text-gray-400 hover:text-white transition-all">Instagram</a></li>
+                        <li><a href="#" target="_blank" class="text-gray-400 hover:text-white transition-all">TikTok</a>
+                        </li>
+                        <li><a href="#" target="_blank"
+                                class="text-gray-400 hover:text-white transition-all">WhatsApp</a></li>
+                    </ul>
+                </div>
+
+                <!-- INFORMACIÓN LEGAL -->
+                <div>
+                    <h3 class="text-xl font-extrabold mb-4">Legal</h3>
+                    <ul class="space-y-4">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Términos y Condiciones</a>
+                        </li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Política de Privacidad</a>
+                        </li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-all">Política de Cookies</a>
+                        </li>
+                        <li><a href="#contacto" class="text-gray-400 hover:text-white transition-all">Soporte</a></li>
+                    </ul>
+                </div>
+
+                <!-- INFORMACIÓN DE LA CARNICERÍA -->
+                <div>
+                    <h3 class="text-xl font-extrabold mb-4">Carnicería "Don Llambo"</h3>
+                    <ul class="space-y-4">
+                        <li class="text-gray-400">📍 Dirección: Quito - Ecuador</li>
+                        <li class="text-gray-400">📞 Teléfono: +593 000 000 000</li>
+                        <li class="text-gray-400">🕒 Horarios: Lun - Dom | 7:00 AM - 9:00 PM</li>
+                        <li><a href="#contacto" class="text-gray-400 hover:text-white transition-all">Contáctanos</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Barra inferior -->
+            <div class="mt-12 border-t border-gray-700 pt-8 text-center text-sm text-gray-400">
+                <p>&copy; 2025 Carnicería Don Llambo. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+</div>

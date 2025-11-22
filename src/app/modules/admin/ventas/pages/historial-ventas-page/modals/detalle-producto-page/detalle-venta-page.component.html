@@ -1,0 +1,190 @@
+<div class="flex flex-col md:min-w-200 max -m-6 height-dialog">
+    <!-- Header -->
+    <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+        <div class="text-lg font-medium">Detalle Venta Nro. {{numeroVenta}}</div>
+        <button mat-icon-button [tabIndex]="-1" (click)="cerrarVentanaEmergente()">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Compose form -->
+    <div class="flex flex-col flex-auto w-full">
+        <div class="grid grid-cols-1 xl:grid-cols-1 gap-8 w-full mt-6">
+
+            <!-- Tabla -->
+            <div class="xl:col-span-1 flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto mx-6">
+                    <table class="w-full bg-transparent mb-3" mat-table matSort [dataSource]="pageSlice"
+                        [trackBy]="trackByFn" #detalleVentaTable>
+
+
+                        <!-- Imagen del producto -->
+                        <ng-container matColumnDef="urlfotoproducto">
+                            <th mat-header-cell *matHeaderCellDef>Imagen</th>
+                            <td mat-cell *matCellDef="let producto" class="min-w-10">
+                                <div class="flex items-center">
+                                    <div
+                                        class="relative flex items-center justify-center w-12 h-12 mr-6 rounded overflow-hidden border">
+                                        <img *ngIf="producto.urlFotoProducto"
+                                            [alt]="'Imagen de ' + producto.nombreProducto"
+                                            [src]="producto.urlFotoProducto" class="w-full h-full object-cover">
+                                        <div *ngIf="!producto.urlFotoProducto"
+                                            class="flex items-center justify-center w-full h-full text-xs font-semibold leading-none text-center uppercase bg-gray-200">
+                                            SIN IMAGEN
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </ng-container>
+
+
+
+
+                        <!-- Nombre Producto -->
+                        <ng-container matColumnDef="nombreproducto">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                Nombre Producto
+                            </th>
+                            <td mat-cell *matCellDef="let producto" class="min-w-30">
+                                <span class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full"
+                                        [style.backgroundColor]="producto.colorProducto"></span>
+                                    <span class="ml-3 leading-4">{{producto.nombreProducto}}</span>
+                                </span>
+                            </td>
+                        </ng-container>
+
+
+                        <!-- Categoría Producto -->
+                        <ng-container matColumnDef="categoriaproducto">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                Categoría Producto
+                            </th>
+                            <td mat-cell *matCellDef="let producto" class="min-w-30">
+                                <span class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full"
+                                        [style.backgroundColor]="producto.colorCategoria"></span>
+                                    <span class="ml-3 leading-4">{{producto.nombreCategoria}}</span>
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!-- Marca Producto -->
+                        <ng-container matColumnDef="marcaproducto">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                Marca Producto
+                            </th>
+                            <td mat-cell *matCellDef="let producto" class="min-w-30">
+                                <span class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full"
+                                        [style.backgroundColor]="producto.colorMarca"></span>
+                                    <span class="ml-3 leading-4">{{producto.nombreMarca}}</span>
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!-- Categoría -->
+                        <ng-container matColumnDef="categoria">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                Categoría
+                            </th>
+                            <td mat-cell *matCellDef="let producto" class="min-w-30">
+                                <span class="flex items-center">
+                                    <span class="w-2 h-2 rounded-full"
+                                        [style.backgroundColor]="producto.categoria.color"></span>
+                                    <span class="ml-3 leading-4">{{producto.categoria.nombre}}</span>
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!--  Precio -->
+                        <ng-container matColumnDef="precioproducto">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef> Precio</th>
+                            <td mat-cell *matCellDef="let producto">
+                                <span style="color: #056DB6;" class="pr-2 w-auto h-auto rounded-full">
+                                    {{ producto.precioProducto |
+                                    currency:monedaInfo.codigoMoneda:'code':'':
+                                    monedaInfo.cultureInfo }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+
+                        <!-- Cantidad -->
+                        <ng-container matColumnDef="cantidad">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef class="text-center">
+                                Cantidad
+                            </th>
+                            <td mat-cell *matCellDef="let producto" class="min-w-10 text-center">
+                                <span class="leading-relaxed whitespace-nowrap">{{producto?.cantidad}}</span>
+
+                            </td>
+                        </ng-container>
+
+                        <!-- Total -->
+                        <ng-container matColumnDef="total">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef> Total</th>
+                            <td mat-cell *matCellDef="let producto">
+                                <span style="color: #056DB6;" class="pr-2 w-auto h-auto rounded-full">
+                                    {{ producto.precioTotal |
+                                    currency:monedaInfo.codigoMoneda:'code':'':
+                                    monedaInfo.cultureInfo }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!-- Activar/Desactivar -->
+                        <ng-container matColumnDef="activarDesactivar">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Activo</th>
+                            <td mat-cell *matCellDef="let producto">
+                                <mat-slide-toggle [checked]="producto.activo" color="primary"
+                                    (change)="UpdateActivoProductoAsync(producto, $event.checked)"
+                                    [disabled]="disabledAcciones">
+                                </mat-slide-toggle>
+                            </td>
+                        </ng-container>
+
+                        <!-- Acciones -->
+                        <ng-container matColumnDef="acciones">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </th>
+                            <td mat-cell *matCellDef="let element">
+                                <button mat-icon-button [matMenuTriggerFor]="menu" [disabled]="disabledAcciones">
+                                    <mat-icon>more_vert</mat-icon>
+                                </button>
+                                <mat-menu #menu="matMenu">
+                                    <button mat-menu-item (click)="onShowFormDetalleProducto(element)">
+                                        <mat-icon svgIcon="feather:eye"></mat-icon> Ver
+                                    </button>
+                                    <button mat-menu-item (click)="onShowFormModificaProducto(element)">
+                                        <mat-icon svgIcon="feather:edit-2"></mat-icon> Editar
+                                    </button>
+                                    <button mat-menu-item (click)="DeleteAsync(element)">
+                                        <mat-icon svgIcon="feather:trash-2"></mat-icon> Eliminar
+                                    </button>
+                                </mat-menu>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="detalleVentaTableColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: detalleVentaTableColumns;"></tr>
+                    </table>
+                </div>
+
+                <div class="paginator" *ngIf="allDetalleVentaDataSource.data.length > 0">
+                    <mat-paginator #paginator [length]="allDetalleVentaDataSource.data.length" [pageSize]="10"
+                        [pageSizeOptions]="[10, 15, 20]" aria-label="Seleccione página" (page)="onPageChange($event)">
+                    </mat-paginator>
+                </div>
+                <div class="paginator" *ngIf="allDetalleVentaDataSource.data.length === 0">
+                    <img [src]="imgNoDataUltimosRegistros" alt="No hay datos disponibles" class="w-72 mx-auto mt-2" />
+                    <div
+                        class="mt-4 sm:mt-8 text-2xl md:text-2xl font-semibold tracking-tight leading-tight md:leading-none text-center">
+                        {{textoResultadoTable}}</div>
+                    <div>
+                        <p class="mt-2 text-gray-500 text-center">Aplique otros filtros de búsqueda</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

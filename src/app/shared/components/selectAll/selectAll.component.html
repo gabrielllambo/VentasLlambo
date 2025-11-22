@@ -1,0 +1,9 @@
+<mat-checkbox class="mat-option" 
+              [indeterminate]="isIndeterminate()" 
+              [checked]="isChecked()" 
+              (onKeyPress)="$event.stopPropagation()"
+              (change)="toggleSelection($event)">
+    {{text}}
+</mat-checkbox>
+
+ 

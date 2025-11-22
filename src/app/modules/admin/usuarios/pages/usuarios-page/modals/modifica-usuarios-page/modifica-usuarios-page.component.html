@@ -1,0 +1,251 @@
+<div class="flex flex-col max-w-3xl md:min-w-200 max -m-6 height-dialog">
+    <!-- Header -->
+    <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+        <div class="text-lg font-medium">Modifica Usuario</div>
+        <button mat-icon-button [tabIndex]="-1" (click)="cerrarVentanaEmergente()">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Compose form -->
+    <form class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto" [formGroup]="actualizaUsuarioForm">
+        @if (isMobilSize()) {
+        <div class="flex flex-wrap space-y-2">
+
+            <div class="w-full">
+                <!-- Tipo de Documento -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Tipo de Documento</mat-label>
+                    <mat-select formControlName="tipoDocumento">
+                        <mat-option [value]="usuario.tipoDocumento.id">
+                            {{ usuario.tipoDocumento.descripcion }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Número de Documento -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Número de Documento</mat-label>
+                    <input autocomplete="off" matInput formControlName="numeroDocumento">
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Rol -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Rol</mat-label>
+                    <mat-select formControlName="rol" required #selectRolItem [compareWith]="compareObjects">
+                        <mat-select-trigger *ngIf="selectRolItem.value">
+                            {{selectRolItem.value.nombre}}
+                        </mat-select-trigger>
+                        <mat-option *ngFor="let option of allRol" [value]="option">
+                            {{ option.nombre }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="actualizaUsuarioForm.get('rol').hasError('required')">Rol
+                        es
+                        requerido</mat-error>
+                </mat-form-field>
+
+                <!-- Género -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Género</mat-label>
+                    <mat-select formControlName="genero" required>
+                        <mat-option [value]="usuario.genero">
+                            {{ usuario.genero.descripcion }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+            </div>
+
+            <div class="w-full">
+                <!-- Nombres -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Nombres</mat-label>
+                    <input autocomplete="off" matInput formControlName="nombres">
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Apellidos -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Apellidos</mat-label>
+                    <input autocomplete="off" matInput formControlName="apellidos">
+
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Fecha de Nacimiento -->
+                <mat-form-field class="w-full" appearance="outline">
+                    <mat-label>Fecha de Nacimiento</mat-label>
+                    <input matInput [min]="minDate" [max]="maxDate" [matDatepicker]="picker"
+                        [formControlName]="'fechaNacimiento'" (click)="picker.open()" autocomplete="off">
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Celular -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Celular</mat-label>
+                    <input autocomplete="off" matInput formControlName="celular" maxlength="20">
+                    <mat-error *ngIf="actualizaUsuarioForm.get('celular')?.hasError('onlyPhoneNumbersForm')">
+                        Ingrese un celular válido.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Dirección -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Dirección</mat-label>
+                    <input matInput formControlName="direccion" />
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Correo Electrónico -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Correo Electrónico</mat-label>
+                    <input autocomplete="off" matInput formControlName="correoElectronico">
+                </mat-form-field>
+            </div>
+
+            <!-- Botones -->
+            <div class="w-full flex justify-between">
+                <button class="mobil-btn" mat-stroked-button color="accent" type="button"
+                    (click)="cerrarVentanaEmergente()">
+                    <span>Cancelar</span>
+                </button>
+                <span class="w-4"></span>
+                <button class="mobil-btn" mat-flat-button color="primary" type="button" (click)="UpdateAsync()"
+                    [disabled]="actualizaUsuarioForm.invalid || isCallingService">
+                    <span *ngIf="!actualizaUsuarioForm.disabled">Guardar</span>
+                    <mat-progress-spinner *ngIf="actualizaUsuarioForm.disabled" [diameter]="24"
+                        mode="indeterminate"></mat-progress-spinner>
+                </button>
+            </div>
+        </div>
+
+        } @else {
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Tipo de Documento -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Tipo de Documento</mat-label>
+                <mat-select formControlName="tipoDocumento">
+                    <mat-option [value]="usuario.tipoDocumento.id">
+                        {{ usuario.tipoDocumento.descripcion }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Número de Documento -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Número de Documento</mat-label>
+                <input autocomplete="off" matInput formControlName="numeroDocumento" maxlength="20" required>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Rol -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Rol</mat-label>
+                <mat-select formControlName="rol" required #selectRolItem [compareWith]="compareObjects">
+                    <mat-select-trigger *ngIf="selectRolItem.value">
+                        {{selectRolItem.value.nombre}}
+                    </mat-select-trigger>
+                    <mat-option *ngFor="let option of allRol" [value]="option">
+                        {{ option.nombre }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="actualizaUsuarioForm.get('rol').hasError('required')">Rol
+                    es
+                    requerido</mat-error>
+            </mat-form-field>
+
+            <!-- Género -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Género</mat-label>
+                <mat-select formControlName="genero" required>
+                    <mat-option [value]="usuario.genero">
+                        {{ usuario.genero.descripcion }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Nombres -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Nombres</mat-label>
+                <input autocomplete="off" matInput formControlName="nombres">
+            </mat-form-field>
+
+            <!-- Apellidos -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Apellidos</mat-label>
+                <input autocomplete="off" matInput formControlName="apellidos">
+
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Fecha de Nacimiento -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Fecha de Nacimiento</mat-label>
+                <input matInput [min]="minDate" [max]="maxDate" [matDatepicker]="picker"
+                    [formControlName]="'fechaNacimiento'" (click)="picker.open()" autocomplete="off">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+
+            <!-- Celular -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Celular</mat-label>
+                <input autocomplete="off" matInput formControlName="celular" maxlength="20">
+                <mat-error *ngIf="actualizaUsuarioForm.get('celular')?.hasError('onlyPhoneNumbersForm')">
+                    Ingrese un celular válido.
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Dirección -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Dirección</mat-label>
+                <input autocomplete="off" matInput formControlName="direccion" maxlength="200">
+            </mat-form-field>
+
+            <!-- Correo Electrónico -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Correo Electrónico</mat-label>
+                <input autocomplete="nope" matInput formControlName="correoElectronico" maxlength="50" required>
+            </mat-form-field>
+
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end mt-2">
+            <button class="px-8" mat-stroked-button [color]="'accent'" type="button" (click)="cerrarVentanaEmergente()">
+                <span> Cancelar </span>
+            </button>
+            <button class="  hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                mat-flat-button [color]="'primary'" type="button"
+                [disabled]="actualizaUsuarioForm.invalid || isCallingService" (click)="UpdateAsync()">
+                <span *ngIf="!actualizaUsuarioForm.disabled">
+                    Guardar
+                </span>
+                <mat-progress-spinner *ngIf="actualizaUsuarioForm.disabled" [diameter]="24" [mode]="'indeterminate'">
+                </mat-progress-spinner>
+            </button>
+        </div>
+        }
+
+    </form>
+</div>

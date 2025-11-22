@@ -1,0 +1,251 @@
+<mat-drawer-container class="flex flex-col flex-auto min-w-0">
+    <!-- Drawer -->
+    <mat-drawer class="w-90" [mode]="'over'" #matDrawer autoFocus="false">
+        <!-- Header -->
+        <div class="flex items-center justify-between m-4 mr-3 sm:my-5">
+            <!-- Title -->
+            <div class="text-3xl font-semibold tracking-tight leading-8">Filtrar por:</div>
+            <!-- Close Drawer -->
+            <div>
+                <button mat-icon-button (click)="matDrawer.close()">
+                    <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                </button>
+            </div>
+        </div>
+        <div class="flex flex-col flex-auto h-full dark:bg-default">
+            <!-- Filtros -->
+            <div class="flex flex-col flex-auto shrink-0 pt-6 bg-card dark:bg-transparent">
+                <form class="flex flex-col px-6" [formGroup]="filtroAnalisisVentasForm">
+                    <!-- Fecha  Inicio -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Fecha inicio</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off" matInput
+                            [matDatepicker]="pickerInicio" [formControlName]="'fechaInicio'">
+                        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerInicio></mat-datepicker>
+                        <mat-error *ngIf="filtroAnalisisVentasForm.get('fechaInicio').hasError('required')">Fecha
+                            inicio es requerido</mat-error>
+                    </mat-form-field>
+
+                    <!-- Fecha  Fin -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Fecha fin</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off" matInput
+                            [matDatepicker]="pickerFin" [formControlName]="'fechaFin'">
+                        <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerFin></mat-datepicker>
+                        <mat-error *ngIf="filtroAnalisisVentasForm.get('fechaFin').hasError('required')">Fecha
+                            fin es requerido</mat-error>
+                    </mat-form-field>
+
+                    <button class="mt-4 mb-8" mat-flat-button [color]="'primary'" (click)="btnBuscar(true)"
+                        [disabled]="filtroAnalisisVentasForm.invalid || disabledBuscar">
+                        <mat-icon *ngIf="!disabledBuscar" class="icon-size-2"
+                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                        <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
+                        <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24" [mode]="'indeterminate'">
+                        </mat-progress-spinner>
+
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </mat-drawer>
+    <!-- Content -->
+    <mat-drawer-content class="flex flex-col">
+        <div class="bg-card">
+
+            <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
+
+                <div *ngIf="!skeleton"
+                    class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
+                    <!-- Avatar and name -->
+                    <div class="flex items-center min-w-0 w-full">
+                        @if (decodeToken.urlfoto != "") {
+                        <div class="flex-0 w-16 h-16 rounded-full overflow-hidden">
+                            <img class="w-full h-full object-cover" [src]="decodeToken.urlfoto">
+                        </div>
+                        }
+                        <div class="flex flex-col min-w-0 ml-4 flex-grow">
+                            <ng-container>
+                                <div
+                                    class="text-2xl md:text-2xl font-semibold tracking-tight leading-7 md:leading-snug">
+                                    Hola, {{decodeToken.nombres}}
+                                </div>
+                            </ng-container>
+                            <div class="flex items-center">
+                                Rol: <div class="ml-1.5 leading-6 text-primary">{{decodeToken.nombreRol}}</div>
+                            </div>
+                            <div class="text-sm text-gray-500 mt-1">Su resumen {{filtroRangoFecha}}</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex items-center space-x-3 sm:ml-2 sm:mt-0">
+                        <!-- Botón de configuración -->
+                        <button class="   ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center" mat-flat-button
+                            [color]="'primary'" (click)="matDrawer.open()">
+                            <mat-icon class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                            <span class="ml-2">Filtrar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex-auto border-t -mt-px   ">
+            <div class="w-full max-w-screen-xl mx-auto">
+                <!-- Tabs -->
+                <mat-tab-group class="sm:px-2" mat-stretch-tabs="false" [animationDuration]="'0'">
+                    <!-- Inicio -->
+                    <mat-tab label="Inicio">
+                        <ng-template matTabContent>
+                            <div class="grid grid-cols-1 xl:grid-cols-1 gap-8 w-full ">
+                                <!-- SKELETON -->
+                                <ngx-skeleton-loader
+                                    class=" sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden"
+                                    count="40" [theme]="{ 'border-radius': '0', height: '25px' }"
+                                    *ngIf="skeleton"></ngx-skeleton-loader>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0"
+                                    *ngIf="!skeleton">
+
+                                    @if (reporteResumenDataSource.evolucionVentasFecha.totalVenta.length == 0 ) {
+
+                                    <div class="sm:col-span-2 md:col-span-4 flex flex-col    overflow-hidden">
+
+                                        <div
+                                            class="grid grid-cols-1 lg:grid-cols-1 grid-flow-row gap-6 w-full mt-8 sm:mt-4">
+                                            <!-- New vs. Closed -->
+                                            <div class="flex flex-col flex-auto">
+
+                                                <div class="flex flex-col items-center">
+                                                    <img [src]="imgNoDataHome" alt="No hay datos disponibles"
+                                                        class="w-72   object-cover" />
+                                                    <div
+                                                        class="mt-4 sm:mt-8 text-2xl md:text-2xl font-semibold tracking-tight leading-tight md:leading-none text-center">
+                                                        {{textoResultado}}</div>
+                                                    <div>
+                                                        <p class="mt-2 text-gray-500 text-center">Aplique otros filtros
+                                                            de
+                                                            búsqueda
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                    } @else {
+
+                                    <!-- Evolución por fecha -->
+                                    <div
+                                        class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                                        <div class="flex justify-between items-center">
+                                            <div class="text-lg font-medium tracking-tight leading-6 truncate">Total
+                                                Ventas
+                                                por Fechas
+                                            </div>
+                                        </div>
+                                        <div
+                                            class="grid grid-cols-1 lg:grid-cols-1 grid-flow-row gap-6 w-full mt-8 sm:mt-4">
+                                            <div class="flex flex-col flex-auto">
+                                                <div class="flex flex-col flex-auto">
+                                                    <apx-chart [series]="chartEvolucionVentasFecha.series"
+                                                        [chart]="chartEvolucionVentasFecha.chart"
+                                                        [xaxis]="chartEvolucionVentasFecha.xaxis"
+                                                        [dataLabels]="chartEvolucionVentasFecha.dataLabels"
+                                                        [stroke]="chartEvolucionVentasFecha.stroke"
+                                                        [tooltip]="chartEvolucionVentasFecha.tooltip"
+                                                        [yaxis]="chartEvolucionVentasFecha.yaxis"
+                                                        [noData]="chartEvolucionVentasFecha.noData"
+                                                        [fill]="chartEvolucionVentasFecha.fill"></apx-chart>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <!--   Top Productos Más vendidas -->
+                                    <div
+                                        class="sm:col-span-2 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                                        <div class="flex justify-between items-center">
+                                            <div
+                                                class="text-lg font-medium tracking-tight leading-6 truncate text-black">
+                                                Top Productos Más Vendidas
+                                            </div>
+                                        </div>
+
+                                        <div class="flex flex-col flex-auto">
+                                            <apx-chart [series]="chartTopDiezProductos.series"
+                                                [chart]="chartTopDiezProductos.chart"
+                                                [colors]="chartTopDiezProductos.colors"
+                                                [dataLabels]="chartTopDiezProductos.dataLabels"
+                                                [plotOptions]="chartTopDiezProductos.plotOptions"
+                                                [tooltip]="chartTopDiezProductos.tooltip"
+                                                [noData]="chartTopDiezProductos.noData"
+                                                [xaxis]="chartTopDiezProductos.xaxis"></apx-chart>
+                                        </div>
+                                    </div>
+
+                                    <!--  Top Marcas Más Vendidas -->
+                                    <div
+                                        class="sm:col-span-2 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                                        <div class="flex justify-between items-center">
+                                            <div
+                                                class="text-lg font-medium tracking-tight leading-6 truncate text-black">
+                                                Top Marcas Más Vendidas
+                                            </div>
+                                        </div>
+
+                                        <div class="flex flex-col flex-auto">
+                                            <apx-chart [series]="chartTopDiezMarcas.series"
+                                                [chart]="chartTopDiezMarcas.chart" [colors]="chartTopDiezMarcas.colors"
+                                                [dataLabels]="chartTopDiezMarcas.dataLabels"
+                                                [plotOptions]="chartTopDiezMarcas.plotOptions"
+                                                [tooltip]="chartTopDiezMarcas.tooltip"
+                                                [noData]="chartTopDiezMarcas.noData"
+                                                [xaxis]="chartTopDiezMarcas.xaxis"></apx-chart>
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                        </ng-template>
+                    </mat-tab>
+
+                    <!-- Colaboradores -->
+                    <mat-tab>
+                        <ng-template mat-tab-label>
+                            <span class="inline-flex items-center space-x-2">
+                                <span class="">Colaboradores</span>
+
+                            </span>
+                        </ng-template>
+                        <ng-template matTabContent>
+                            <div
+                                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full min-w-0">
+                                <ng-container *ngFor="let colaborador of colaboradoresActivos">
+                                    <div
+                                        class="flex flex-col flex-auto items-center bg-card shadow rounded-2xl overflow-hidden">
+                                        <div class="flex flex-col flex-auto w-full p-8 text-center">
+                                            <div class="w-32 h-32 mx-auto rounded-full overflow-hidden bg-gray-100">
+                                                <img class="w-full h-full object-cover"
+                                                    [src]="colaborador.urlFoto ? colaborador.urlFoto : 'assets/images/logo/default-avatar.jpg'"
+                                                    alt="Avatar del colaborador">
+                                            </div>
+                                            <div class="mt-6 font-medium">{{colaborador.nombres}}</div>
+                                            <div class="text-secondary">{{colaborador.nombreRol}}</div>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </ng-template>
+                    </mat-tab>
+
+                </mat-tab-group>
+            </div>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

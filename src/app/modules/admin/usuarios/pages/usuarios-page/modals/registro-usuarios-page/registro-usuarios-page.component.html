@@ -1,0 +1,413 @@
+<div class="flex flex-col max-w-3xl md:min-w-200 max -m-6 height-dialog">
+    <!-- Header -->
+    <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+        <div class="text-lg font-medium">Nuevo usuario</div>
+        <button mat-icon-button [tabIndex]="-1" (click)="cerrarVentanaEmergente()">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Compose form -->
+    <form class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto" [formGroup]="registroUsuarioForm">
+        @if (isMobilSize()) {
+        <div class="flex flex-wrap space-y-2">
+
+            <div class="w-full">
+                <!-- Tipo de Documento -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Tipo de Documento</mat-label>
+                    <mat-select formControlName="tipoDocumento" required #selectTipoDocumentoItem>
+                        <mat-select-trigger *ngIf="selectTipoDocumentoItem.value">
+                            {{selectTipoDocumentoItem.value.descripcion}}
+                        </mat-select-trigger>
+                        <mat-option *ngFor="let option of allTipoDocumento" [value]="option">
+                            {{ option.descripcion }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="registroUsuarioForm.get('tipoDocumento').hasError('required')">Tipo de Documento
+                        es
+                        requerido</mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Número de Documento -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Número de Documento</mat-label>
+                    <input autocomplete="off" matInput formControlName="numeroDocumento" maxlength="20" required>
+                    <mat-error *ngIf="registroUsuarioForm.get('numeroDocumento').hasError('required')">
+                        Número de Documento es requerido
+                    </mat-error>
+                    <mat-error *ngIf="registroUsuarioForm.get('numeroDocumento')?.hasError('onlyNumbersForm')">
+                        Ingrese solo números.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Rol -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>--Seleccione Rol--</mat-label>
+                    <mat-select formControlName="rol" required #selectRolItem>
+                        <mat-select-trigger *ngIf="selectRolItem.value">
+                            {{selectRolItem.value.nombre}}
+                        </mat-select-trigger>
+                        <mat-option *ngFor="let option of allRol" [value]="option">
+                            {{ option.nombre }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="registroUsuarioForm.get('rol').hasError('required')">Rol
+                        es
+                        requerido</mat-error>
+                </mat-form-field>
+
+                <!-- Género -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>--Seleccione Género--</mat-label>
+                    <mat-select formControlName="genero" required #selectGeneroItem>
+                        <mat-select-trigger *ngIf="selectGeneroItem.value">
+                            {{selectGeneroItem.value.descripcion}}
+                        </mat-select-trigger>
+                        <mat-option *ngFor="let option of allGenero" [value]="option">
+                            {{ option.descripcion }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="registroUsuarioForm.get('genero').hasError('required')">Género
+                        es
+                        requerido</mat-error>
+                </mat-form-field>
+
+            </div>
+
+            <div class="w-full">
+                <!-- Nombres -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Nombres</mat-label>
+                    <input autocomplete="off" matInput formControlName="nombres" maxlength="50" required>
+                    <mat-error *ngIf="registroUsuarioForm.get('nombres').hasError('required')">
+                        Nombres es requerido
+                    </mat-error>
+                    <mat-error *ngIf="registroUsuarioForm.get('nombres')?.hasError('onlyLettersForm')">
+                        Ingrese solo caracteres.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Apellidos -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Apellidos</mat-label>
+                    <input autocomplete="off" matInput formControlName="apellidos" maxlength="50" required>
+                    <mat-error *ngIf="registroUsuarioForm.get('apellidos').hasError('required')">
+                        Apellidos es requerido
+                    </mat-error>
+                    <mat-error *ngIf="registroUsuarioForm.get('apellidos')?.hasError('onlyLettersForm')">
+                        Ingrese solo caracteres.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+ 
+            <div class="w-full">
+                <!-- Fecha de Nacimiento -->
+                <mat-form-field class="w-full" appearance="outline">
+                    <mat-label>Fecha de Nacimiento</mat-label>
+                    <input matInput [min]="minDate" [max]="maxDate" [matDatepicker]="picker"
+                        [formControlName]="'fechaNacimiento'" (click)="picker.open()" autocomplete="off">
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                    <mat-error *ngIf="registroUsuarioForm.get('fechaNacimiento').hasError('required')">
+                        Fecha de Nacimiento es requerido.
+                    </mat-error>
+                    <mat-error *ngIf="registroUsuarioForm.get('fechaNacimiento').hasError('edadMinimaNoCumplida')">
+                        Debes tener al menos 18 años para registrarte.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Celular -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Celular</mat-label>
+                    <input autocomplete="off" matInput formControlName="celular" maxlength="20">
+                    <mat-error *ngIf="registroUsuarioForm.get('celular')?.hasError('onlyPhoneNumbersForm')">
+                        Ingrese un celular válido.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Dirección -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Dirección</mat-label>
+                    <input matInput formControlName="direccion"/>
+                </mat-form-field>
+            </div>
+            
+            <div class="w-full">
+                <!-- Correo Electrónico -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Correo Electrónico</mat-label>
+                    <input autocomplete="off" matInput formControlName="correoElectronico" maxlength="50" required>
+                    <mat-error *ngIf="registroUsuarioForm.get('correoElectronico').hasError('required')">
+                        Correo Electrónico es requerido
+                    </mat-error>
+                    <mat-error *ngIf="registroUsuarioForm.get('correoElectronico')?.hasError('invalidEmail')">
+                        Ingrese un correo válido.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+ 
+            <div class="w-full">
+                <!-- Contraseña Nueva -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Contraseña Nueva</mat-label>
+                    <input matInput [formControlName]="'contrasenia'" required type="password" #passwordField
+                        autocomplete="new-password">
+                    <button mat-icon-button type="button"
+                        (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'"
+                        matSuffix>
+                        <mat-icon class="material-icons-outlined color-icon" matSuffix
+                            *ngIf="passwordField.type === 'password'">visibility_off</mat-icon>
+                        <mat-icon class="material-icons-outlined color-icon" matSuffix
+                            *ngIf="passwordField.type === 'text'">visibility</mat-icon>
+                    </button>
+                    <mat-error *ngIf="registroUsuarioForm?.get('contrasenia').hasError('required')">
+                        Contraseña es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Confirmar Contraseña Nueva -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Confirmar Contraseña Nueva</mat-label>
+                    <input matInput [formControlName]="'confirmarContrasenia'" required type="password"
+                        #repetirPasswordField autocomplete="new-password">
+                    <button mat-icon-button type="button"
+                        (click)="repetirPasswordField.type === 'password' ? repetirPasswordField.type = 'text' : repetirPasswordField.type = 'password'"
+                        matSuffix>
+                        <mat-icon class="material-icons-outlined color-icon" matSuffix
+                            *ngIf="repetirPasswordField.type === 'password'">visibility_off</mat-icon>
+                        <mat-icon class="material-icons-outlined color-icon" matSuffix
+                            *ngIf="repetirPasswordField.type === 'text'">visibility</mat-icon>
+                    </button>
+                    <mat-error *ngIf="registroUsuarioForm?.get('confirmarContrasenia')?.hasError('mustMatch')">
+                        Las contraseñas no coinciden
+                    </mat-error>
+                </mat-form-field>
+            </div>
+ 
+            <!-- Botones -->
+            <div class="w-full flex justify-between">
+                <button class="mobil-btn" mat-stroked-button color="accent" type="button"
+                    (click)="cerrarVentanaEmergente()">
+                    <span>Cancelar</span>
+                </button>
+                <span class="w-4"></span>
+                <button class="mobil-btn" mat-flat-button color="primary" type="button" (click)="InsertAsync()"
+                    [disabled]="registroUsuarioForm.invalid || isCallingService">
+                    <span *ngIf="!registroUsuarioForm.disabled">Guardar</span>
+                    <mat-progress-spinner *ngIf="registroUsuarioForm.disabled" [diameter]="24"
+                        mode="indeterminate"></mat-progress-spinner>
+                </button>
+            </div>
+        </div>
+
+        } @else {
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Tipo de Documento -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>--Seleccione Tipo de Documento--</mat-label>
+                <mat-select formControlName="tipoDocumento" required #selectTipoDocumentoItem>
+                    <mat-select-trigger *ngIf="selectTipoDocumentoItem.value">
+                        {{selectTipoDocumentoItem.value.descripcion}}
+                    </mat-select-trigger>
+                    <mat-option *ngFor="let option of allTipoDocumento" [value]="option">
+                        {{ option.descripcion }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="registroUsuarioForm.get('tipoDocumento').hasError('required')">Tipo de Documento
+                    es
+                    requerido</mat-error>
+
+            </mat-form-field>
+
+            <!-- Número de Documento -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Número de Documento</mat-label>
+                <input autocomplete="off" matInput formControlName="numeroDocumento" maxlength="20" required>
+                <mat-error *ngIf="registroUsuarioForm.get('numeroDocumento').hasError('required')">
+                    Número de Documento es requerido
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Rol -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>--Seleccione Rol--</mat-label>
+                <mat-select formControlName="rol" required #selectRolItem>
+                    <mat-select-trigger *ngIf="selectRolItem.value">
+                        {{selectRolItem.value.nombre}}
+                    </mat-select-trigger>
+                    <mat-option *ngFor="let option of allRol" [value]="option">
+                        {{ option.nombre }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="registroUsuarioForm.get('rol').hasError('required')">Rol
+                    es
+                    requerido</mat-error>
+            </mat-form-field>
+
+            <!-- Género -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>--Seleccione Género--</mat-label>
+                <mat-select formControlName="genero" required #selectGeneroItem>
+                    <mat-select-trigger *ngIf="selectGeneroItem.value">
+                        {{selectGeneroItem.value.descripcion}}
+                    </mat-select-trigger>
+                    <mat-option *ngFor="let option of allGenero" [value]="option">
+                        {{ option.descripcion }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="registroUsuarioForm.get('genero').hasError('required')">Género
+                    es
+                    requerido</mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Nombres -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Nombres</mat-label>
+                <input autocomplete="off" matInput formControlName="nombres" maxlength="50" required>
+                <mat-error *ngIf="registroUsuarioForm.get('nombres').hasError('required')">
+                    Nombres es requerido
+                </mat-error>
+                <mat-error *ngIf="registroUsuarioForm.get('nombres')?.hasError('onlyLettersForm')">
+                    Ingrese solo caracteres.
+                </mat-error>
+            </mat-form-field>
+            <!-- Apellidos -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Apellidos</mat-label>
+                <input autocomplete="off" matInput formControlName="apellidos" maxlength="50" required>
+                <mat-error *ngIf="registroUsuarioForm.get('apellidos').hasError('required')">
+                    Apellidos es requerido
+                </mat-error>
+                <mat-error *ngIf="registroUsuarioForm.get('apellidos')?.hasError('onlyLettersForm')">
+                    Ingrese solo caracteres.
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+
+
+            <!-- Fecha de Nacimiento -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Fecha de Nacimiento</mat-label>
+                <input matInput [min]="minDate" [max]="maxDate" [matDatepicker]="picker"
+                    [formControlName]="'fechaNacimiento'" (click)="picker.open()" autocomplete="off">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-error *ngIf="registroUsuarioForm.get('fechaNacimiento').hasError('required')">
+                    Fecha de Nacimiento es requerido.
+                </mat-error>
+                <mat-error *ngIf="registroUsuarioForm.get('fechaNacimiento').hasError('edadMinimaNoCumplida')">
+                    Debes tener al menos 18 años para registrarte.
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Celular -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Celular</mat-label>
+                <input autocomplete="off" matInput formControlName="celular" maxlength="20">
+                <mat-error *ngIf="registroUsuarioForm.get('celular')?.hasError('onlyPhoneNumbersForm')">
+                    Ingrese un celular válido.
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+
+            <!-- Dirección -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Dirección</mat-label>
+                <input autocomplete="off" matInput formControlName="direccion" maxlength="200">
+            </mat-form-field>
+
+            <!-- Correo Electrónico -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Correo Electrónico</mat-label>
+                <input autocomplete="nope" matInput formControlName="correoElectronico" maxlength="50" required>
+                <mat-error *ngIf="registroUsuarioForm.get('correoElectronico')?.hasError('required')">
+                    Correo Electrónico es requerido
+                </mat-error>
+                <mat-error *ngIf="registroUsuarioForm.get('correoElectronico')?.hasError('invalidEmail')">
+                    Ingrese un correo válido.
+                </mat-error>
+            </mat-form-field>
+
+
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+
+            <!-- Contraseña -->
+            <mat-form-field class="w-full" appearance="outline">
+                <mat-label>Contraseña nueva</mat-label>
+                <input matInput [formControlName]="'contrasenia'" required type="password" #passwordField
+                    autocomplete="new-password">
+                <button mat-icon-button type="button"
+                    (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'"
+                    matSuffix>
+                    <mat-icon class="material-icons-outlined color-icon" matSuffix
+                        *ngIf="passwordField.type === 'password'">visibility_off</mat-icon>
+                    <mat-icon class="material-icons-outlined color-icon" matSuffix
+                        *ngIf="passwordField.type === 'text'">visibility</mat-icon>
+                </button>
+                <mat-error *ngIf="registroUsuarioForm?.get('contrasenia').hasError('required')">
+                    Contraseña es requerido
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="w-full" appearance="outline">
+                <mat-label>Confirmar Contraseña Nueva</mat-label>
+                <input matInput [formControlName]="'confirmarContrasenia'" required type="password"
+                    #repetirPasswordField autocomplete="new-password">
+                <button mat-icon-button type="button"
+                    (click)="repetirPasswordField.type === 'password' ? repetirPasswordField.type = 'text' : repetirPasswordField.type = 'password'"
+                    matSuffix>
+                    <mat-icon class="material-icons-outlined color-icon" matSuffix
+                        *ngIf="repetirPasswordField.type === 'password'">visibility_off</mat-icon>
+                    <mat-icon class="material-icons-outlined color-icon" matSuffix
+                        *ngIf="repetirPasswordField.type === 'text'">visibility</mat-icon>
+                </button>
+                <mat-error *ngIf="registroUsuarioForm?.get('confirmarContrasenia')?.hasError('mustMatch')">
+                    Las contraseñas no coinciden
+                </mat-error>
+            </mat-form-field>
+
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end mt-2">
+            <button class="px-8" mat-stroked-button [color]="'accent'" type="button" (click)="cerrarVentanaEmergente()">
+                <span> Cancelar </span>
+            </button>
+            <button class="  hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                mat-flat-button [color]="'primary'" type="button"
+                [disabled]="registroUsuarioForm.invalid || isCallingService" (click)="InsertAsync()">
+                <span *ngIf="!registroUsuarioForm.disabled">
+                    Guardar
+                </span>
+                <mat-progress-spinner *ngIf="registroUsuarioForm.disabled" [diameter]="24" [mode]="'indeterminate'">
+                </mat-progress-spinner>
+            </button>
+        </div>
+        }
+
+    </form>
+</div>

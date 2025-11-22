@@ -1,0 +1,366 @@
+<div class="flex flex-col max-w-3xl md:min-w-200 max -m-6 height-dialog">
+    <!-- Header -->
+    <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+        <div class="text-lg font-medium">Nuevo Producto</div>
+        <button mat-icon-button [tabIndex]="-1" (click)="cerrarVentanaEmergente()">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Compose form -->
+    <form class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto" [formGroup]="registroProductoForm">
+        @if (isMobilSize()) {
+        <div class="flex flex-wrap space-y-2">
+            <div class="w-full">
+                <!-- Código -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Código</mat-label>
+                    <input autocomplete="off" matInput formControlName="codigo" maxlength="20" required>
+                    <mat-error *ngIf="registroProductoForm.get('codigo').hasError('required')">
+                        Código es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Nombre -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Nombre</mat-label>
+                    <input autocomplete="off" matInput formControlName="nombre" maxlength="250" required>
+                    <mat-error *ngIf="registroProductoForm.get('nombre').hasError('required')">
+                        Nombre es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="w-full">
+                <!-- Categoría -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Seleccione Categoría</mat-label>
+                    <mat-select formControlName="categoria" required #selectCategoriaItem>
+                        <mat-select-trigger *ngIf="selectCategoriaItem.value">
+                            <span class="color-indicator"
+                                [style.backgroundColor]="selectCategoriaItem.value.color"></span>
+                            {{selectCategoriaItem.value.nombre}}
+                        </mat-select-trigger>
+                        <mat-option *ngFor="let option of allCategoria" [value]="option">
+                            <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                            {{ option.nombre }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="registroProductoForm.get('categoria').hasError('required')">Categoría es
+                        requerido</mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Marca -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Seleccione Marca</mat-label>
+                    <mat-select formControlName="marca" required #selectMarcaItem>
+                        <mat-select-trigger *ngIf="selectMarcaItem.value">
+                            <span class="color-indicator" [style.backgroundColor]="selectMarcaItem.value.color"></span>
+                            {{selectMarcaItem.value.nombre}}
+                        </mat-select-trigger>
+                        <mat-option *ngFor="let option of allMarca" [value]="option">
+                            <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                            {{ option.nombre }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="registroProductoForm.get('marca').hasError('required')">Marca es
+                        requerido</mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Precio Compra -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Precio Compra</mat-label>
+                    <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="precioCompra"
+                        maxlength="6" required>
+                    <mat-error *ngIf="registroProductoForm.get('precioCompra').hasError('required')">
+                        Precio Compra es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Precio Venta -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Precio Venta</mat-label>
+                    <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="precioVenta"
+                        maxlength="6" required>
+                    <mat-error *ngIf="registroProductoForm.get('precioVenta').hasError('required')">
+                        Precio Venta es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Stock -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Stock</mat-label>
+                    <input type="number" autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="stock"
+                        max="999" min="1" required (keydown)="preventNegative($event)">
+                    <mat-error *ngIf="registroProductoForm.get('stock').hasError('required')">
+                        Stock es requerido
+                    </mat-error>
+                    <mat-error *ngIf="registroProductoForm.get('stock').hasError('max')">
+                        El stock no puede exceder 999
+                    </mat-error>
+                    <mat-error *ngIf="registroProductoForm.get('stock').hasError('min')">
+                        El stock no puede ser menor a 0
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Descripción -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Descripción</mat-label>
+                    <textarea matInput formControlName="descripcion" maxlength="500"></textarea>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Color -->
+                <mat-form-field class="w-full">
+                    <input autocomplete="off" matInput readonly placeholder="Color">
+                    <ngx-colors formControlName="color" ngx-colors-trigger required [(ngModel)]="colorSelected"
+                        acceptLabel="Aceptar" cancelLabel="Cancelar"></ngx-colors>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full ">
+                <div class="flex justify-center items-center gap-2 mb-4">
+                    <div
+                        class="relative flex items-center justify-center w-32 h-32 rounded-full overflow-hidden ring-4 ring-bg-card bg-gray-100 group">
+
+                        <!-- Imagen Container -->
+                        <ng-container *ngIf="selectedFiles?.length > 0 || foto; else noImage">
+                            <img class="absolute inset-0 object-cover object-center w-full h-full"
+                                [src]="selectedFiles || foto">
+                        </ng-container>
+
+                        <!-- Plantilla para cuando no hay imagen -->
+                        <ng-template #noImage>
+                            <div
+                                class="flex flex-col items-center justify-center w-full h-full bg-gray-200 text-gray-600">
+                                <span class="text-lg font-semibold">SIN IMAGEN</span>
+                                <span *ngIf="iniciales" class="text-4xl font-bold uppercase">{{ iniciales }}</span>
+                            </div>
+                        </ng-template>
+
+                        <!-- Controles para subir/eliminar avatar -->
+                        <div
+                            class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <!-- Icono de la cámara para subir una nueva foto -->
+                            <label
+                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                for="avatar-file-input" matRipple>
+                                <mat-icon class="text-white" [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+                            </label>
+                            <!-- Input de archivo -->
+                            <input id="avatar-file-input" type="file" class="hidden " [accept]="'image/jpeg, image/png'"
+                                (change)="onFileSelected($event)" />
+
+                            @if (selectedFiles?.length > 0 || foto !== "" ) {
+                            <!-- Icono de eliminar imagen -->
+                            <button mat-icon-button class="ml-2 text-white hover:text-red-500"
+                                aria-label="Eliminar avatar" (click)="eliminarFoto()">
+                                <mat-icon class="text-white" [svgIcon]="'heroicons_outline:trash'"
+                                    aria-hidden="true"></mat-icon>
+                            </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="w-full flex justify-between mb-2">
+                <button class="mobil-btn" mat-stroked-button color="accent" type="button"
+                    (click)="cerrarVentanaEmergente()">
+                    <span>Cancelar</span>
+                </button>
+                <span class="w-4"></span>
+                <button class="mobil-btn" mat-flat-button color="primary" type="button" (click)="InsertAsync()"
+                    [disabled]="registroProductoForm.invalid || isCallingService">
+                    <span *ngIf="!registroProductoForm.disabled">Guardar</span>
+                    <mat-progress-spinner *ngIf="registroProductoForm.disabled" [diameter]="24"
+                        mode="indeterminate"></mat-progress-spinner>
+                </button>
+            </div>
+        </div>
+
+        } @else {
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Código -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Código</mat-label>
+                <input autocomplete="off" matInput formControlName="codigo" maxlength="20" required>
+                <mat-error *ngIf="registroProductoForm.get('codigo').hasError('required')">
+                    Código es requerido
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Nombre -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Nombre</mat-label>
+                <input autocomplete="off" matInput formControlName="nombre" maxlength="250" required>
+                <mat-error *ngIf="registroProductoForm.get('nombre').hasError('required')">
+                    Nombre es requerido
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Seleccione Categoría -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>--Seleccione Categoría--</mat-label>
+                <mat-select formControlName="categoria" required #selectCategoriaItem>
+                    <mat-select-trigger *ngIf="selectCategoriaItem.value">
+                        <span class="color-indicator" [style.backgroundColor]="selectCategoriaItem.value.color"></span>
+                        {{selectCategoriaItem.value.nombre}}
+                    </mat-select-trigger>
+                    <mat-option *ngFor="let option of allCategoria" [value]="option">
+                        <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                        {{ option.nombre }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="registroProductoForm.get('categoria').hasError('required')">Categoría es
+                    requerido</mat-error>
+            </mat-form-field>
+
+            <!-- Seleccione Marca -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>--Seleccione Marca--</mat-label>
+                <mat-select formControlName="marca" required #selectMarcaItem>
+                    <mat-select-trigger *ngIf="selectMarcaItem.value">
+                        <span class="color-indicator" [style.backgroundColor]="selectMarcaItem.value.color"></span>
+                        {{selectMarcaItem.value.nombre}}
+                    </mat-select-trigger>
+                    <mat-option *ngFor="let option of allMarca" [value]="option">
+                        <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                        {{ option.nombre }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="registroProductoForm.get('marca').hasError('required')">Marca es
+                    requerido</mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Precio Compra -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Precio Compra</mat-label>
+                <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="precioCompra" maxlength="6"
+                    required>
+                <mat-error *ngIf="registroProductoForm.get('precioCompra').hasError('required')">
+                    Precio Compra es requerido
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Precio Venta -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Precio Venta</mat-label>
+                <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="precioVenta" maxlength="6"
+                    required>
+                <mat-error *ngIf="registroProductoForm.get('precioVenta').hasError('required')">
+                    Precio Venta es requerido
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Stock -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Stock</mat-label>
+                <input type="number" autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="stock"
+                    max="999" min="1" required (keydown)="preventNegative($event)">
+                <mat-error *ngIf="registroProductoForm.get('stock').hasError('required')">
+                    Stock es requerido
+                </mat-error>
+                <mat-error *ngIf="registroProductoForm.get('stock').hasError('max')">
+                    El stock no puede exceder 999
+                </mat-error>
+                <mat-error *ngIf="registroProductoForm.get('stock').hasError('min')">
+                    El stock no puede ser menor a 0
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4">
+            <!-- Descripción -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Descripción</mat-label>
+                <textarea matInput formControlName="descripcion" maxlength="250"></textarea>
+            </mat-form-field>
+        </div>
+
+        <!-- Color -->
+        <mat-form-field>
+            <input autocomplete="off" matInput readonly placeholder="Color">
+            <ngx-colors [formControlName]="'color'" ngx-colors-trigger required [(ngModel)]="colorSelected"
+                acceptLabel="Aceptar" cancelLabel="Cancelar">
+            </ngx-colors>
+        </mat-form-field>
+
+        <div class="flex justify-center items-center gap-4">
+            <div
+                class="relative flex items-center justify-center w-32 h-32 rounded-full overflow-hidden ring-4 ring-bg-card bg-gray-100 group">
+
+                <!-- Imagen Container -->
+                <ng-container *ngIf="selectedFiles?.length > 0 || foto; else noImage">
+                    <img class="absolute inset-0 object-cover object-center w-full h-full"
+                        [src]="selectedFiles || foto">
+                </ng-container>
+
+                <!-- Plantilla para cuando no hay imagen -->
+                <ng-template #noImage>
+                    <div class="flex flex-col items-center justify-center w-full h-full bg-gray-200 text-gray-600">
+                        <span class="text-lg font-semibold">SIN IMAGEN</span>
+                    </div>
+                </ng-template>
+
+                <!-- Controles para subir/eliminar avatar -->
+                <div
+                    class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <!-- Icono de la cámara para subir una nueva foto -->
+                    <label class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                        for="avatar-file-input" matRipple>
+                        <mat-icon class="text-white" [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+                    </label>
+                    <!-- Input de archivo -->
+                    <input id="avatar-file-input" type="file" class="hidden" [accept]="'image/jpeg, image/png'"
+                        (change)="onFileSelected($event)" />
+
+                    @if (selectedFiles?.length > 0 || foto !== "" ) {
+                    <!-- Icono de eliminar imagen -->
+                    <button mat-icon-button class="ml-2 text-white hover:text-red-500" aria-label="Eliminar avatar"
+                        (click)="eliminarFoto()">
+                        <mat-icon class="text-white" [svgIcon]="'heroicons_outline:trash'"
+                            aria-hidden="true"></mat-icon>
+                    </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end mt-2">
+            <button class="px-8" mat-stroked-button [color]="'accent'" type="button" (click)="cerrarVentanaEmergente()">
+                <span> Cancelar </span>
+            </button>
+            <button class="  hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                mat-flat-button [color]="'primary'" type="button"
+                [disabled]="registroProductoForm.invalid || isCallingService" (click)="InsertAsync()">
+                <span *ngIf="!registroProductoForm.disabled">
+                    Guardar
+                </span>
+                <mat-progress-spinner *ngIf="registroProductoForm.disabled" [diameter]="24" [mode]="'indeterminate'">
+                </mat-progress-spinner>
+            </button>
+        </div>
+        }
+
+    </form>
+</div>

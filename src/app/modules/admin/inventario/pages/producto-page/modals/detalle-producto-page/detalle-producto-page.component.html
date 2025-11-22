@@ -1,0 +1,359 @@
+<div class="flex flex-col max-w-3xl md:min-w-200 max -m-6 height-dialog">
+    <!-- Header -->
+    <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+        <div class="text-lg font-medium">Detalle Producto</div>
+        <button mat-icon-button [tabIndex]="-1" (click)="cerrarVentanaEmergente()">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Compose form -->
+    <form class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto" [formGroup]="detalleProductoForm">
+        @if (isMobilSize()) {
+        <div class="flex flex-wrap space-y-2">
+            <div class="w-full">
+                <!-- Código -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Código</mat-label>
+                    <input autocomplete="off" matInput formControlName="codigo" maxlength="5" required>
+                    <mat-error *ngIf="detalleProductoForm.get('codigo').hasError('required')">
+                        Código es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Nombre -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Nombre</mat-label>
+                    <input autocomplete="off" matInput formControlName="nombre" maxlength="250" required>
+                    <mat-error *ngIf="detalleProductoForm.get('nombre').hasError('required')">
+                        Nombre es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="w-full">
+                <!-- Categoría -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Seleccione Categoría</mat-label>
+                    <mat-select formControlName="categoria" required #selectCategoriaItem
+                        [compareWith]="compareObjects">
+                        <mat-select-trigger *ngIf="selectCategoriaItem.value">
+                            <span class="color-indicator"
+                                [style.backgroundColor]="selectCategoriaItem.value.color"></span>
+                            {{selectCategoriaItem.value.nombre}}
+                        </mat-select-trigger>
+                        <mat-option *ngFor="let option of allCategoria" [value]="option">
+                            <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                            {{ option.nombre }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="detalleProductoForm.get('categoria').hasError('required')">Categoría es
+                        requerido</mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Marca -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Seleccione Marca</mat-label>
+                    <mat-select formControlName="marca" required #selectMarcaItem [compareWith]="compareObjects">
+                        <mat-select-trigger *ngIf="selectMarcaItem.value">
+                            <span class="color-indicator" [style.backgroundColor]="selectMarcaItem.value.color"></span>
+                            {{selectMarcaItem.value.nombre}}
+                        </mat-select-trigger>
+                        <mat-option *ngFor="let option of allMarca" [value]="option">
+                            <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                            {{ option.nombre }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="detalleProductoForm.get('marca').hasError('required')">Marca es
+                        requerido</mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Precio Compra -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Precio Compra</mat-label>
+                    <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="precioCompra"
+                        maxlength="6" required>
+                    <mat-error *ngIf="detalleProductoForm.get('precioCompra').hasError('required')">
+                        Precio Compra es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Precio Venta -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Precio Venta</mat-label>
+                    <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="precioVenta"
+                        maxlength="6" required>
+                    <mat-error *ngIf="detalleProductoForm.get('precioVenta').hasError('required')">
+                        Precio Venta es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Stock -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Stock</mat-label>
+                    <input type="number" autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="stock"
+                        max="999" required>
+                    <mat-error *ngIf="detalleProductoForm.get('stock').hasError('required')">
+                        Stock es requerido
+                    </mat-error>
+                    <mat-error *ngIf="detalleProductoForm.get('stock').hasError('max')">
+                        El stock no puede exceder 9999
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Descripción -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Descripción</mat-label>
+                    <textarea matInput formControlName="descripcion" maxlength="500"></textarea>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Color -->
+                <mat-form-field class="w-full">
+                    <input matInput disabled placeholder="Color" autocomplete="off">
+                    <ngx-colors [formControlName]="'color'" ngx-colors-trigger acceptLabel="Aceptar"
+                        cancelLabel="Cancelar">
+                    </ngx-colors>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Fecha Registro -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Fecha registro</mat-label>
+                    <input autocomplete="off" matInput [formControlName]="'fechaRegistro'"
+                        [matDatetimepicker]="fechaRegistro" autocomplete="false" placeholder="Fecha registro"
+                        class="text-sm h-8 p-1" />
+                    <mat-datetimepicker-toggle matSuffix [for]="fechaRegistro"></mat-datetimepicker-toggle>
+                    <mat-datetimepicker #fechaRegistro type="datetime" openOnFocus="false"
+                        timeInterval="5"></mat-datetimepicker>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
+                <!-- Última Fecha Modificación   -->
+                <mat-form-field class="w-full" [appearance]="'outline'">
+                    <mat-label>Última fecha modificación</mat-label>
+                    <input matInput [formControlName]="'fechaActualizacion'" [matDatetimepicker]="fechaActualizacion"
+                        autocomplete="false" placeholder="Última fecha modificación" class="text-sm h-8 p-1" />
+                    <mat-datetimepicker-toggle matSuffix [for]="fechaActualizacion"></mat-datetimepicker-toggle>
+                    <mat-datetimepicker #fechaActualizacion type="datetime" openOnFocus="false"
+                        timeInterval="5"></mat-datetimepicker>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full ">
+                <div class="flex justify-center items-center gap-2 mb-4">
+                    <div
+                        class="relative flex items-center justify-center w-32 h-32 rounded-full overflow-hidden ring-4 ring-bg-card bg-gray-100 group">
+
+                        <!-- Imagen Container -->
+                        <ng-container *ngIf="selectedFiles?.length > 0 || foto; else noImage">
+                            <img class="absolute inset-0 object-cover object-center w-full h-full"
+                                [src]="selectedFiles || foto" [disabled]="true">
+                        </ng-container>
+
+                        <!-- Plantilla para cuando no hay imagen -->
+                        <ng-template #noImage>
+                            <div
+                                class="flex flex-col items-center justify-center w-full h-full bg-gray-200 text-gray-600">
+                                <span class="text-lg font-semibold">SIN IMAGEN</span>
+                                <span *ngIf="iniciales" class="text-4xl font-bold uppercase">{{ iniciales }}</span>
+                            </div>
+                        </ng-template>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="w-full flex justify-between">
+                <button class="mobil-btn" mat-flat-button color="primary" type="button"
+                    (click)="cerrarVentanaEmergente()">
+                    <span>Cerrar</span>
+                </button>
+            </div>
+        </div>
+
+        } @else {
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Código -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Código</mat-label>
+                <input autocomplete="off" matInput formControlName="codigo" maxlength="5" required>
+                <mat-error *ngIf="detalleProductoForm.get('codigo').hasError('required')">
+                    Código es requerido
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Nombre -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Nombre</mat-label>
+                <input autocomplete="off" matInput formControlName="nombre" maxlength="250" required>
+                <mat-error *ngIf="detalleProductoForm.get('nombre').hasError('required')">
+                    Nombre es requerido
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Seleccione Categoría -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>--Seleccione Categoría--</mat-label>
+                <mat-select formControlName="categoria" required #selectCategoriaItem [compareWith]="compareObjects">
+                    <mat-select-trigger *ngIf="selectCategoriaItem.value">
+                        <span class="color-indicator" [style.backgroundColor]="selectCategoriaItem.value.color"></span>
+                        {{selectCategoriaItem.value.nombre}}
+                    </mat-select-trigger>
+                    <mat-option *ngFor="let option of allCategoria" [value]="option">
+                        <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                        {{ option.nombre }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="detalleProductoForm.get('categoria').hasError('required')">Categoría es
+                    requerido</mat-error>
+            </mat-form-field>
+
+            <!-- Seleccione Marca -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>--Seleccione Marca--</mat-label>
+                <mat-select formControlName="marca" required #selectMarcaItem [compareWith]="compareObjects">
+                    <mat-select-trigger *ngIf="selectMarcaItem.value">
+                        <span class="color-indicator" [style.backgroundColor]="selectMarcaItem.value.color"></span>
+                        {{selectMarcaItem.value.nombre}}
+                    </mat-select-trigger>
+                    <mat-option *ngFor="let option of allMarca" [value]="option">
+                        <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                        {{ option.nombre }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="detalleProductoForm.get('marca').hasError('required')">Marca es
+                    requerido</mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Precio Compra -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Precio Compra</mat-label>
+                <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="precioCompra" maxlength="6"
+                    required>
+                <mat-error *ngIf="detalleProductoForm.get('precioCompra').hasError('required')">
+                    Precio Compra es requerido
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Precio Venta -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Precio Venta</mat-label>
+                <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="precioVenta" maxlength="6"
+                    required>
+                <mat-error *ngIf="detalleProductoForm.get('precioVenta').hasError('required')">
+                    Precio Venta es requerido
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Stock -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Stock</mat-label>
+                <input type="number" autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="stock"
+                    max="999" required>
+                <mat-error *ngIf="detalleProductoForm.get('stock').hasError('required')">
+                    Stock es requerido
+                </mat-error>
+                <mat-error *ngIf="detalleProductoForm.get('stock').hasError('max')">
+                    El stock no puede exceder 9999
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4">
+            <!-- Descripción -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Descripción</mat-label>
+                <textarea matInput formControlName="descripcion" maxlength="250"></textarea>
+            </mat-form-field>
+
+        </div>
+
+
+
+        <div class="flex justify-between gap-4">
+            <!-- Color -->
+            <mat-form-field class="flex-1">
+                <input autocomplete="off" matInput disabled placeholder="Color">
+                <ngx-colors [formControlName]="'color'" ngx-colors-trigger acceptLabel="Aceptar" cancelLabel="Cancelar">
+                </ngx-colors>
+            </mat-form-field>
+        </div>
+
+
+        <div class="flex justify-between gap-4 mb-2">
+
+            <!-- Fecha Registro -->
+            <mat-form-field class="flex-1" [appearance]="'outline'">
+                <mat-label>Fecha registro</mat-label>
+                <input autocomplete="off" matInput [formControlName]="'fechaRegistro'"
+                    [matDatetimepicker]="fechaRegistro" autocomplete="false" placeholder="Fecha registro"
+                    class="text-sm h-8 p-1" />
+                <mat-datetimepicker-toggle matSuffix [for]="fechaRegistro"></mat-datetimepicker-toggle>
+                <mat-datetimepicker #fechaRegistro type="datetime" openOnFocus="false"
+                    timeInterval="5"></mat-datetimepicker>
+            </mat-form-field>
+
+            <!-- Última Fecha Modificación   -->
+            <mat-form-field class="flex-1 " [appearance]="'outline'">
+                <mat-label>Última fecha modificación</mat-label>
+                <input matInput [formControlName]="'fechaActualizacion'" [matDatetimepicker]="fechaActualizacion"
+                    autocomplete="false" placeholder="Última fecha modificación" class="text-sm h-8 p-1" />
+                <mat-datetimepicker-toggle matSuffix [for]="fechaActualizacion"></mat-datetimepicker-toggle>
+                <mat-datetimepicker #fechaActualizacion type="datetime" openOnFocus="false"
+                    timeInterval="5"></mat-datetimepicker>
+            </mat-form-field>
+
+        </div>
+
+        <div class="flex justify-center items-center gap-4">
+            <div
+                class="relative flex items-center justify-center w-32 h-32 rounded-full overflow-hidden ring-4 ring-bg-card bg-gray-100 group">
+
+                <!-- Imagen Container -->
+                <ng-container *ngIf="selectedFiles?.length > 0 || foto; else noImage">
+                    <img class="absolute inset-0 object-cover object-center w-full h-full" [src]="selectedFiles || foto"
+                        [disabled]="true">
+                </ng-container>
+
+                <!-- Plantilla para cuando no hay imagen -->
+                <ng-template #noImage>
+                    <div class="flex flex-col items-center justify-center w-full h-full bg-gray-200 text-gray-600">
+                        <span class="text-lg font-semibold">SIN IMAGEN</span>
+                    </div>
+                </ng-template>
+
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end mt-2">
+            <button class="px-8" mat-flat-button [color]="'primary'" type="button" (click)="cerrarVentanaEmergente()">
+                <span> Cerrar </span>
+            </button>
+            <span class="w-2"></span>
+        </div>
+        }
+
+    </form>
+</div>

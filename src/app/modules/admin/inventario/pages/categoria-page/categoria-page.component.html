@@ -1,0 +1,233 @@
+<mat-drawer-container class="flex-auto h-full">
+    <!-- Drawer -->
+    <mat-drawer class="w-90" [mode]="'over'" #matDrawer autoFocus="false">
+        <!-- Header -->
+        <div class="flex items-center justify-between m-4 mr-3 sm:my-5">
+            <!-- Title -->
+            <div class="text-3xl font-semibold tracking-tight leading-8">Filtrar por:</div>
+            <!-- Close Drawer -->
+            <div>
+                <button mat-icon-button (click)="matDrawer.close()">
+                    <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                </button>
+            </div>
+        </div>
+        <div class="flex flex-col flex-auto h-full dark:bg-default">
+            <!-- Filtros -->
+            <div class="flex flex-col flex-auto shrink-0 pt-6 bg-card dark:bg-transparent">
+
+                <form class="flex flex-col px-6" [formGroup]="filtroCategoriaForm">
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Nombre</mat-label>
+                        <input matInput formControlName="nombre" maxlength="50" autocomplete="off">
+                    </mat-form-field>
+                    <button class="mt-4 mb-8" mat-flat-button [color]="'primary'" (click)="btnBuscar()"
+                        [disabled]="filtroCategoriaForm.invalid || disabledBuscar">
+                        <mat-icon *ngIf="!disabledBuscar" class="icon-size-2"
+                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                        <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
+                        <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24" [mode]="'indeterminate'">
+                        </mat-progress-spinner>
+
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </mat-drawer>
+    <!-- Content -->
+    <mat-drawer-content class="flex flex-col">
+        <div class="flex flex-col flex-auto w-full">
+            <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+                <!-- Title and action buttons -->
+                <div class="flex items-center justify-between w-full">
+
+                    <div class="flex-1 min-w-0">
+                        <!-- Title -->
+                        <div class="mt-2">
+                            <h2 class="text-2xl md:text-2xl font-semibold tracking-tight leading-8">Lista de Categorías
+                            </h2>
+                        </div>
+                        <!-- Breadcrumbs -->
+                        <div class="flex flex-wrap items-center font-medium">
+                            <div>
+                                <a class="whitespace-nowrap text-primary-500">Categorías</a>
+                            </div>
+                            <div class="flex items-center ml-1 whitespace-nowrap">
+                                <mat-icon class="icon-size-5 text-secondary"
+                                    [svgIcon]="'heroicons_mini:chevron-right'"></mat-icon>
+                                <a class="ml-1 text-primary-500">Lista de Categorías</a>
+                            </div>
+
+                        </div>
+
+                    </div>
+ 
+                    <div class="flex items-center ml-6">
+                        @if (isMobilSize()) {
+                        <!-- Actions menu (visible on xs) -->
+                        <button [matMenuTriggerFor]="actionsMenu" mat-icon-button>
+                            <mat-icon [svgIcon]="'heroicons_mini:ellipsis-vertical'"></mat-icon>
+                        </button>
+                        <mat-menu #actionsMenu="matMenu">
+                            <button mat-menu-item (click)="onShowFormRegistrarCategoria()">
+                                <mat-icon [svgIcon]="'heroicons_solid:plus'"></mat-icon>
+                                <span class="ml-1">Nuevo</span>
+                            </button>
+                            <button mat-menu-item (click)="matDrawer.open()">
+                                <mat-icon [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                                <span class="ml-1">Filtrar</span>
+                            </button>
+                            <button mat-menu-item [disabled]="disabledExportar" (click)="onExportar()">
+                                <mat-icon [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
+                                <span class="ml-1">Exportar</span>
+                            </button>
+                        </mat-menu>
+                        } @else {
+                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                            mat-flat-button [color]="'primary'" (click)="onShowFormRegistrarCategoria()"
+                            [color]="'primary'">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:plus'"></mat-icon>
+                            <span class="ml-2">Nuevo</span>
+                        </button>
+                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                            mat-stroked-button (click)="matDrawer.open()">
+                            <mat-icon class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                            <span class="ml-2">Filtrar</span>
+                        </button>
+                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                            mat-stroked-button  [disabled]="disabledExportar" (click)="onExportar()">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
+                            <span class="ml-2">Exportar</span>
+                        </button>
+                        }
+
+                    </div>
+                </div>
+                <div class="w-full">
+
+                    <div class="skeleton-default  bg-card shadow rounded-2xl overflow-hidden " *ngIf="skeleton">
+                        <ngx-skeleton-loader [count]="skeletonNumber"
+                            [theme]="{ 'border-radius': '0', height: '50px' }"></ngx-skeleton-loader>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-1 gap-8 w-full mt-6">
+
+                        <!-- Tabla -->
+                        <div class="xl:col-span-1 flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden"
+                            *ngIf="!skeleton">
+                            <div class="overflow-x-auto mx-6">
+                                <table class="w-full bg-transparent mb-3" mat-table matSort [dataSource]="pageSlice"
+                                    [trackBy]="trackByFn" #categoriaTable>
+
+                                    <!-- Nombre -->
+                                    <ng-container matColumnDef="nombre">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Nombre
+                                        </th>
+                                        <td mat-cell *matCellDef="let categoria" class="min-w-50">
+                                            <span class="flex items-center">
+                                                <span class="w-2 h-2 rounded-full"
+                                                    [style.backgroundColor]="categoria.color"></span>
+                                                <span class="ml-3 leading-4">{{categoria.nombre}}</span>
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Categoría -->
+                                    <ng-container matColumnDef="medida">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>Medida</th>
+                                        <td mat-cell *matCellDef="let categoria" class="min-w-50">
+                                            <span class="flex items-center">
+                                                <span class="ml-3 leading-4">{{categoria.medida.nombre}}</span>
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Descripción -->
+                                    <ng-container matColumnDef="descripcion">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Descripción
+                                        </th>
+                                        <td mat-cell *matCellDef="let categoria">
+                                            <span class="pr-6 whitespace-nowrap">
+                                                {{categoria.descripcion}}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Fecha Registro -->
+                                    <ng-container matColumnDef="fechaRegistro">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                                            Fecha Registro
+                                        </th>
+                                        <td mat-cell *matCellDef="let categoria" style="min-width: 180px">
+                                            <span class="pr-6 whitespace-nowrap">
+                                                {{categoria.fechaRegistro | date:'dd/MM/yyyy HH:mm'}}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Activar/Desactivar -->
+                                    <ng-container matColumnDef="activarDesactivar">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Activo</th>
+                                        <td mat-cell *matCellDef="let categoria">
+                                            <mat-slide-toggle [checked]="categoria.activo" color="primary"
+                                                (change)="UpdateActivoCategoriaAsync(categoria, $event.checked)"
+                                                [disabled]="disabledAcciones">
+                                            </mat-slide-toggle>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Acciones -->
+                                    <ng-container matColumnDef="acciones">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </th>
+                                        <td mat-cell *matCellDef="let element">
+                                            <div class="flex">
+                                                <button mat-icon-button color="accent"
+                                                    (click)="onShowFormDetalleCategoria(element)" class="p-1"
+                                                    [disabled]="disabledAcciones">
+                                                    <mat-icon svgIcon="feather:eye"></mat-icon>
+                                                </button>
+                                                <button mat-icon-button color="primary"
+                                                    (click)="onShowFormModificaCategoria(element)" class="p-1"
+                                                    [disabled]="disabledAcciones">
+                                                    <mat-icon svgIcon="feather:edit-2"></mat-icon>
+                                                </button>
+                                                <button mat-icon-button color="warn" (click)="DeleteAsync(element)"
+                                                    class="p-1" [disabled]="disabledAcciones">
+                                                    <mat-icon svgIcon="feather:trash-2"></mat-icon>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="categoriaTableColumns"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: categoriaTableColumns;"></tr>
+                                </table>
+                            </div>
+
+                            <div class="paginator" *ngIf="allCategoriaDataSource.data.length > 0">
+                                <mat-paginator #paginator [length]="allCategoriaDataSource.data.length" [pageSize]="5"
+                                    [pageSizeOptions]="[10, 15, 20]" aria-label="Seleccione página"
+                                    (page)="onPageChange($event)">
+                                </mat-paginator>
+                            </div>
+                            <div class="paginator" *ngIf="allCategoriaDataSource.data.length === 0">
+                                <img [src]="imgNoDataUltimosRegistros" alt="No hay datos disponibles"
+                                    class="w-72 mx-auto mt-2" />
+                                <div
+                                    class="mt-4 sm:mt-8 text-2xl md:text-2xl font-semibold tracking-tight leading-tight md:leading-none text-center">
+                                    {{textoResultadoTable}}</div>
+                                <div>
+                                    <p class="mt-2 text-gray-500 text-center">Aplique otros filtros de búsqueda</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

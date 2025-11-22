@@ -1,0 +1,102 @@
+<div class="w-full max-w-3xl">
+
+
+
+    <!-- Form -->
+    <form [formGroup]="securityForm">
+
+        <!-- Section -->
+        <div class="w-full">
+            <div class="text-xl">Cambio de contraseña</div>
+            <div class="text-secondary">Después de cambiar su contraseña, necesitarás iniciar sesión nuevamente</div>
+        </div>
+
+        <!-- Alert -->
+        <fuse-alert class="mt-8" *ngIf="showAlert" [appearance]="'outline'" [showIcon]="false" [type]="alert.type"
+            [type]="alert.type" [@shake]="alert.type === 'error'">
+            <div [innerHTML]="alert.message"></div>
+        </fuse-alert>
+
+        <div class="grid sm:grid-cols-4 gap-6 w-full mt-8">
+            <!-- Current password -->
+            <div class="sm:col-span-4">
+                <mat-form-field class="w-full" [subscriptSizing]="'dynamic'" appearance="outline">
+                    <mat-label>Contraseña actual</mat-label>
+                    <input [formControlName]="'txtContraseniaActual'" type="password" matInput>
+                    <mat-error *ngIf="securityForm?.get('txtContraseniaActual').hasError('required')">
+                        Contraseña actual requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <!-- New password -->
+            <div class="sm:col-span-4">
+                <mat-form-field class="w-full" [subscriptSizing]="'dynamic'" appearance="outline">
+                    <mat-label>Contraseña nueva</mat-label>
+                    <input matInput [formControlName]="'txtContraseniaNueva'" required type="password" #passwordField>
+                    <button mat-icon-button type="button"
+                        (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'"
+                        matSuffix>
+                        <mat-icon class="material-icons-outlined color-icon" matSuffix
+                            *ngIf="passwordField.type === 'password'">visibility_off</mat-icon>
+                        <mat-icon class="material-icons-outlined color-icon" matSuffix
+                            *ngIf="passwordField.type === 'text'">visibility</mat-icon>
+                    </button>
+                    <mat-error *ngIf="securityForm?.get('txtContraseniaNueva').hasError('required')">
+                        Contraseña es requerido
+                    </mat-error>
+                </mat-form-field>
+ 
+            </div>
+
+            <!-- New password -->
+            <div class="sm:col-span-4">
+                <mat-form-field class="w-full" [subscriptSizing]="'dynamic'" appearance="outline">
+                    <mat-label>Confirmar contraseña nueva</mat-label>
+                    <input matInput [formControlName]="'txtConfirmarContraseniaNueva'" required type="password"
+                        #repetirPasswordField>
+                    <button mat-icon-button type="button"
+                        (click)="repetirPasswordField.type === 'password' ? repetirPasswordField.type = 'text' : repetirPasswordField.type = 'password'"
+                        matSuffix>
+                        <mat-icon class="material-icons-outlined color-icon" matSuffix
+                            *ngIf="repetirPasswordField.type === 'password'">visibility_off</mat-icon>
+                        <mat-icon class="material-icons-outlined color-icon" matSuffix
+                            *ngIf="repetirPasswordField.type === 'text'">visibility</mat-icon>
+                    </button>
+                    <mat-error *ngIf="securityForm?.get('txtConfirmarContraseniaNueva').hasError('mustMatch')">
+                        Las contraseñas no coinciden
+                    </mat-error>
+                </mat-form-field>
+
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="mt-10 mb-5"></div>
+
+        <!-- Contenido para pantallas pequeñas -->
+        <div class="w-full flex justify-between lg:hidden">
+            <span class="w-4"></span>
+            <button disabled="true" class="mobil-btn w-40 flex justify-center items-center" mat-flat-button color="primary"
+                type="button" [disabled]="securityForm.invalid || isCallingService"
+                (click)="UpdateUsuarioContraseniaByIdAsync()">
+                <span *ngIf="!securityForm.disabled">Guardar</span>
+                <mat-progress-spinner *ngIf="securityForm.disabled" [diameter]="24"
+                    mode="indeterminate"></mat-progress-spinner>
+            </button>
+        </div>
+
+        <!-- Contenido para pantallas grandes -->
+        <div class="hidden lg:flex justify-end mt-2">
+            <button disabled="true" class="ml-3 w-40 h-10 flex items-center justify-center" mat-flat-button [color]="'primary'"
+                type="button" [disabled]="securityForm.invalid || isCallingService" (click)="UpdateUsuarioContraseniaByIdAsync()">
+                <span *ngIf="!securityForm.disabled" >
+                    Guardar
+                </span>
+                <mat-progress-spinner *ngIf="securityForm.disabled" [diameter]="24" [mode]="'indeterminate'">
+                </mat-progress-spinner>
+            </button>
+        </div>
+
+    </form>
+
+</div>
