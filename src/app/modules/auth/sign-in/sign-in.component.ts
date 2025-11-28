@@ -61,8 +61,8 @@ export class AuthSignInComponent implements OnInit {
         this.signInForm = this._formBuilder.group({
             // correo: [this.initCorreo, [Validators.required, CommonValidators.invalidEmail()]],
             // password: [this.initClave, [Validators.required, Validators.minLength(Numeracion.Doce), Validators.maxLength(Numeracion.Ochenta)]],
-            correo: ['admin@gmail.com', [Validators.required, CommonValidators.invalidEmail()]],
-            password: ['Contrasenia2025*', [Validators.required, Validators.minLength(Numeracion.Doce), Validators.maxLength(Numeracion.Ochenta)]],
+            //correo: ['admin@gmail.com', [Validators.required, CommonValidators.invalidEmail()]],
+            //password: ['Contrasenia2025*', [Validators.required, Validators.minLength(Numeracion.Doce), Validators.maxLength(Numeracion.Ochenta)]],
             rememberMe: [this.initCheck],
         });
     }
