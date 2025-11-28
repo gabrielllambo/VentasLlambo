@@ -5,14 +5,16 @@ import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
 import { LayoutComponent } from 'app/shared/components/layout/layout.component';
 
 export const appRoutes: Route[] = [
-    {
+    /* {
         path: '', loadChildren: () => import('app/modules/landing/home/home.routes'),
         component: LayoutComponent,
         data: {
             layout: 'empty'
         },
-    },
+    }, */
 
+    { path: '', pathMatch: 'full', redirectTo: 'sign-in' },
+    
     { path: 'signed-in-redirect', pathMatch: 'full', redirectTo: 'admin' },
 
     {
