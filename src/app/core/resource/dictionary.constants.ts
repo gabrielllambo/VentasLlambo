@@ -141,8 +141,8 @@ export const StatusCode = {
 }
 
 export const ImagenesUrl = {
-  noDataUltimosRegistros: "/assets/images/logo/noDataUltimosRegistros.png",
-  noDataGraficos: "/assets/images/logo/noDataGraficos.png",
-  noDataHome: "/assets/images/logo/noDatadefault.png",
+  noDataUltimosRegistros: "assets/images/logo/noDataUltimosRegistros.png",
+  noDataGraficos: "assets/images/logo/noDataGraficos.png",
+  noDataHome: "assets/images/logo/noDatadefault.png",
 }
 
