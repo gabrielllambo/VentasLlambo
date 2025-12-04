@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1764603791358,
+  "timestamp": 1764814208048,
   "index": "/VentasLlambo/index.html",
   "assetGroups": [
     {
@@ -13,7 +13,7 @@
       "urls": [
         "/VentasLlambo/111.c48561fc33fd42be.js",
         "/VentasLlambo/194.fcb5c28160bd0869.js",
-        "/VentasLlambo/315.cc4b7d3f06c9bb28.js",
+        "/VentasLlambo/315.bfdc45290f1397be.js",
         "/VentasLlambo/389.d36921564c095ef0.js",
         "/VentasLlambo/394.8ad354a9b3d1b404.js",
         "/VentasLlambo/494.371ea3cb29eb6288.js",
@@ -30,7 +30,7 @@
         "/VentasLlambo/main.5229a481996c68f0.js",
         "/VentasLlambo/manifest.webmanifest",
         "/VentasLlambo/polyfills.631001974abafcfe.js",
-        "/VentasLlambo/runtime.f02e10b1119b0929.js",
+        "/VentasLlambo/runtime.c7bc2db2c587749c.js",
         "/VentasLlambo/styles.9b741396e67318a4.css"
       ],
       "patterns": []
@@ -103,7 +103,7 @@
   "hashTable": {
     "/VentasLlambo/111.c48561fc33fd42be.js": "e010d3c8aed67777402e05305149bd37389035c5",
     "/VentasLlambo/194.fcb5c28160bd0869.js": "8ab6724e129d2a562f1b03eb0b0d87f50c35a1d3",
-    "/VentasLlambo/315.cc4b7d3f06c9bb28.js": "7c77b4b855897883de1d0f2ace9a76e985888e4f",
+    "/VentasLlambo/315.bfdc45290f1397be.js": "498cab9495c6ab3d1b4ad0b25dbffb8f3f85d01f",
     "/VentasLlambo/389.d36921564c095ef0.js": "d6e45c69f0692ab8a3e17eb5e3413990e8c7aa39",
     "/VentasLlambo/394.8ad354a9b3d1b404.js": "fa2dc08b73e23fc48873453112af0f5fecea4504",
     "/VentasLlambo/494.371ea3cb29eb6288.js": "271a4674e722b82bb6566e32b9be2de71e281a59",
@@ -168,11 +168,11 @@
     "/VentasLlambo/common.f4c1dab0f7617eb5.js": "8f88e4f5befab17e1aaa4f358a9a09a7e2ac0d8d",
     "/VentasLlambo/favicon-16x16.png": "4463b7db3b5da7262d436ffe1dac5092b713cc8c",
     "/VentasLlambo/favicon-32x32.png": "644e41a811f1b2d0f8b8b2841f9f8e80ed8cbdbd",
-    "/VentasLlambo/index.html": "18f9bbe5dbe77d20fda1f7d1840fbc372282eb2c",
+    "/VentasLlambo/index.html": "72d019c71662c8023a739687c809fec7ffc9afb4",
     "/VentasLlambo/main.5229a481996c68f0.js": "918140b5ad074ee03e9806c378f6085ad421d0c8",
     "/VentasLlambo/manifest.webmanifest": "53d610a3cc964e70c15e67c5e2511cca1b9dc034",
     "/VentasLlambo/polyfills.631001974abafcfe.js": "8c21bee83690ad996459020bab9fc67dcb36e35f",
-    "/VentasLlambo/runtime.f02e10b1119b0929.js": "168966c8c815ea4a890f014fcfd8ef8e761d01c1",
+    "/VentasLlambo/runtime.c7bc2db2c587749c.js": "1802b3fcfd5db6d63492a510c293cddf667a31ec",
     "/VentasLlambo/styles.9b741396e67318a4.css": "033be7096bc653b11d04933e57eb87d49abb2e34"
   },
   "navigationUrls": [
