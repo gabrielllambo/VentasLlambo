@@ -116,6 +116,8 @@ export const ArchivoExcel = {
   NombreHojaExcelProductos: "Productos.xlsx",
   NombreExcelExportarVentas: "Reporte_Ventas.xlsx",
   NombreHojaExcelVentas: "Ventas.xlsx",
+  NombreExcelExportarCompras: "Reporte_Compras.xlsx",
+  NombreHojaExcelCompras: "Compras.xlsx",
 };
  
 export const Tools = {

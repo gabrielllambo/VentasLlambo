@@ -20,6 +20,18 @@ export const Cliente = {
     DeleteAsync: '/api/Cliente/deleteAsync',
 }
 
+// PROVEEDOR
+export const Proveedor = {
+    GetAllByFilterAsync: '/api/Proveedor/allByFilterAsync',
+    ExistCorreoAsync: '/api/Proveedor/existCorreoAsync',
+    ExistNumeroDocumentoAsync: '/api/Proveedor/existNumeroDocumentoAsync',
+    GetByNumDocumentoCorreoAsync: '/api/Proveedor/byNumDocumentoCorreoAsync',
+    InsertAsync: '/api/Proveedor/insertAsync',
+    UpdateAsync: '/api/Proveedor/updateAsync',
+    UpdateActivoAsync: '/api/Proveedor/updateActivoAsync',
+    DeleteAsync: '/api/Proveedor/deleteAsync',
+};
+
 export const Inventario = {
     Medida: {
         GetAllMedidaAsync: '/api/Inventario/allMedidaAsync',
@@ -60,6 +72,14 @@ export const Venta = {
     AnulaAsync: '/api/Venta/anulaAsync',
 };
 
+export const Compra = {
+    GetAllByFilterAsync: '/api/Compra/allByFilterAsync',
+    GetAllUsuariosAsync: '/api/Compra/allUsuariosAsync',
+    InsertAsync: '/api/Compra/insertAsync',
+    AnulaAsync: '/api/Compra/anulaAsync',
+};
+
+
 export const DetalleVenta = {
      GetDetalleAsync: '/api/DetalleVenta/detalleAsync',
      GetAnalisisProductosByFilterAsync: '/api/DetalleVenta/analisisProductosByFilterAsync',
@@ -69,6 +89,17 @@ export const DetalleVenta = {
      GetReportePorProductosAsync: '/api/DetalleVenta/reportePorProductosAsync',
      GetReportePorCategoriasAsync: '/api/DetalleVenta/reportePorCategoriasAsync',
      GetReportePorMarcasAsync: '/api/DetalleVenta/reportePorMarcasAsync',
+};
+
+export const DetalleCompra = {
+    GetDetalleAsync: '/api/DetalleCompra/detalleAsync',
+    GetAnalisisProductosByFilterAsync: '/api/DetalleCompra/analisisProductosByFilterAsync',
+    GetAnalisisCategoriasByFilterAsync: '/api/DetalleCompra/analisisCategoriasByFilterAsync',
+    GetAnalisisMarcasByFilterAsync: '/api/DetalleCompra/analisisMarcasByFilterAsync',
+    GetResumenReporteAsync: '/api/DetalleCompra/resumenReporteAsync',
+    GetReportePorProductosAsync: '/api/DetalleCompra/reportePorProductosAsync',
+    GetReportePorCategoriasAsync: '/api/DetalleCompra/reportePorCategoriasAsync',
+    GetReportePorMarcasAsync: '/api/DetalleCompra/reportePorMarcasAsync',
 };
 
 export const Parametro = {

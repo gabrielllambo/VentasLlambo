@@ -1,14 +1,14 @@
 <div class="flex flex-col max-w-3xl md:min-w-200 max -m-6 height-dialog">
     <!-- Header -->
     <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
-        <div class="text-lg font-medium">Detalle cliente</div>
+        <div class="text-lg font-medium">Detalle proveedor</div>
         <button mat-icon-button [tabIndex]="-1" (click)="cerrarVentanaEmergente()">
             <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
         </button>
     </div>
 
     <!-- Compose form -->
-    <form class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto" [formGroup]="detalleClienteForm">
+    <form class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto" [formGroup]="detalleProveedorForm">
         @if (isMobilSize()) {
         <div class="flex flex-wrap space-y-2">
             <div class="w-full">
@@ -18,11 +18,9 @@
                     <mat-select [formControlName]="'tipoDocumento'" required #selectTipoDocumentoItem
                         [compareWith]="compareObjects">
                         <mat-select-trigger *ngIf="selectTipoDocumentoItem.value">
-
                             {{selectTipoDocumentoItem.value.descripcion}}
                         </mat-select-trigger>
                         <mat-option *ngFor="let option of allTipoDocumento" [value]="option">
-
                             {{ option.nombre }}
                         </mat-option>
                     </mat-select>
@@ -38,35 +36,19 @@
             </div>
 
             <div class="w-full">
-                <!-- Nombres -->
+                <!-- Nombre Comercial -->
                 <mat-form-field class="w-full" [appearance]="'outline'">
-                    <mat-label>Nombres</mat-label>
-                    <input autocomplete="off" matInput formControlName="nombres" maxlength="50" required>
+                    <mat-label>Nombre Comercial</mat-label>
+                    <input autocomplete="off" matInput formControlName="nombreComercial" maxlength="50" required>
                 </mat-form-field>
             </div>
 
             <div class="w-full">
-                <!-- Apellidos -->
+                <!-- Razon Social -->
                 <mat-form-field class="w-full" [appearance]="'outline'">
-                    <mat-label>Apellidos</mat-label>
-                    <input autocomplete="off" matInput formControlName="apellidos" maxlength="50" required>
+                    <mat-label>Razon Social</mat-label>
+                    <input autocomplete="off" matInput formControlName="razonSocial" maxlength="50" required>
                 </mat-form-field>
-            </div>
-
-            <div class="w-full">
-                <!-- Género -->
-                <mat-form-field class="w-full" [appearance]="'outline'">
-                    <mat-label>Género</mat-label>
-                    <mat-select formControlName="genero" required #selectGeneroItem [compareWith]="compareObjects">
-                        <mat-select-trigger *ngIf="selectGeneroItem.value">
-                            {{selectGeneroItem.value.descripcion}}
-                        </mat-select-trigger>
-                        <mat-option *ngFor="let option of allGeneros" [value]="option">
-                            {{ option.descripcion }}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
-
             </div>
 
             <div class="w-full">
@@ -81,7 +63,7 @@
                 <!-- Celular -->
                 <mat-form-field class="w-full" [appearance]="'outline'">
                     <mat-label>Celular</mat-label>
-                    <input autocomplete="off" matInput formControlName="celular" maxlength="50">
+                    <input autocomplete="off" matInput formControlName="telefono" maxlength="50">
                 </mat-form-field>
             </div>
 
@@ -97,24 +79,21 @@
                 <!-- Fecha Registro -->
                 <mat-form-field class="w-full" [appearance]="'outline'">
                     <mat-label>Fecha registro</mat-label>
-                    <input autocomplete="off" matInput [formControlName]="'fechaRegistro'"
-                        [matDatetimepicker]="fechaRegistro" autocomplete="false" placeholder="Fecha registro"
-                        class="text-sm h-8 p-1" />
+                    <input matInput [formControlName]="'fechaRegistro'" [matDatetimepicker]="fechaRegistro"
+                        placeholder="Fecha registro" class="text-sm h-8 p-1" />
                     <mat-datetimepicker-toggle matSuffix [for]="fechaRegistro"></mat-datetimepicker-toggle>
-                    <mat-datetimepicker #fechaRegistro type="datetime" openOnFocus="false"
-                        timeInterval="5"></mat-datetimepicker>
+                    <mat-datetimepicker #fechaRegistro type="datetime" timeInterval="5"></mat-datetimepicker>
                 </mat-form-field>
             </div>
 
             <div class="w-full">
-                <!-- Última Fecha Modificación   -->
+                <!-- Última Fecha Modificación -->
                 <mat-form-field class="w-full" [appearance]="'outline'">
                     <mat-label>Última fecha modificación</mat-label>
                     <input matInput [formControlName]="'fechaActualizacion'" [matDatetimepicker]="fechaActualizacion"
-                        autocomplete="false" placeholder="Última fecha modificación" class="text-sm h-8 p-1" />
+                        placeholder="Última fecha modificación" class="text-sm h-8 p-1" />
                     <mat-datetimepicker-toggle matSuffix [for]="fechaActualizacion"></mat-datetimepicker-toggle>
-                    <mat-datetimepicker #fechaActualizacion type="datetime" openOnFocus="false"
-                        timeInterval="5"></mat-datetimepicker>
+                    <mat-datetimepicker #fechaActualizacion type="datetime" timeInterval="5"></mat-datetimepicker>
                 </mat-form-field>
             </div>
 
@@ -124,18 +103,18 @@
                     (click)="cerrarVentanaEmergente()">
                     <span>Cerrar</span>
                 </button>
-                <span class="w-4"></span>
-
             </div>
         </div>
 
         } @else {
 
+        <!-- --- Vista de escritorio igual a la versión original, solo cambiando el título y el formGroup --- -->
+
         <div class="flex justify-between gap-4 mb-2">
             <!-- Tipo de Documento -->
             <mat-form-field class="flex-1" [appearance]="'outline'">
                 <mat-label>Tipo de Documento</mat-label>
-                <mat-select [formControlName]="'tipoDocumento'" required #selectTipoDocumentoItem
+                <mat-select formControlName="tipoDocumento" required #selectTipoDocumentoItem
                     [compareWith]="compareObjects">
                     <mat-select-trigger *ngIf="selectTipoDocumentoItem.value">
                         {{selectTipoDocumentoItem.value.descripcion}}
@@ -146,96 +125,67 @@
                 </mat-select>
             </mat-form-field>
 
-            <!-- Número de Documento -->
-            <mat-form-field class="flex-1" [appearance]="'outline'">
+            <mat-form-field class="flex-1" appearance="outline">
                 <mat-label>Número de Documento</mat-label>
-                <input autocomplete="off" appTwoDigitDecimaNumber matInput formControlName="numeroDocumento"
-                    maxlength="20" required>
+                <input autocomplete="off" matInput formControlName="numeroDocumento" maxlength="20" required>
             </mat-form-field>
         </div>
 
         <div class="flex justify-between gap-4 mb-2">
-            <!-- Nombres -->
-            <mat-form-field class="flex-1" [appearance]="'outline'">
-                <mat-label>Nombres</mat-label>
-                <input autocomplete="off" matInput formControlName="nombres" maxlength="50" required>
+            <mat-form-field class="flex-1" appearance="outline">
+                <mat-label>Nombre Comercial</mat-label>
+                <input autocomplete="off" matInput formControlName="nombreComercial" maxlength="50" required>
             </mat-form-field>
-            <!-- Apellidos -->
-            <mat-form-field class="flex-1" [appearance]="'outline'">
-                <mat-label>Apellidos</mat-label>
-                <input autocomplete="off" matInput formControlName="apellidos" maxlength="50" required>
+
+            <mat-form-field class="flex-1" appearance="outline">
+                <mat-label>razon Social</mat-label>
+                <input autocomplete="off" matInput formControlName="razonSocial" maxlength="50" required>
             </mat-form-field>
         </div>
 
         <div class="flex justify-between gap-4 mb-2">
-
-            <!-- Género -->
-            <mat-form-field class="flex-1" [appearance]="'outline'">
-                <mat-label>Género</mat-label>
-                <mat-select formControlName="genero" required #selectGeneroItem [compareWith]="compareObjects">
-                    <mat-select-trigger *ngIf="selectGeneroItem.value">
-                        {{selectGeneroItem.value.descripcion}}
-                    </mat-select-trigger>
-                    <mat-option *ngFor="let option of allGeneros" [value]="option">
-                        {{ option.descripcion }}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
-
-            <!-- Correo Electrónico -->
-            <mat-form-field class="flex-1" [appearance]="'outline'">
+            <mat-form-field class="flex-1" appearance="outline">
                 <mat-label>Correo Electrónico</mat-label>
                 <input autocomplete="off" matInput formControlName="correoElectronico" maxlength="50" required>
             </mat-form-field>
-
         </div>
 
         <div class="flex justify-between gap-4">
-            <!-- Celular -->
-            <mat-form-field class="flex-1" [appearance]="'outline'">
-                <mat-label>Celular</mat-label>
-                <input autocomplete="off" matInput formControlName="celular" maxlength="20">
+            <mat-form-field class="flex-1" appearance="outline">
+                <mat-label>Teléfono</mat-label>
+                <input autocomplete="off" matInput formControlName="telefono" maxlength="20">
             </mat-form-field>
 
-            <!-- Dirección -->
-            <mat-form-field class="flex-1" [appearance]="'outline'">
+            <mat-form-field class="flex-1" appearance="outline">
                 <mat-label>Dirección</mat-label>
-                <input matInput formControlName="direccion" />
+                <input autocomplete="off" matInput formControlName="direccion">
             </mat-form-field>
         </div>
 
         <div class="flex justify-between gap-4 mb-2">
-
-            <!-- Fecha Registro -->
-            <mat-form-field class="flex-1" [appearance]="'outline'">
+            <mat-form-field class="flex-1" appearance="outline">
                 <mat-label>Fecha registro</mat-label>
-                <input autocomplete="off" matInput [formControlName]="'fechaRegistro'"
-                    [matDatetimepicker]="fechaRegistro" autocomplete="false" placeholder="Fecha registro"
-                    class="text-sm h-8 p-1" />
+                <input autocomplete="off" matInput formControlName="fechaRegistro" [matDatetimepicker]="fechaRegistro"
+                    class="text-sm h-8 p-1">
                 <mat-datetimepicker-toggle matSuffix [for]="fechaRegistro"></mat-datetimepicker-toggle>
-                <mat-datetimepicker #fechaRegistro type="datetime" openOnFocus="false"
-                    timeInterval="5"></mat-datetimepicker>
+                <mat-datetimepicker #fechaRegistro type="datetime" openOnFocus="false" timeInterval="5"></mat-datetimepicker>
             </mat-form-field>
 
-            <!-- Última Fecha Modificación   -->
-            <mat-form-field class="flex-1" [appearance]="'outline'">
+            <mat-form-field class="flex-1" appearance="outline">
                 <mat-label>Última fecha modificación</mat-label>
-                <input matInput [formControlName]="'fechaActualizacion'" [matDatetimepicker]="fechaActualizacion"
-                    autocomplete="false" placeholder="Última fecha modificación" class="text-sm h-8 p-1" />
+                <input autocomplete="off" matInput formControlName="fechaActualizacion" [matDatetimepicker]="fechaActualizacion"
+                    class="text-sm h-8 p-1">
                 <mat-datetimepicker-toggle matSuffix [for]="fechaActualizacion"></mat-datetimepicker-toggle>
-                <mat-datetimepicker #fechaActualizacion type="datetime" openOnFocus="false"
-                    timeInterval="5"></mat-datetimepicker>
+                <mat-datetimepicker #fechaActualizacion type="datetime" openOnFocus="false" timeInterval="5"></mat-datetimepicker>
             </mat-form-field>
         </div>
 
-        <!-- Actions -->
         <div class="flex justify-end mt-2">
             <button class="px-8" mat-flat-button color="primary" type="button" (click)="cerrarVentanaEmergente()">
-                <span> Cerrar </span>
+                <span>Cerrar</span>
             </button>
-
         </div>
-        }
 
+        }
     </form>
 </div>

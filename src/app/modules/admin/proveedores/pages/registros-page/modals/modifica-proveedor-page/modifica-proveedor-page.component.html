@@ -1,0 +1,201 @@
+<div class="flex flex-col max-w-3xl md:min-w-200 max -m-6 height-dialog">
+    <!-- Header -->
+    <div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+        <div class="text-lg font-medium">Modificar Proveedor</div>
+        <button mat-icon-button [tabIndex]="-1" (click)="cerrarVentanaEmergente()">
+            <mat-icon class="text-current" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Form -->
+    <form class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto" [formGroup]="actualizaProveedorForm">
+
+        @if (isMobilSize()) {
+
+        <div class="flex flex-wrap space-y-2">
+
+            <!-- Número de Documento -->
+            <div class="w-full">
+                <mat-form-field class="w-full" appearance="outline">
+                    <mat-label>Número de Documento</mat-label>
+                    <input matInput autocomplete="off" formControlName="numeroDocumento" maxlength="25" required>
+                    <mat-error *ngIf="actualizaProveedorForm.get('numeroDocumento').hasError('required')">
+                        Número de Documento es requerido
+                    </mat-error>
+                    <mat-error *ngIf="actualizaProveedorForm.get('numeroDocumento')?.hasError('onlyNumbersForm')">
+                        Ingrese solo números.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <!-- Razón Social -->
+            <div class="w-full">
+                <mat-form-field class="w-full" appearance="outline">
+                    <mat-label>Razón Social</mat-label>
+                    <input matInput autocomplete="off" formControlName="razonSocial" maxlength="100" required>
+                    <mat-error *ngIf="actualizaProveedorForm.get('razonSocial').hasError('required')">
+                        Razón Social es requerida
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <!-- Nombre Comercial -->
+            <div class="w-full">
+                <mat-form-field class="w-full" appearance="outline">
+                    <mat-label>Nombre Comercial</mat-label>
+                    <input matInput autocomplete="off" formControlName="nombreComercial" maxlength="100" required>
+                    <mat-error *ngIf="actualizaProveedorForm.get('nombreComercial').hasError('required')">
+                        Nombre Comercial es requerida
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <!-- Correo -->
+            <div class="w-full">
+                <mat-form-field class="w-full" appearance="outline">
+                    <mat-label>Correo Electrónico</mat-label>
+                    <input matInput autocomplete="off" formControlName="correoElectronico" maxlength="50" required>
+                    <mat-error *ngIf="actualizaProveedorForm.get('correoElectronico').hasError('required')">
+                        Correo Electrónico es requerido
+                    </mat-error>
+                    <mat-error *ngIf="actualizaProveedorForm.get('correoElectronico')?.hasError('invalidEmail')">
+                        Ingrese un correo válido.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <!-- Teléfono -->
+            <div class="w-full">
+                <mat-form-field class="w-full" appearance="outline">
+                    <mat-label>Teléfono</mat-label>
+                    <input matInput autocomplete="off" formControlName="telefono" maxlength="20">
+                    <mat-error *ngIf="actualizaProveedorForm.get('telefono')?.hasError('onlyPhoneNumbersForm')">
+                        Ingrese un número válido.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <!-- Dirección -->
+            <div class="w-full">
+                <mat-form-field class="w-full" appearance="outline">
+                    <mat-label>Dirección</mat-label>
+                    <input matInput formControlName="direccion">
+                </mat-form-field>
+            </div>
+
+            <!-- Activo -->
+            <div class="w-full">
+                <mat-checkbox formControlName="activo">Proveedor Activo</mat-checkbox>
+            </div>
+
+            <!-- Botones -->
+            <div class="w-full flex justify-between">
+                <button class="mobil-btn" mat-stroked-button color="accent" type="button"
+                    (click)="cerrarVentanaEmergente()">
+                    Cancelar
+                </button>
+
+                <button class="mobil-btn" mat-flat-button color="primary" type="button"
+                    (click)="UpdateAsync()"
+                    [disabled]="actualizaProveedorForm.invalid || isCallingService">
+                    <span *ngIf="!actualizaProveedorForm.disabled">Guardar</span>
+                    <mat-progress-spinner *ngIf="actualizaProveedorForm.disabled" diameter="24"
+                        mode="indeterminate"></mat-progress-spinner>
+                </button>
+            </div>
+        </div>
+
+        } @else {
+
+        <div class="flex justify-between gap-4 mb-2">
+
+            <!-- Número de Documento -->
+            <mat-form-field class="flex-1" appearance="outline">
+                <mat-label>Número de Documento</mat-label>
+                <input matInput autocomplete="off" formControlName="numeroDocumento" maxlength="25" required>
+                <mat-error *ngIf="actualizaProveedorForm.get('numeroDocumento').hasError('required')">
+                    Número de Documento es requerido
+                </mat-error>
+                <mat-error *ngIf="actualizaProveedorForm.get('numeroDocumento')?.hasError('onlyNumbersForm')">
+                    Ingrese solo números.
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Razón Social -->
+            <mat-form-field class="flex-1" appearance="outline">
+                <mat-label>Razón Social</mat-label>
+                <input matInput autocomplete="off" formControlName="razonSocial" maxlength="100" required>
+                <mat-error *ngIf="actualizaProveedorForm.get('razonSocial').hasError('required')">
+                    Razón Social es requerida
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <!-- Nombre Comercial -->
+            <div class="w-full">
+                <mat-form-field class="w-full" appearance="outline">
+                    <mat-label>Nombre Comercial</mat-label>
+                    <input matInput autocomplete="off" formControlName="nombreComercial" maxlength="100" required>
+                    <mat-error *ngIf="actualizaProveedorForm.get('nombreComercial').hasError('required')">
+                        Nombre Comercial es requerida
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+        <div class="flex justify-between gap-4 mb-2">
+            <!-- Correo -->
+            <mat-form-field class="flex-1" appearance="outline">
+                <mat-label>Correo Electrónico</mat-label>
+                <input matInput autocomplete="off" formControlName="correo" maxlength="50" required>
+                <mat-error *ngIf="actualizaProveedorForm.get('correo').hasError('required')">
+                    Correo Electrónico es requerido
+                </mat-error>
+                <mat-error *ngIf="actualizaProveedorForm.get('correo')?.hasError('invalidEmail')">
+                    Ingrese un correo válido.
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Teléfono -->
+            <mat-form-field class="flex-1" appearance="outline">
+                <mat-label>Teléfono</mat-label>
+                <input matInput autocomplete="off" formControlName="telefono" maxlength="20">
+                <mat-error *ngIf="actualizaProveedorForm.get('telefono')?.hasError('onlyPhoneNumbersForm')">
+                    Ingrese un número válido.
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-between gap-4">
+            <!-- Dirección -->
+            <mat-form-field class="flex-1" appearance="outline">
+                <mat-label>Dirección</mat-label>
+                <input matInput formControlName="direccion">
+            </mat-form-field>
+
+            <!-- Activo -->
+            <div class="flex items-center">
+                <mat-checkbox formControlName="activo">Activo</mat-checkbox>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end mt-2">
+            <button mat-stroked-button color="accent" type="button"
+                (click)="cerrarVentanaEmergente()">
+                Cancelar
+            </button>
+
+            <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                mat-flat-button color="primary" type="button"
+                [disabled]="actualizaProveedorForm.invalid || isCallingService"
+                (click)="UpdateAsync()">
+                <span *ngIf="!actualizaProveedorForm.disabled">Guardar</span>
+                <mat-progress-spinner *ngIf="actualizaProveedorForm.disabled"
+                    diameter="24" mode="indeterminate"></mat-progress-spinner>
+            </button>
+        </div>
+
+        }
+
+    </form>
+</div>

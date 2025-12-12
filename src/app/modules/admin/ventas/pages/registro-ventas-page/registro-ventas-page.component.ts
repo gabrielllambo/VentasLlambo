@@ -193,6 +193,8 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
             request.fechaRegistroVenta = txtFechaRegistroVenta;
             request.flgEnviarComprobante = this.flgEnviarComprobante;
             this.isCallingInsertService = Flags.Show;
+    console.log('Request a enviar:', request);
+
 
             this._ventaService.InsertAsync(request).subscribe((response: ResponseDTO) => {
 
