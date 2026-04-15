@@ -76,7 +76,7 @@
                 <!-- Precio Compra -->
                 <mat-form-field class="w-full" [appearance]="'outline'">
                     <mat-label>Precio Compra</mat-label>
-                    <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="precioCompra"
+                    <input autocomplete="off" readonly matInput appTwoDigitDecimaNumber formControlName="precioCompra"
                         maxlength="6" required>
                     <mat-error *ngIf="actualizaProductoForm.get('precioCompra').hasError('required')">
                         Precio Compra es requerido
@@ -253,14 +253,14 @@
 
         <div class="flex justify-between gap-4 mb-2">
             <!-- Precio Compra -->
-            <mat-form-field class="flex-1" [appearance]="'outline'">
+            <!-- <mat-form-field class="flex-1" [appearance]="'outline'">
                 <mat-label>Precio Compra</mat-label>
                 <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="precioCompra" maxlength="6"
                     required>
                 <mat-error *ngIf="actualizaProductoForm.get('precioCompra').hasError('required')">
                     Precio Compra es requerido
                 </mat-error>
-            </mat-form-field>
+            </mat-form-field> -->
 
             <!-- Precio Venta -->
             <mat-form-field class="flex-1" [appearance]="'outline'">
@@ -273,7 +273,7 @@
             </mat-form-field>
 
             <!-- Stock -->
-            <mat-form-field class="flex-1" [appearance]="'outline'">
+            <!-- <mat-form-field class="flex-1" [appearance]="'outline'">
                 <mat-label>Stock</mat-label>
                 <input type="number" autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="stock"
                     max="999" min="1" required (keydown)="preventNegative($event)">
@@ -286,8 +286,8 @@
                 <mat-error *ngIf="actualizaProductoForm.get('stock').hasError('min')">
                     El stock no puede ser menor a 0
                 </mat-error>
-            </mat-form-field>
-        </div>
+            </mat-form-field>-->
+        </div> 
 
         <div class="flex justify-between gap-4">
             <!-- Descripción -->

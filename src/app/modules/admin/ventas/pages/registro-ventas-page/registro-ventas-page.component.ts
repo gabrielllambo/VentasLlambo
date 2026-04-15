@@ -130,7 +130,7 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
             nombreMarca: producto?.marca.nombre,
             colorMarca: producto?.marca.color,
             cantidad: producto?.cantidad,
-            nombreMedida: producto?.categoria.medida.nombre,
+            nombreMedida: producto?.categoria.medida?.nombre,
             precioCompra: producto?.precioCompra,
             precioVenta: producto?.precioVenta,
         }));
@@ -193,7 +193,7 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
             request.fechaRegistroVenta = txtFechaRegistroVenta;
             request.flgEnviarComprobante = this.flgEnviarComprobante;
             this.isCallingInsertService = Flags.Show;
-    console.log('Request a enviar:', request);
+            console.log('Request a enviar:', request);
 
 
             this._ventaService.InsertAsync(request).subscribe((response: ResponseDTO) => {
@@ -391,5 +391,72 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
     trackByFn(index: number, item: any): any {
         return item.id || index;
     }
+
+    bloquearDecimales(event: KeyboardEvent): void {
+        const teclasBloqueadas = ['.', ',', 'e', 'E', '-', '+'];
+
+        if (teclasBloqueadas.includes(event.key)) {
+            event.preventDefault();
+        }
+    }
+    bloquearPegadoDecimal(event: ClipboardEvent): void {
+        const texto = event.clipboardData?.getData('text') ?? '';
+
+        if (!/^\d+$/.test(texto)) {
+            event.preventDefault();
+        }
+    }
+
+    validarCantidad(producto: any): void {
+        if (!producto.cantidad || producto.cantidad < 1) {
+            producto.cantidad = 1;
+            return;
+        }
+
+        // Fuerza entero
+        producto.cantidad = Math.trunc(producto.cantidad);
+
+        // Respeta stock
+        if (producto.cantidad > producto.stock) {
+            producto.cantidad = producto.stock;
+        }
+    }
+
+    validarPeso(producto: any): void {
+
+        // Solo aplica para productos por PESO
+        if (producto.tipoMedida !== 1) {
+            return;
+        }
+
+        if (producto.cantidad == null) {
+            producto.cantidad = 0.01;
+            return;
+        }
+
+        let cantidad = Number(producto.cantidad);
+
+        // No permitir valores inválidos
+        if (isNaN(cantidad) || cantidad <= 0) {
+            producto.cantidad = 0.01;
+            return;
+        }
+
+        // Limitar a 2 decimales
+        cantidad = Math.floor(cantidad * 100) / 100;
+
+        // Validar stock disponible
+        if (cantidad > producto.stock) {
+            cantidad = producto.stock;
+        }
+
+        // Mínimo permitido
+        if (cantidad < 0.01) {
+            cantidad = 0.01;
+        }
+
+        producto.cantidad = cantidad;
+    }
+
 
 }

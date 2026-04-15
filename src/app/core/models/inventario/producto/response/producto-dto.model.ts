@@ -7,9 +7,9 @@ export class ProductoDTO {
     nombre: string;
     descripcion: string;
     color: string;
-    precioCompra: number;
+    precioCompra: number | null;
     precioVenta: number;
-    stock: number;
+    stock: number | null;
     urlFoto: string;
     fechaRegistro: Date;
     fechaActualizacion: Date;
@@ -17,4 +17,6 @@ export class ProductoDTO {
     categoria: CategoriaDTO;
     marca: MarcaDTO;
     cantidad: number;
+    fechaCaducidad: Date | null;
+    tipoMedida: number;
 }

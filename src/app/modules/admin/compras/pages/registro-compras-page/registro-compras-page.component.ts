@@ -42,7 +42,7 @@ export class RegistroComprasPageComponent implements OnInit, OnDestroy {
     public isBuscandoProductosDisabled = false;
     public hayProveedor = Flags.False;
     public filtroRegistroComprasForm: UntypedFormGroup;
-    public productoTableColumns: string[] = ['foto', 'nombre', 'stock', 'precioCompra', 'cantidad', 'total', 'acciones'];
+    public productoTableColumns: string[] = ['foto', 'nombre', 'stock', 'precioCompra', 'fechaCaducidad', 'cantidad', 'total', 'acciones'];
     public parametroBusquedaProducto = '';
     public parametroBusquedaProveedor = '';
     public notaAdicional = '';
@@ -96,13 +96,10 @@ export class RegistroComprasPageComponent implements OnInit, OnDestroy {
     }
 
     aumentarCantidad(producto: ProductoSeleccionadosCompra): void {
-        if (producto.cantidad < producto.stock) {
-            producto.cantidad++;
-            this.lstProductosSeleccionados._updateChangeSubscription();
-        } else {
-            this._toolService.showWarning('Límite de stock alcanzado', 'Advertencia');
-        }
+        producto.cantidad++;
+        this.lstProductosSeleccionados._updateChangeSubscription();
     }
+
 
     onSelectCategoryProduct(category: MatButtonToggleChange): void {
         this._inventarioService.GetAllProductsByCategoryAsync(category.value.idCategoria).subscribe((response: ProductoDTO[]) => {
@@ -136,7 +133,9 @@ export class RegistroComprasPageComponent implements OnInit, OnDestroy {
             cantidad: producto.cantidad,
 
             // Ajustado también
-            precioCompra: producto.precioCompra    // antes tenías precioCosto
+            precioCompra: producto.precioCompra,    // antes tenías precioCosto
+
+            fechaCaducidad: producto.fechaCaducidad
 
         }));
 
@@ -299,7 +298,8 @@ export class RegistroComprasPageComponent implements OnInit, OnDestroy {
         const productoSeleccionado: ProductoSeleccionadosCompra = {
             ...producto,
             cantidad: 1,
-            precioCompra: producto.precioCompra ?? 0,   // seguridad
+            precioCompra: producto.precioCompra ?? 0,
+            fechaCaducidad: producto.fechaCaducidad   // seguridad
         };
 
         if (index === -1) {
@@ -331,4 +331,52 @@ export class RegistroComprasPageComponent implements OnInit, OnDestroy {
     trackByFn(index: number, item: any): any {
         return item.id || index;
     }
+
+    bloquearDecimales(event: KeyboardEvent): void {
+        const teclasBloqueadas = ['.', ',', 'e', 'E', '-', '+'];
+
+        if (teclasBloqueadas.includes(event.key)) {
+            event.preventDefault();
+        }
+    }
+    bloquearPegadoDecimal(event: ClipboardEvent): void {
+        const texto = event.clipboardData?.getData('text') ?? '';
+
+        if (!/^\d+$/.test(texto)) {
+            event.preventDefault();
+        }
+    }
+
+    validarPeso(producto: any): void {
+
+        // Solo aplica para productos por PESO
+        if (producto.tipoMedida !== 1) {
+            return;
+        }
+
+        if (producto.cantidad == null) {
+            producto.cantidad = 0.01;
+            return;
+        }
+
+        let cantidad = Number(producto.cantidad);
+
+        // No permitir valores inválidos
+        if (isNaN(cantidad) || cantidad <= 0) {
+            producto.cantidad = 0.01;
+            return;
+        }
+
+        // Limitar a 2 decimales
+        cantidad = Math.floor(cantidad * 100) / 100;
+
+        // Mínimo permitido
+        if (cantidad < 0.01) {
+            cantidad = 0.01;
+        }
+
+        producto.cantidad = cantidad;
+    }
+
+
 }

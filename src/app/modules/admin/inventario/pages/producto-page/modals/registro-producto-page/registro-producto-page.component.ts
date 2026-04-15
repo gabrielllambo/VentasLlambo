@@ -53,10 +53,11 @@ export class RegistroProductoPageComponent implements OnInit {
       codigo: ['', [Validators.required, Validators.minLength(Numeracion.Tres), Validators.maxLength(Numeracion.Cien),]],
       nombre: ['', [Validators.required, Validators.minLength(Numeracion.Dos), Validators.maxLength(Numeracion.Mil)]],
       descripcion: ['', [Validators.maxLength(Numeracion.DoscientosCincuenta)]],
-      precioCompra: ['', [Validators.required]],
+      precioCompra: ['',[]],
       precioVenta: ['', [Validators.required]],
-      stock: ['', [Validators.required]],
-      color: ['', []]
+      stock: ['', []],
+      color: ['', []],
+      tipoMedida: ['', [Validators.required]],
     });
   }
 
@@ -72,9 +73,10 @@ export class RegistroProductoPageComponent implements OnInit {
     const txtColor = this.registroProductoForm.get('color').value;
     const txtNombre = this.registroProductoForm.get('nombre').value;
     const txtDescripcion = this.registroProductoForm.get('descripcion').value;
-    const txtPrecioCompra = this.registroProductoForm.get('precioCompra').value;
+    const txtPrecioCompra = 0;
     const txtPrecioVenta = this.registroProductoForm.get('precioVenta').value;
-    const txtStock = this.registroProductoForm.get('stock').value;
+    const txtStock = 0;
+    const txtTipoMedida = this.registroProductoForm.get('tipoMedida').value;
 
     if (FuseValidators.isEmptyInputValue(destinationTimeZoneId)) {
       this._toolService.showWarning(DictionaryWarning.InvalidLocalizacion, DictionaryWarning.Tittle);
@@ -111,20 +113,20 @@ export class RegistroProductoPageComponent implements OnInit {
       return;
     }
 
-    if (FuseValidators.isEmptyInputValue(txtPrecioCompra) || txtPrecioCompra == Numeracion.Cero) {
+    /* if (FuseValidators.isEmptyInputValue(txtPrecioCompra) || txtPrecioCompra == Numeracion.Cero) {
       this._toolService.showWarning(DictionaryWarning.InvalidPrecioCompra, DictionaryWarning.Tittle);
       return;
-    }
+    } */
 
     if (FuseValidators.isEmptyInputValue(txtPrecioVenta) || txtPrecioVenta == Numeracion.Cero) {
       this._toolService.showWarning(DictionaryWarning.InvalidPrecioVenta, DictionaryWarning.Tittle);
       return;
     }
 
-    if (FuseValidators.isEmptyInputValue(txtStock) || txtStock == Numeracion.Cero) {
+    /* if (FuseValidators.isEmptyInputValue(txtStock) || txtStock == Numeracion.Cero) {
       this._toolService.showWarning(DictionaryWarning.InvalidPrecioStock, DictionaryWarning.Tittle);
       return;
-    }
+    } */
 
     const request = new RegistrarProductoRequest();
 
@@ -141,6 +143,9 @@ export class RegistroProductoPageComponent implements OnInit {
     request.stock = txtStock
     request.nombreArchivo = this.nombreArchivo;
     request.fotoBase64 = this.foto;
+    request.tipoMedida = txtTipoMedida
+
+    console.log('Request a enviar:', request);
 
     this.registroProductoForm.disable();
     this.isCallingService = Flags.True;

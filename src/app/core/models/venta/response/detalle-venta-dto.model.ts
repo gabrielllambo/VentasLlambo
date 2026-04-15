@@ -8,4 +8,6 @@ export class DetalleVentaDTO {
     precioProducto: number;
     cantidad: number;
     precioTotal: number;
+    fechaCaducidad: Date;
+    numeroLote: string;
 }

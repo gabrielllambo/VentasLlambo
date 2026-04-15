@@ -12,5 +12,6 @@ export class RegistrarProductoRequest {
     stock: number;
     nombreArchivo: string;
     fotoBase64: string;
+    tipoMedida: number;
 }
 

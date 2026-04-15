@@ -15,17 +15,23 @@ import { ToolService } from 'app/core/services/tool/tool.service';
   selector: 'app-detalle-venta-page',
   templateUrl: './detalle-venta-page.component.html',
   styleUrl: './detalle-venta-page.component.scss',
-    providers: [
-          {
-              provide: MatPaginatorIntl,
-              useClass: SpanishDetalleVentasPaginatorService,
-          }
-      ],
+  providers: [
+    {
+      provide: MatPaginatorIntl,
+      useClass: SpanishDetalleVentasPaginatorService,
+    }
+  ],
 })
 export class DetalleVentaPageComponent implements OnInit {
 
   public pageSlice: MatTableDataSource<DetalleVentaDTO> = new MatTableDataSource();
-  public detalleVentaTableColumns: string[] = ['urlfotoproducto', 'nombreproducto', 'categoriaproducto', 'marcaproducto', 'precioproducto', 'cantidad', 'total',];
+  public detalleVentaTableColumns: string[] = ['urlfotoproducto',
+    'nombreproducto',
+    'lote',
+    'fechaCaducidad',
+    'cantidad',
+    'precioproducto',
+    'total'];
   public allDetalleVentaDataSource: MatTableDataSource<DetalleVentaDTO> = new MatTableDataSource();
 
   @ViewChild(MatPaginator) private _paginator: MatPaginator;
@@ -46,6 +52,7 @@ export class DetalleVentaPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+      console.log(this.paramsForms.lstDetalleVenta);
     this.monedaInfo = this.paramsForms.monedaInfo;
     this.allDetalleVentaDataSource.data = this.paramsForms.lstDetalleVenta;
     this.numeroVenta = this.paramsForms.numeroVenta;

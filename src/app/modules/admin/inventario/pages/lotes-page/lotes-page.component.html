@@ -1,0 +1,280 @@
+<mat-drawer-container class="flex-auto h-full">
+    <!-- Drawer -->
+    <mat-drawer class="w-90" [mode]="'over'" #matDrawer autoFocus="false">
+        <!-- Header -->
+        <div class="flex items-center justify-between m-4 mr-3 sm:my-5">
+            <!-- Title -->
+            <div class="text-3xl font-semibold tracking-tight leading-8">Filtrar por:</div>
+            <!-- Close Drawer -->
+            <div>
+                <button mat-icon-button (click)="matDrawer.close()">
+                    <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                </button>
+            </div>
+        </div>
+        <div class="flex flex-col flex-auto h-full dark:bg-default">
+            <!-- Filtros -->
+            <div class="flex flex-col flex-auto shrink-0 pt-6 bg-card dark:bg-transparent">
+
+                <form class="flex flex-col px-6" [formGroup]="filtroLoteForm">
+
+                    <!-- Usuarios -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Usuarios</mat-label>
+                        <mat-select [formControlName]="'usuarios'" multiple #selectUsuarioItem>
+                            <mat-select-trigger>
+                                <ng-container *ngIf="selectUsuarioItem.value?.length > 0">
+                                    <span *ngFor="let usuario of selectUsuarioItem.value; let i = index">
+                                        {{ usuario.correoElectronico || '' }}<ng-container
+                                            *ngIf="i < selectUsuarioItem.value.length - 1">, </ng-container>
+                                    </span>
+                                </ng-container>
+                            </mat-select-trigger>
+                            <app-selectAll [model]="filtroLoteForm.get('usuarios')" [values]="allUsuarioSource">
+                            </app-selectAll>
+                            <mat-option *ngFor="let option of allUsuarioSource" [value]="option">
+                                {{option.correoElectronico }}</mat-option>
+
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Número de Lote -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Número de Lote</mat-label>
+                        <input matInput formControlName="numeroLote" maxlength="50" autocomplete="off">
+                    </mat-form-field>
+
+                    <!-- Fecha Lote Inicio -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Fecha Lote Inicio</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off" matInput
+                            [matDatepicker]="pickerInicio" [formControlName]="'fechaLoteInicio'">
+                        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerInicio></mat-datepicker>
+                    </mat-form-field>
+
+                    <!-- Fecha Lote Fin -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Fecha Lote Fin</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off" matInput
+                            [matDatepicker]="pickerFin" [formControlName]="'fechaLoteFin'">
+                        <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerFin></mat-datepicker>
+                    </mat-form-field>
+
+                    <!-- Monto Lote Inicio -->
+                    <mat-form-field class="w-full " [appearance]="'outline'">
+                        <mat-label>Monto Lote Inicio</mat-label>
+                        <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="montoLoteInicio">
+                    </mat-form-field>
+
+                    <!-- Monto Lote Fin -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Monto Lote Fin</mat-label>
+                        <input autocomplete="off" matInput appTwoDigitDecimaNumber formControlName="montoLoteFin">
+                    </mat-form-field>
+
+                    <button class="mt-4 mb-8" mat-flat-button [color]="'primary'" (click)="btnBuscar()"
+                        [disabled]="filtroLoteForm.invalid || disabledBuscar">
+                        <mat-icon *ngIf="!disabledBuscar" class="icon-size-2"
+                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                        <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
+                        <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24" [mode]="'indeterminate'">
+                        </mat-progress-spinner>
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </mat-drawer>
+    <!-- Content -->
+    <mat-drawer-content class="flex flex-col">
+        <div class="flex flex-col flex-auto w-full">
+            <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+                <!-- Title and action buttons -->
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex-1 min-w-0">
+                        <!-- Title -->
+                        <div class="mt-2">
+                            <h2 class="text-2xl md:text-2xl font-semibold tracking-tight leading-8">
+                                Lista de Lotes
+                            </h2>
+                        </div>
+                        <!-- Breadcrumbs -->
+                        <div class="flex flex-wrap items-center font-medium">
+                            <div>
+                                <a class="whitespace-nowrap text-primary-500">
+                                    Lotes
+                                </a>
+                            </div>
+                            <div class="flex items-center ml-1 whitespace-nowrap">
+                                <mat-icon class="icon-size-5 text-secondary"
+                                    [svgIcon]="'heroicons_mini:chevron-right'"></mat-icon>
+                                <a class="ml-1 text-primary-500">
+                                    Lista de Lotes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center ml-6">
+                        @if (isMobilSize()) {
+                        <!-- Actions menu (visible on xs) -->
+                        <button [matMenuTriggerFor]="actionsMenu" mat-icon-button>
+                            <mat-icon [svgIcon]="'heroicons_mini:ellipsis-vertical'"></mat-icon>
+                        </button>
+                        <mat-menu #actionsMenu="matMenu">
+                            <button mat-menu-item (click)="onExportar()">
+                                <mat-icon [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
+                                <span class="ml-1">Exportar</span>
+                            </button>
+                            <button mat-menu-item (click)="matDrawer.open()">
+                                <mat-icon [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                                <span class="ml-1">Filtrar</span>
+                            </button>
+
+                        </mat-menu>
+                        } @else {
+                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                            mat-flat-button [color]="'primary'" [color]="'primary'" (click)="onExportar()">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
+                            <span class="ml-2">Exportar</span>
+                        </button>
+                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                            mat-stroked-button (click)="matDrawer.open()">
+                            <mat-icon class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                            <span class="ml-2">Filtrar</span>
+                        </button>
+                        }
+
+                    </div>
+                </div>
+                <div class="w-full ">
+
+                    <div class="skeleton-default  bg-card shadow rounded-2xl overflow-hidden " *ngIf="skeleton">
+                        <ngx-skeleton-loader [count]="skeletonNumber"
+                            [theme]="{ 'border-radius': '0', height: '50px' }"></ngx-skeleton-loader>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-1 gap-8 w-full mt-6">
+
+                        <!-- Tabla -->
+                        <div class="xl:col-span-1 flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden"
+                            *ngIf="!skeleton">
+                            <div class="overflow-x-auto mx-6">
+                                <table class="w-full bg-transparent mb-3" mat-table matSort
+                                    [dataSource]="pageSlice?.data" [trackBy]="trackByFn" #LoteTable>
+
+                                    <ng-container matColumnDef="codigoLote">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef> Código Lote </th>
+                                        <td mat-cell *matCellDef="let lote" class="min-w-40 font-medium text-blue-600">
+                                            <span class="ml-3">{{lote.codigoLote}}</span>
+                                        </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="producto">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef> Producto </th>
+                                        <td mat-cell *matCellDef="let lote">
+                                            <span class="pr-6 whitespace-nowrap font-medium text-gray-700">
+                                                {{ lote.nombreProducto }}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="proveedor">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef> Proveedor </th>
+                                        <td mat-cell *matCellDef="let lote">
+                                            <span class="pr-6 whitespace-nowrap text-gray-600">
+                                                {{ lote.nombreProveedor }}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="fechaRegistro">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef> Fecha Registro </th>
+                                        <td mat-cell *matCellDef="let lote" style="min-width: 150px">
+                                            <span class="pr-6 whitespace-nowrap">
+                                                {{lote.fechaRegistro | date:'dd/MM/yyyy'}}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="fechaVencimiento">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef> Fecha Vencimiento </th>
+                                        <td mat-cell *matCellDef="let lote" style="min-width: 150px">
+                                            <span class="pr-6 whitespace-nowrap">
+                                                {{lote.fechaCaducidad | date:'dd/MM/yyyy'}}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="stockDisponible">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef class="min-w-10"> Stock
+                                            Disponible </th>
+                                        <td mat-cell *matCellDef="let lote">
+                                            <span style="color: #056DB6;" class="font-bold pr-6">
+                                                {{ lote.cantidadDisponible | number:'1.2-3' }} kg
+                                            </span>
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="cantidadInicial">
+                                        <th mat-header-cell *matHeaderCellDef> Cantidad Inicial </th>
+                                        <td mat-cell *matCellDef="let lote"> {{lote.cantidadInicial}} kg </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="ubicacion">
+                                        <th mat-header-cell *matHeaderCellDef> Ubicación </th>
+                                        <td mat-cell *matCellDef="let lote">
+                                            {{ lote.ubicacion ? lote.ubicacion : '-' }}
+                                        </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="precioCompra">
+                                        <th mat-header-cell *matHeaderCellDef> P. Compra </th>
+                                        <td mat-cell *matCellDef="let lote"> {{lote.precioCompra | currency}}
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="estado">
+                                        <th mat-header-cell mat-sort-header *matHeaderCellDef
+                                            class="min-w-10 text-center"> Estado </th>
+                                        <td mat-cell *matCellDef="let lote" class="min-w-10 text-center">
+                                            <span
+                                                class="inline-flex items-center font-bold text-xs px-2.5 py-0.5 rounded-full tracking-wide uppercase"
+                                                [ngClass]="{
+                                                    'bg-green-200 text-green-800 dark:bg-green-600 dark:text-green-50': lote?.estado === 1,
+                                                    'bg-orange-200 text-orange-800 dark:bg-orange-600 dark:text-orange-50': lote?.estado === 2,
+                                                    'bg-red-200 text-red-800 dark:bg-red-600 dark:text-red-50': lote?.estado === 3
+                                                }">
+                                                <span class="leading-relaxed whitespace-nowrap">
+                                                    {{ lote?.estado === 1 ? 'Activo' : (lote?.estado === 2 ? 'Por
+                                                    Vencer' : 'Vencido') }}
+                                                </span>
+                                            </span>
+                                        </td>
+                                    </ng-container>
+                                    <tr mat-header-row *matHeaderRowDef="lotesTableColumns"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: lotesTableColumns;"></tr>
+                                </table>
+                            </div>
+
+                            <div class="paginator" *ngIf="allHistorialLoteDataSource?.data.length > 0">
+                                <mat-paginator #paginator [length]="allHistorialLoteDataSource?.data?.length"
+                                    [pageSize]="5" [pageSizeOptions]="[10, 15, 20]" aria-label="Seleccione página"
+                                    (page)="onPageChange($event)">
+                                </mat-paginator>
+                            </div>
+                            <div class="paginator" *ngIf="allHistorialLoteDataSource?.data?.length === 0">
+                                <img [src]="imgNoDataUltimosRegistros" alt="No hay datos disponibles"
+                                    class="w-72 mx-auto mt-2" />
+                                <div
+                                    class="mt-4 sm:mt-8 text-2xl md:text-2xl font-semibold tracking-tight leading-tight md:leading-none text-center">
+                                    {{textoResultadoTable}}</div>
+                                <div>
+                                    <p class="mt-2 text-gray-500 text-center">Aplique otros filtros de búsqueda</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

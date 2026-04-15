@@ -16,13 +16,17 @@ import { ProductoPageComponent } from './pages/producto-page/producto-page.compo
 import { ModificaProductoPageComponent } from './pages/producto-page/modals/modifica-producto-page/modifica-producto-page.component';
 import { DetalleProductoPageComponent } from './pages/producto-page/modals/detalle-producto-page/detalle-producto-page.component';
 import { RegistroProductoPageComponent } from './pages/producto-page/modals/registro-producto-page/registro-producto-page.component';
+import { LotesPageComponent } from './pages/lotes-page/lotes-page.component';
+import { DetalleCompraPageComponent } from './pages/lotes-page/modals/detalle-producto-page/detalle-compra-page.component';
 
 const BASE_MODULES = [CommonModule, SharedModule, InventarioRoutingModule];
 
 const BASE_COMPONENTS = [
   CategoriaPageComponent,
   MarcaPageComponent,
-  ProductoPageComponent
+  ProductoPageComponent,
+  LotesPageComponent,
+  DetalleCompraPageComponent
 ];
 
 const PRODUCTO = [RegistroProductoPageComponent,

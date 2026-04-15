@@ -63,6 +63,10 @@ export const Inventario = {
         UpdateActivoMarcaAsync: '/api/Inventario/updateActivoMarcaAsync',
         DeleteMarcaAsync: '/api/Inventario/deleteMarcaAsync',
     },
+    Lote: {
+        GetAllLotesByFilterAsync: '/api/Inventario/allLoteByFilterAsync',
+        GetAllLotesForComboBoxAsync: '/api/Inventario/allLotesForComboBoxAsync',
+    },
 };
 
 export const Venta = {

@@ -7,10 +7,10 @@ export class ActualizarProductoRequest {
     nombre: string;
     descripcion: string;
     color: string;
-    precioCompra: number;
-    precioVenta: number;
-    stock: number;
-    nombreArchivo: string;
+/*     precioCompra: number;
+ */    precioVenta: number;
+/*     stock: number;
+ */    nombreArchivo: string;
     foto: string;
     activo: number;
 }

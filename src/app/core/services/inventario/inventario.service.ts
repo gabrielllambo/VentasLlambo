@@ -24,6 +24,8 @@ import { ActualizarProductoRequest } from 'app/core/models/inventario/producto/r
 import { ActualizarActivoProductoRequest } from 'app/core/models/inventario/producto/request/actualizar-activo-producto-request.model';
 import { EliminarProductoRequest } from 'app/core/models/inventario/producto/request/eliminar-producto-request.model';
 import { CategoriaConConteoDTO } from 'app/core/models/inventario/producto/response/categoria-con-conteo-dto.model';
+import { LoteDTO } from 'app/core/models/inventario/lote/response/lote-dto-request.model';
+import { ObtenerLoteRequest } from 'app/core/models/inventario/lote/request/obtener-lotes-request.model';
 
 @Injectable({
     providedIn: 'root'
@@ -73,7 +75,7 @@ export class InventarioService {
     }
 
     GetAllProductsByCategoryAsync(idCategory: number): Observable<ProductoDTO[]> {
-        return this.apiService.query(Url.Inventario.Producto.GetAllProductsByCategoryAsync, { idCategory})
+        return this.apiService.query(Url.Inventario.Producto.GetAllProductsByCategoryAsync, { idCategory })
             .pipe(tap(data => data));
     }
 
@@ -81,7 +83,7 @@ export class InventarioService {
         return this.apiService.query(Url.Inventario.Producto.GetAllProductoForComboBoxAsync, {})
             .pipe(tap(data => data));
     }
- 
+
     InsertProductoAsync(request: RegistrarProductoRequest): Observable<ResponseDTO> {
         return this.apiService.post(Url.Inventario.Producto.InsertProductoAsync, request)
             .pipe(tap(data => data));
@@ -106,7 +108,7 @@ export class InventarioService {
         return this.apiService.post(Url.Inventario.Categoria.DeleteCategoriaAsync, request)
             .pipe(tap(data => data));
     }
- 
+
     UpdateActivoCategoriaAsync(request: ActualizarActivoCategoriaRequest): Observable<ResponseDTO> {
         return this.apiService.post(Url.Inventario.Categoria.UpdateActivoCategoriaAsync, request)
             .pipe(tap(data => data));
@@ -116,7 +118,7 @@ export class InventarioService {
         return this.apiService.query(Url.Inventario.Marca.GetAllMarcaByFilterAsync, request)
             .pipe(tap(data => data));
     }
- 
+
     GetAllMarcasForComboBoxAsync(): Observable<MarcaDTO[]> {
         return this.apiService.query(Url.Inventario.Marca.GetAllMarcasForComboBoxAsync, {})
             .pipe(tap(data => data));
@@ -142,4 +144,12 @@ export class InventarioService {
             .pipe(tap(data => data));
     }
 
+    GetAllLotesByFilterAsync(request: ObtenerLoteRequest): Observable<LoteDTO[]> {
+        return this.apiService.query(Url.Inventario.Lote.GetAllLotesByFilterAsync, request)
+            .pipe(tap(data => data));
+    }
+    GetAllLotesForComboBoxAsync(): Observable<LoteDTO[]> {
+        return this.apiService.query(Url.Inventario.Lote.GetAllLotesForComboBoxAsync, {})
+            .pipe(tap(data => data));
+    }
 }

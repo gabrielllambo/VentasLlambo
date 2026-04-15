@@ -58,9 +58,9 @@ export class ModificaProductoPageComponent implements OnInit {
       codigo: [{ value: this.producto.codigo, disabled: true }],
       nombre: [this.producto.nombre, [Validators.required, Validators.minLength(Numeracion.Dos), Validators.maxLength(Numeracion.Mil)]],
       descripcion: [this.producto.descripcion, [Validators.maxLength(Numeracion.DoscientosCincuenta)]],
-      precioCompra: [this.producto.precioCompra, [Validators.required]],
+      precioCompra: [{value: null, disabled: true}],
       precioVenta: [this.producto.precioVenta, [Validators.required]],
-      stock: [this.producto.stock, [Validators.required]],
+      stock: [{ value: null, disabled: true}],
       color: [this.producto.color, [Validators.required]],
 
     });
@@ -79,10 +79,10 @@ export class ModificaProductoPageComponent implements OnInit {
     const cboMarcaSelected = this.actualizaProductoForm.value.marca.id;
     const txtNombre = this.actualizaProductoForm.value.nombre;
     const txtDescripcion = this.actualizaProductoForm.value.descripcion;
-    const txtPrecioCompra = this.actualizaProductoForm.value.precioCompra;
-    const txtPrecioVenta = this.actualizaProductoForm.value.precioVenta;
-    const txtStock = this.actualizaProductoForm.value.stock;
-
+/*     const txtPrecioCompra = this.actualizaProductoForm.value.precioCompra;
+ */    const txtPrecioVenta = this.actualizaProductoForm.value.precioVenta;
+/*     const txtStock = this.actualizaProductoForm.value.stock;
+ */
     if (FuseValidators.isEmptyInputValue(destinationTimeZoneId)) {
       this._toolService.showWarning(DictionaryWarning.InvalidLocalizacion, DictionaryWarning.Tittle);
       return;
@@ -108,20 +108,20 @@ export class ModificaProductoPageComponent implements OnInit {
       return;
     }
 
-    if (FuseValidators.isEmptyInputValue(txtPrecioCompra) || txtPrecioCompra == Numeracion.Cero) {
+    /* if (FuseValidators.isEmptyInputValue(txtPrecioCompra) || txtPrecioCompra == Numeracion.Cero) {
       this._toolService.showWarning(DictionaryWarning.InvalidPrecioCompra, DictionaryWarning.Tittle);
       return;
-    }
+    } */
 
     if (FuseValidators.isEmptyInputValue(txtPrecioVenta) || txtPrecioVenta == Numeracion.Cero) {
       this._toolService.showWarning(DictionaryWarning.InvalidPrecioVenta, DictionaryWarning.Tittle);
       return;
     }
 
-    if (FuseValidators.isEmptyInputValue(txtStock) || txtStock == Numeracion.Cero) {
+    /*     if (FuseValidators.isEmptyInputValue(txtStock) || txtStock == Numeracion.Cero) {
       this._toolService.showWarning(DictionaryWarning.InvalidPrecioStock, DictionaryWarning.Tittle);
       return;
-    }
+    } */
     
     if (FuseValidators.isEmptyInputValue(txtColor)) {
       this._toolService.showWarning(DictionaryWarning.InvalidColor, DictionaryWarning.Tittle);
@@ -138,10 +138,10 @@ export class ModificaProductoPageComponent implements OnInit {
     request.nombre = txtNombre;
     request.descripcion = txtDescripcion;
     request.color = txtColor;
-    request.precioCompra = txtPrecioCompra;
-    request.precioVenta = txtPrecioVenta;
-    request.stock = txtStock
-    request.nombreArchivo = this.nombreArchivo;
+/*     request.precioCompra = txtPrecioCompra;
+ */    request.precioVenta = txtPrecioVenta;
+/*     request.stock = txtStock
+ */    request.nombreArchivo = this.nombreArchivo;
     request.foto = this.foto;
 
     this.actualizaProductoForm.disable();
