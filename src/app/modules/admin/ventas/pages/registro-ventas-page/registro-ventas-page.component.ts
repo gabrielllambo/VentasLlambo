@@ -114,7 +114,6 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
     }
 
     InsertAsync() {
-
         const destinationTimeZoneId = this._toolService.getTimeZone();
         const idUsuario = this.userInfoLogueado.idUsuario;
         const idCliente = this.clienteData?.id;

@@ -26,9 +26,6 @@ export class NavigationMockApi {
                     return menuStorage
                         .filter(menu => !menu.flgMenuHijo)
                         .map(parentMenu => {
-
-
-
                             const children = menuStorage
                                 .filter(menu => menu.flgMenuHijo && menu.padre === parentMenu.padre)
                                 .map(child => ({

@@ -138,7 +138,7 @@
                             <th mat-header-cell *matHeaderCellDef>Cantidad</th>
                             <td mat-cell *matCellDef="let producto">
                                 <!-- PRODUCTO POR UNIDAD -->
-                                <div *ngIf="producto.tipoMedida === 2" class="flex items-center space-x-2">
+                                <div *ngIf="producto.tipoMedida === 1" class="flex items-center space-x-2">
 
                                     <button mat-icon-button color="primary" (click)="disminuirCantidad(producto)"
                                         [disabled]="isCallingInsertService">
@@ -158,7 +158,7 @@
                                 </div>
 
                                 <!-- PRODUCTO POR PESO -->
-                                <div *ngIf="producto.tipoMedida === 1" class="flex items-center space-x-2">
+                                <div *ngIf="producto.tipoMedida === 2" class="flex items-center space-x-2">
 
                                     <input type="number" class="w-24 text-center border rounded-md"
                                         [(ngModel)]="producto.cantidad" min="0.01" step="0.01"

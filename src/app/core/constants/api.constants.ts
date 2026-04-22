@@ -67,6 +67,10 @@ export const Inventario = {
         GetAllLotesByFilterAsync: '/api/Inventario/allLoteByFilterAsync',
         GetAllLotesForComboBoxAsync: '/api/Inventario/allLotesForComboBoxAsync',
     },
+    Fisico: {
+        RegistrarInventarioFisicoAsync: '/api/InventarioFisico/registrar',
+        AjustarInventarioFisicoAsync: '/api/InventarioFisico/ajustar/' // Dejamos la barra al final para concatenar el ID
+    }
 };
 
 export const Venta = {

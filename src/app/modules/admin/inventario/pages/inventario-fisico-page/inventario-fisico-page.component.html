@@ -1,0 +1,111 @@
+<mat-drawer-container class="flex-auto h-full">
+    <mat-drawer class="w-90" [mode]="'over'" #matDrawer autoFocus="false">
+        <div class="flex items-center justify-between m-4 mr-3 sm:my-5">
+            <div class="text-3xl font-semibold tracking-tight leading-8">Filtros de Conteo</div>
+            <button mat-icon-button (click)="matDrawer.close()">
+                <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+        </div>
+        <div class="flex flex-col flex-auto h-full dark:bg-default">
+            <div class="flex flex-col flex-auto shrink-0 pt-6 bg-card dark:bg-transparent">
+                <form class="flex flex-col px-6" [formGroup]="filtroInventarioForm">
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Buscar Producto / Lote</mat-label>
+                        <input matInput formControlName="terminoBusqueda" placeholder="Ej: Agua Mineral o Lote 001" autocomplete="off">
+                    </mat-form-field>
+
+                    <button class="mt-4 mb-8" mat-flat-button [color]="'primary'" (click)="btnBuscar()">
+                        <mat-icon class="icon-size-2" [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                        <span class="ml-2">Buscar para contar</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </mat-drawer>
+
+    <mat-drawer-content class="flex flex-col">
+        <div class="flex flex-col flex-auto w-full">
+            <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+                
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex-1 min-w-0">
+                        <h2 class="text-2xl font-semibold tracking-tight leading-8">Toma Física de Inventario</h2>
+                        <div class="flex items-center font-medium">
+                            <a class="text-primary-500">Inventario</a>
+                            <mat-icon class="icon-size-5 text-secondary" [svgIcon]="'heroicons_mini:chevron-right'"></mat-icon>
+                            <span class="text-secondary">Conteo Físico</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center ml-6">
+                        <button class="hidden sm:inline-flex ml-3 px-6 h-10 items-center justify-center"
+                                mat-flat-button [color]="'warn'" (click)="onFinalizarAjuste()" 
+                                [disabled]="dataSource.data.length === 0">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                            <span class="ml-2">Finalizar y Ajustar Stock</span>
+                        </button>
+                        
+                        <button class="ml-3 sm:w-10 sm:h-10" mat-stroked-button (click)="matDrawer.open()">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="w-full mt-6">
+                    <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="overflow-x-auto mx-6 mt-4">
+                            <table class="w-full bg-transparent mb-3" mat-table [dataSource]="dataSource">
+
+                                <ng-container matColumnDef="producto">
+                                    <th mat-header-cell *matHeaderCellDef> Producto / Lote </th>
+                                    <td mat-cell *matCellDef="let item">
+                                        <div class="flex flex-col">
+                                            <span class="font-semibold text-gray-700">{{item.nombreProducto}}</span>
+                                            <span class="text-xs text-secondary">Lote: {{item.codigoLote}}</span>
+                                        </div>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="stockSistema">
+                                    <th mat-header-cell *matHeaderCellDef> Stock Sistema </th>
+                                    <td mat-cell *matCellDef="let item" class="text-blue-600 font-medium">
+                                        {{item.cantidadSistema | number:'1.2-2'}}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="cantidadFisica">
+                                    <th mat-header-cell *matHeaderCellDef> Cantidad Contada </th>
+                                    <td mat-cell *matCellDef="let item">
+                                        <mat-form-field class="w-32 mt-4" [appearance]="'outline'">
+                                            <input matInput type="number" [(ngModel)]="item.cantidadFisica" (input)="calcularDiferencia(item)">
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="diferencia">
+                                    <th mat-header-cell *matHeaderCellDef> Diferencia </th>
+                                    <td mat-cell *matCellDef="let item" [ngClass]="item.diferencia < 0 ? 'text-red-500' : 'text-green-500'">
+                                        {{item.diferencia | number:'1.2-2'}}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="acciones">
+                                    <th mat-header-cell *matHeaderCellDef> </th>
+                                    <td mat-cell *matCellDef="let item">
+                                        <button mat-icon-button (click)="guardarBorrador(item)" matTooltip="Guardar Conteo">
+                                            <mat-icon class="text-primary" [svgIcon]="'heroicons_solid:arrow-path'"></mat-icon>
+                                        </button>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

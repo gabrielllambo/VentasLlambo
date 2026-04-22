@@ -30,6 +30,7 @@ export class DetalleVentaPageComponent implements OnInit {
     'lote',
     'fechaCaducidad',
     'cantidad',
+    'precioCompra',
     'precioproducto',
     'total'];
   public allDetalleVentaDataSource: MatTableDataSource<DetalleVentaDTO> = new MatTableDataSource();

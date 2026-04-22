@@ -10,4 +10,5 @@ export class DetalleVentaDTO {
     precioTotal: number;
     fechaCaducidad: Date;
     numeroLote: string;
+    precioCompra: number;
 }

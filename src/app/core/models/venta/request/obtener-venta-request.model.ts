@@ -7,4 +7,5 @@ export class ObtenerVentaRequest {
     fechaVentaFin?: Date;
     montoVentaInicio: number;
     montoVentaFin: number;
+    precioCompra?: number;
 }

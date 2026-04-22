@@ -77,10 +77,18 @@
 
                             </td>
                         </ng-container>
+                        <ng-container matColumnDef="precioCompra">
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef class="text-center">
+                                Precio Compra
+                            </th>
+                            <td mat-cell *matCellDef="let producto" class="min-w-10 text-center">
+                                <span class="leading-relaxed whitespace-nowrap">{{producto?.precioCompra}}</span>
 
+                            </td>
+                        </ng-container>
                         <!--  Precio -->
                         <ng-container matColumnDef="precioproducto">
-                            <th mat-header-cell mat-sort-header *matHeaderCellDef> Precio</th>
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef> Precio Venta</th>
                             <td mat-cell *matCellDef="let producto">
                                 <span style="color: #056DB6;" class="pr-2 w-auto h-auto rounded-full">
                                     {{ producto.precioProducto |

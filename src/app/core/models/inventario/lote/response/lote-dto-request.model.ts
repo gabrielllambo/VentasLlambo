@@ -5,4 +5,5 @@ export class LoteDTO {
     fechaVencimiento:Date;
     stockDisponible: number;
     activo: boolean;
+    idProducto?: number;
 }

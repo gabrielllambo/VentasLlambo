@@ -26,6 +26,7 @@ import { EliminarProductoRequest } from 'app/core/models/inventario/producto/req
 import { CategoriaConConteoDTO } from 'app/core/models/inventario/producto/response/categoria-con-conteo-dto.model';
 import { LoteDTO } from 'app/core/models/inventario/lote/response/lote-dto-request.model';
 import { ObtenerLoteRequest } from 'app/core/models/inventario/lote/request/obtener-lotes-request.model';
+import { RegistrarInventarioFisicoRequest } from 'app/core/models/inventario/inventario-fisico/request/registrar-inventario-fisico-request.model';
 
 @Injectable({
     providedIn: 'root'
@@ -150,6 +151,15 @@ export class InventarioService {
     }
     GetAllLotesForComboBoxAsync(): Observable<LoteDTO[]> {
         return this.apiService.query(Url.Inventario.Lote.GetAllLotesForComboBoxAsync, {})
+            .pipe(tap(data => data));
+    }
+    RegistrarInventarioFisicoAsync(request: RegistrarInventarioFisicoRequest): Observable<ResponseDTO> {
+        return this.apiService.post(Url.Inventario.Fisico.RegistrarInventarioFisicoAsync, request)
+            .pipe(tap(data => data));
+    }
+    AjustarInventarioFisicoAsync(idInventarioFisico: number, idUsuarioGuid: string): Observable<ResponseDTO> {
+        const url = `${Url.Inventario.Fisico.AjustarInventarioFisicoAsync}${idInventarioFisico}?idUsuarioGuid=${idUsuarioGuid}`;
+        return this.apiService.put(url, {})
             .pipe(tap(data => data));
     }
 }
