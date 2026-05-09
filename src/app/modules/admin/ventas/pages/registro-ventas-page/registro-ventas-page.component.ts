@@ -457,5 +457,25 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
         producto.cantidad = cantidad;
     }
 
+    validarPrecio(producto: any): void {
+        let precio = Number(producto.precioVenta);
+
+        if (isNaN(precio) || precio < 0) {
+            producto.precioVenta = 0;
+        } else {
+            // Limita el valor ingresado a máximo 2 decimales
+            producto.precioVenta = Math.floor(precio * 100) / 100;
+        }
+        
+        // Forzar actualización de la tabla para reflejar el recálculo del "Total" de esa fila
+        this.lstProductosSeleccionados._updateChangeSubscription();
+    }
+
+    bloquearCaracteresInvalidosPrecio(event: KeyboardEvent): void {
+        const teclasBloqueadas = ['e', 'E', '-', '+', ',']; // Se permite el '.' para los centavos
+        if (teclasBloqueadas.includes(event.key)) {
+            event.preventDefault();
+        }
+    }
 
 }

@@ -150,7 +150,7 @@ export class InicioPageComponent implements OnInit, OnDestroy {
         this.chartEvolucionVentasFecha = {
             series: [
                 {
-                    color: "#056DB6",
+                    color: "#00E396", // Un verde vibrante para las ventas
                     name: "Total",
                     data: this.reporteResumenDataSource.evolucionVentasFecha.totalVenta
                 }
@@ -169,7 +169,7 @@ export class InicioPageComponent implements OnInit, OnDestroy {
                     enabled: false
                 },
                 height: 350,
-                type: "line",
+                type: "area", // Cambiamos el gráfico a tipo Área
                 zoom: {
                     enabled: false
                 },
@@ -231,7 +231,13 @@ export class InicioPageComponent implements OnInit, OnDestroy {
 
             },
             fill: {
-                opacity: 1
+                type: "gradient",
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.6,
+                    opacityTo: 0.1,
+                    stops: [0, 90, 100]
+                }
             },
         };
     }
@@ -254,7 +260,8 @@ export class InicioPageComponent implements OnInit, OnDestroy {
                     fontSize: '14px'
                 }
             },
-            colors: this.reporteResumenDataSource.topDiezProductosVentas.colores,
+            // Paleta de colores única para el Top 10 de Productos
+            colors: ['#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0', '#546E7A', '#26a69a', '#D10CE8', '#FF66C3', '#A5978B'],
             chart: {
                 type: "bar",
                 height: 350,
@@ -341,7 +348,8 @@ export class InicioPageComponent implements OnInit, OnDestroy {
                     fontSize: '14px'
                 }
             },
-            colors: this.reporteResumenDataSource.topDiezMarcasVentas.colores,
+            // Paleta de colores totalmente diferente para el Top 10 de Marcas
+            colors: ['#775DD0', '#FF4560', '#FEB019', '#00E396', '#008FFB', '#A5978B', '#FF66C3', '#D10CE8', '#26a69a', '#546E7A'],
             chart: {
                 type: "bar",
                 height: 350,
@@ -569,6 +577,3 @@ export class InicioPageComponent implements OnInit, OnDestroy {
     }
 
 }
-
-
-
