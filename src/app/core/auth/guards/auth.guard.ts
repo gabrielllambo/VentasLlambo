@@ -29,6 +29,13 @@ export const AuthGuard: CanActivateFn | CanActivateChildFn = (route, state) => {
             }
 
             const requestedUrl = state.url.startsWith('/') ? state.url : `/${state.url}`;
+
+            // Rutas de reportes siempre permitidas para usuarios autenticados
+            const isReportRoute = requestedUrl.includes('/reporte-');
+            if (isReportRoute) {
+                return of(Flags.AccesoPermitido);
+            }
+
             const isAllowed = menuDataStorage.some((menu: { ruta: string }) => menu.ruta === requestedUrl);
 
             if (!isAllowed) {

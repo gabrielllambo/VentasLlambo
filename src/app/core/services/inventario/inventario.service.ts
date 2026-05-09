@@ -27,6 +27,8 @@ import { CategoriaConConteoDTO } from 'app/core/models/inventario/producto/respo
 import { LoteDTO } from 'app/core/models/inventario/lote/response/lote-dto-request.model';
 import { ObtenerLoteRequest } from 'app/core/models/inventario/lote/request/obtener-lotes-request.model';
 import { RegistrarInventarioFisicoRequest } from 'app/core/models/inventario/inventario-fisico/request/registrar-inventario-fisico-request.model';
+import { ObtenerHistorialInventarioFisicoRequest } from 'app/core/models/inventario/inventario-fisico/request/obtener-historial-inventario-fisico-request.model';
+import { ReportePerdidasResumenDTO } from 'app/core/models/inventario/inventario-fisico/response/reporte-perdidas-resumen-dto.model';
 
 @Injectable({
     providedIn: 'root'
@@ -160,6 +162,11 @@ export class InventarioService {
     AjustarInventarioFisicoAsync(idInventarioFisico: number, idUsuarioGuid: string): Observable<ResponseDTO> {
         const url = `${Url.Inventario.Fisico.AjustarInventarioFisicoAsync}${idInventarioFisico}?idUsuarioGuid=${idUsuarioGuid}`;
         return this.apiService.put(url, {})
+            .pipe(tap(data => data));
+    }
+
+    GetHistorialInventarioFisicoAsync(request: ObtenerHistorialInventarioFisicoRequest): Observable<ReportePerdidasResumenDTO> {
+        return this.apiService.post(Url.Inventario.Fisico.GetHistorialInventarioFisicoAsync, request)
             .pipe(tap(data => data));
     }
 }

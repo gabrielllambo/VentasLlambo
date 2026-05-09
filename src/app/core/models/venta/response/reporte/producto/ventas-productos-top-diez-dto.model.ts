@@ -1,5 +1,6 @@
 export class VentasProductosTopDiezDTO {
     colores: string[];
-    productos: number[];
+    productos: string[];
     totalMontos: number[];
+    totalCostosProductos: number[];
 }

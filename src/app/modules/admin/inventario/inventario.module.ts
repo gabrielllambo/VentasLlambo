@@ -19,6 +19,7 @@ import { RegistroProductoPageComponent } from './pages/producto-page/modals/regi
 import { LotesPageComponent } from './pages/lotes-page/lotes-page.component';
 import { DetalleCompraPageComponent } from './pages/lotes-page/modals/detalle-producto-page/detalle-compra-page.component';
 import { InventarioFisicoPageComponent } from './pages/inventario-fisico-page/inventario-fisico-page.component';
+import { ReportePerdidasPageComponent } from './pages/reporte-perdidas-page/reporte-perdidas-page.component';
 
 const BASE_MODULES = [CommonModule, SharedModule, InventarioRoutingModule];
 
@@ -28,7 +29,8 @@ const BASE_COMPONENTS = [
   ProductoPageComponent,
   LotesPageComponent,
   DetalleCompraPageComponent,
-  InventarioFisicoPageComponent
+  InventarioFisicoPageComponent,
+  ReportePerdidasPageComponent
 ];
 
 const PRODUCTO = [RegistroProductoPageComponent,

@@ -10,4 +10,6 @@ export class ReporteResumenDTO {
     distribucionVentasProducto: DistribucionVentasProductosDTO;
     topDiezMarcasVentas: VentasMarcasTopDiezDTO;
     topDiezProductosVentas: VentasProductosTopDiezDTO;
+    totalCostoVentas: number;
+    totalCostosVentasPorFecha: number[];
 }

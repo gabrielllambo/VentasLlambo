@@ -8,12 +8,101 @@ import { cloneDeep } from 'lodash-es';
 @Injectable({ providedIn: 'root' })
 export class NavigationMockApi {
 
-    public menuList: MenuRolDTO[]
+    public menuList: MenuRolDTO[] = [];
     private _securityService = inject(SecurityService);
 
     constructor(private _fuseMockApiService: FuseMockApiService) {
         this.registerHandlers();
     }
+
+    private readonly reportesNav = {
+        id: 'reportes',
+        title: 'Reportes',
+        type: 'collapsable',
+        icon: 'heroicons_outline:chart-bar',
+        children: [
+            {
+                id: 'reportes.ventas',
+                title: 'Ventas',
+                type: 'collapsable',
+                icon: 'heroicons_outline:shopping-cart',
+                children: [
+                    {
+                        id: 'reportes.ventas-categorias',
+                        title: 'Por Categorías',
+                        type: 'basic',
+                        icon: 'heroicons_outline:tag',
+                        link: '/admin/ventas/reporte-categorias',
+                    },
+                    {
+                        id: 'reportes.ventas-marcas',
+                        title: 'Por Marcas',
+                        type: 'basic',
+                        icon: 'heroicons_outline:bookmark',
+                        link: '/admin/ventas/reporte-marcas',
+                    },
+                    {
+                        id: 'reportes.ventas-productos',
+                        title: 'Por Productos',
+                        type: 'basic',
+                        icon: 'heroicons_outline:shopping-bag',
+                        link: '/admin/ventas/reporte-productos',
+                    },
+                    {
+                        id: 'reportes.ganancias',
+                        title: 'Dashboard de Ganancias',
+                        type: 'basic',
+                        icon: 'heroicons_outline:currency-dollar',
+                        link: '/admin/ventas/reporte-ganancias',
+                    },
+                ],
+            },
+            {
+                id: 'reportes.compras',
+                title: 'Compras',
+                type: 'collapsable',
+                icon: 'heroicons_outline:archive-box',
+                children: [
+                    {
+                        id: 'reportes.compras-categorias',
+                        title: 'Por Categorías',
+                        type: 'basic',
+                        icon: 'heroicons_outline:tag',
+                        link: '/admin/compras/reporte-categorias',
+                    },
+                    {
+                        id: 'reportes.compras-marcas',
+                        title: 'Por Marcas',
+                        type: 'basic',
+                        icon: 'heroicons_outline:bookmark',
+                        link: '/admin/compras/reporte-marcas',
+                    },
+                    {
+                        id: 'reportes.compras-productos',
+                        title: 'Por Productos',
+                        type: 'basic',
+                        icon: 'heroicons_outline:shopping-bag',
+                        link: '/admin/compras/reporte-productos',
+                    },
+                ],
+            },
+            {
+                id: 'reportes.inventario',
+                title: 'Inventario',
+                type: 'collapsable',
+                icon: 'heroicons_outline:cube',
+                children: [
+                    {
+                        id: 'reportes.perdidas',
+                        title: 'Reporte de Pérdidas',
+                        type: 'basic',
+                        icon: 'heroicons_outline:exclamation-triangle',
+                        link: '/admin/inventario/reporte-perdidas',
+                    },
+                ],
+            },
+        ],
+    };
 
     registerHandlers(): void {
         this._fuseMockApiService
@@ -23,7 +112,7 @@ export class NavigationMockApi {
                 this.menuList = this._securityService.getMenuStorage();
 
                 const buildNavigation = (menuStorage: MenuRolDTO[], aside: boolean) => {
-                    return menuStorage
+                    const dbItems = menuStorage
                         .filter(menu => !menu.flgMenuHijo)
                         .map(parentMenu => {
                             const children = menuStorage
@@ -35,7 +124,6 @@ export class NavigationMockApi {
                                     icon: child.icono,
                                     link: child.ruta,
                                     externalLink: child.flgEnlaceExterno,
-
                                 }));
 
                             return {
@@ -49,6 +137,8 @@ export class NavigationMockApi {
                                 target: parentMenu.flgEnlaceExterno == true ? '_blank' : ''
                             };
                         });
+
+                    return [...dbItems, this.reportesNav];
                 };
 
                 const compactNavigation = buildNavigation(this.menuList, true);

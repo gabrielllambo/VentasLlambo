@@ -15,28 +15,28 @@
         <div class="flex flex-col flex-auto h-full dark:bg-default">
             <!-- Filtros -->
             <div class="flex flex-col flex-auto shrink-0 pt-6 bg-card dark:bg-transparent">
-                <form class="flex flex-col px-6" [formGroup]="filtroAnalisisVentasForm">
+                <form class="flex flex-col px-6" [formGroup]="filtroAnalisisComprasForm">
 
-                    <!-- Fecha Venta Inicio -->
+                    <!-- Fecha Compra Inicio -->
                     <mat-form-field class="w-full" [appearance]="'outline'">
-                        <mat-label>Fecha Venta Inicio</mat-label>
+                        <mat-label>Fecha Compra Inicio</mat-label>
                         <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off" matInput
-                            [matDatepicker]="pickerInicio" [formControlName]="'fechaVentaInicio'">
+                            [matDatepicker]="pickerInicio" [formControlName]="'fechaCompraInicio'">
                         <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
                         <mat-datepicker #pickerInicio></mat-datepicker>
-                        <mat-error *ngIf="filtroAnalisisVentasForm.get('fechaVentaInicio').hasError('required')">Fecha
-                            Venta inicio es requerido</mat-error>
+                        <mat-error *ngIf="filtroAnalisisComprasForm.get('fechaCompraInicio')?.hasError('required')">Fecha
+                            Compra inicio es requerido</mat-error>
                     </mat-form-field>
 
-                    <!-- Fecha Venta Fin -->
+                    <!-- Fecha Compra Fin -->
                     <mat-form-field class="w-full" [appearance]="'outline'">
-                        <mat-label>Fecha Venta Fin</mat-label>
+                        <mat-label>Fecha Compra Fin</mat-label>
                         <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off" matInput
-                            [matDatepicker]="pickerFin" [formControlName]="'fechaVentaFin'">
+                            [matDatepicker]="pickerFin" [formControlName]="'fechaCompraFin'">
                         <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
                         <mat-datepicker #pickerFin></mat-datepicker>
-                        <mat-error *ngIf="filtroAnalisisVentasForm.get('fechaVentaFin').hasError('required')">Fecha
-                            Venta fin es requerido</mat-error>
+                        <mat-error *ngIf="filtroAnalisisComprasForm.get('fechaCompraFin')?.hasError('required')">Fecha
+                            Compra fin es requerido</mat-error>
                     </mat-form-field>
 
                     <!-- Marcas -->
@@ -52,7 +52,7 @@
                                     </span>
                                 </ng-container>
                             </mat-select-trigger>
-                            <app-selectAll [model]="filtroAnalisisVentasForm.get('marcas')"
+                            <app-selectAll [model]="filtroAnalisisComprasForm.get('marcas')"
                                 [values]="allMarcasDataSource">
                             </app-selectAll>
                             <mat-option *ngFor="let option of allMarcasDataSource" [value]="option">
@@ -60,12 +60,12 @@
                                 {{option.nombre }}</mat-option>
 
                         </mat-select>
-                        <mat-error *ngIf="filtroAnalisisVentasForm.get('marcas').hasError('required')">Marca es
+                        <mat-error *ngIf="filtroAnalisisComprasForm.get('marcas')?.hasError('required')">Marca es
                             requerido</mat-error>
                     </mat-form-field>
 
                     <button class="  mt-4 mb-8" mat-flat-button [color]="'primary'" (click)="getResumen(true)"
-                        [disabled]="filtroAnalisisVentasForm.invalid || disabledBuscar">
+                        [disabled]="filtroAnalisisComprasForm.invalid || disabledBuscar">
                         <mat-icon *ngIf="!disabledBuscar" class="icon-size-2"
                             [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
                         <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
@@ -84,7 +84,7 @@
                 <!-- Title and action buttons -->
                 <div class="flex items-center justify-between w-full">
                     <div>
-                        <h2 class="text-2xl md:text-2xl font-semibold tracking-tight leading-8">Reporte de Ventas por
+                        <h2 class="text-2xl md:text-2xl font-semibold tracking-tight leading-8">Reporte de Compras por
                             Marcas
                         </h2>
                         <div class="font-medium tracking-tight text-secondary">{{filtroRangoFecha}}
@@ -102,7 +102,7 @@
                                 <span class="ml-1">Filtrar</span>
                             </button>
                             <button mat-menu-item (click)="getReportePorMarcaAsync()"
-                                [disabled]="filtroAnalisisVentasForm.invalid || isExportingReport || disabledExportar">
+                                [disabled]="filtroAnalisisComprasForm.invalid || isExportingReport || disabledExportar">
                                 <mat-icon [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
                                 <span class="ml-1">Exportar</span>
                             </button>
@@ -117,7 +117,7 @@
 
                         <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
                             mat-flat-button [color]="'primary'" (click)="getReportePorMarcaAsync()"
-                            [disabled]="filtroAnalisisVentasForm.invalid || isExportingReport || disabledExportar">
+                            [disabled]="filtroAnalisisComprasForm.invalid || isExportingReport || disabledExportar">
                             <mat-icon *ngIf="!isExportingReport" class="icon-size-5"
                                 [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
                             <span class="ml-2" *ngIf="!isExportingReport">Exportar</span>
@@ -138,7 +138,7 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0" *ngIf="!skeleton">
 
-                        @if (ventasAnalisisDataSource.distribucionVentasMarca.totalVentasMarcas.length == 0 ) {
+                        @if (comprasAnalisisDataSource.distribucionComprasMarca.totalComprasMarcas.length == 0 ) {
 
                         <div class="sm:col-span-2 md:col-span-4 flex flex-col    overflow-hidden">
 
@@ -174,16 +174,16 @@
                             <div class="grid grid-cols-1 lg:grid-cols-1 grid-flow-row gap-6 w-full mt-8 sm:mt-4">
                                 <div class="flex flex-col flex-auto">
                                     <div class="flex flex-col flex-auto">
-                                        <apx-chart [plotOptions]="chartEvolucionVentasMarcaFecha.plotOptions"
-                                            [series]="chartEvolucionVentasMarcaFecha.series"
-                                            [chart]="chartEvolucionVentasMarcaFecha.chart"
-                                            [xaxis]="chartEvolucionVentasMarcaFecha.xaxis"
-                                            [yaxis]="chartEvolucionVentasMarcaFecha.yaxis"
-                                            [tooltip]="chartEvolucionVentasMarcaFecha.tooltip"
-                                            [dataLabels]="chartEvolucionVentasMarcaFecha.dataLabels"
-                                            [labels]="chartEvolucionVentasMarcaFecha.labels"
-                                            [noData]="chartEvolucionVentasMarcaFecha.noData"
-                                            [grid]="chartEvolucionVentasMarcaFecha.grid"></apx-chart>
+                                        <apx-chart [plotOptions]="chartEvolucionComprasMarcaFecha.plotOptions"
+                                            [series]="chartEvolucionComprasMarcaFecha.series"
+                                            [chart]="chartEvolucionComprasMarcaFecha.chart"
+                                            [xaxis]="chartEvolucionComprasMarcaFecha.xaxis"
+                                            [yaxis]="chartEvolucionComprasMarcaFecha.yaxis"
+                                            [tooltip]="chartEvolucionComprasMarcaFecha.tooltip"
+                                            [dataLabels]="chartEvolucionComprasMarcaFecha.dataLabels"
+                                            [labels]="chartEvolucionComprasMarcaFecha.labels"
+                                            [noData]="chartEvolucionComprasMarcaFecha.noData"
+                                            [grid]="chartEvolucionComprasMarcaFecha.grid"></apx-chart>
                                     </div>
                                 </div>
 

@@ -69,7 +69,8 @@ export const Inventario = {
     },
     Fisico: {
         RegistrarInventarioFisicoAsync: '/api/InventarioFisico/registrar',
-        AjustarInventarioFisicoAsync: '/api/InventarioFisico/ajustar/' // Dejamos la barra al final para concatenar el ID
+        AjustarInventarioFisicoAsync: '/api/InventarioFisico/ajustar/', // Dejamos la barra al final para concatenar el ID
+        GetHistorialInventarioFisicoAsync: '/api/InventarioFisico/historialByFilterAsync',
     }
 };
 

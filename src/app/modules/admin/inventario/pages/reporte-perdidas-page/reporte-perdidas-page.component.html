@@ -1,0 +1,420 @@
+<mat-drawer-container class="flex-auto h-full">
+    <!-- Drawer Filtros -->
+    <mat-drawer class="w-90" [mode]="'over'" #matDrawer autoFocus="false">
+        <div class="flex items-center justify-between m-4 mr-3 sm:my-5">
+            <div class="text-3xl font-semibold tracking-tight leading-8">Filtrar por:</div>
+            <button mat-icon-button (click)="matDrawer.close()">
+                <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+        </div>
+        <div class="flex flex-col flex-auto h-full dark:bg-default">
+            <div class="flex flex-col flex-auto shrink-0 pt-4 bg-card dark:bg-transparent">
+                <form class="flex flex-col px-6" [formGroup]="filtroForm">
+
+                    <!-- Fecha Inicio -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Fecha Inicio</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off"
+                            matInput [matDatepicker]="pickerInicio" [formControlName]="'fechaInicio'">
+                        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerInicio></mat-datepicker>
+                        <mat-error *ngIf="filtroForm.get('fechaInicio').hasError('required')">Fecha inicio es
+                            requerido</mat-error>
+                    </mat-form-field>
+
+                    <!-- Fecha Fin -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Fecha Fin</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off"
+                            matInput [matDatepicker]="pickerFin" [formControlName]="'fechaFin'">
+                        <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerFin></mat-datepicker>
+                        <mat-error *ngIf="filtroForm.get('fechaFin').hasError('required')">Fecha fin es
+                            requerido</mat-error>
+                    </mat-form-field>
+
+                    <!-- Categorías -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Categorías</mat-label>
+                        <mat-select [formControlName]="'categoria'" multiple #selectCategoriaItem>
+                            <mat-select-trigger>
+                                <ng-container *ngIf="selectCategoriaItem.value?.length > 0">
+                                    <span *ngFor="let cat of selectCategoriaItem.value; let i = index">
+                                        <span class="color-indicator" [style.backgroundColor]="cat?.color"></span>
+                                        {{ cat.nombre || '' }}<ng-container
+                                            *ngIf="i < selectCategoriaItem.value.length - 1">, </ng-container>
+                                    </span>
+                                </ng-container>
+                            </mat-select-trigger>
+                            <app-selectAll [model]="filtroForm.get('categoria')"
+                                [values]="allCategoriaDataSource"></app-selectAll>
+                            <mat-option *ngFor="let option of allCategoriaDataSource" [value]="option">
+                                <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                                {{ option.nombre }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Marcas -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Marcas</mat-label>
+                        <mat-select [formControlName]="'marca'" multiple #selectMarcaItem>
+                            <mat-select-trigger>
+                                <ng-container *ngIf="selectMarcaItem.value?.length > 0">
+                                    <span *ngFor="let marca of selectMarcaItem.value; let i = index">
+                                        <span class="color-indicator" [style.backgroundColor]="marca?.color"></span>
+                                        {{ marca.nombre || '' }}<ng-container
+                                            *ngIf="i < selectMarcaItem.value.length - 1">, </ng-container>
+                                    </span>
+                                </ng-container>
+                            </mat-select-trigger>
+                            <app-selectAll [model]="filtroForm.get('marca')"
+                                [values]="allMarcasDataSource"></app-selectAll>
+                            <mat-option *ngFor="let option of allMarcasDataSource" [value]="option">
+                                <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                                {{ option.nombre }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Productos -->
+                    <mat-form-field class="w-full" [appearance]="'outline'">
+                        <mat-label>Productos</mat-label>
+                        <mat-select [formControlName]="'producto'" multiple #selectProductoItem>
+                            <mat-option *ngFor="let option of allProductosDataSource" [value]="option">
+                                {{ option.nombre }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Solo Pérdidas -->
+                    <div class="flex items-center mb-4">
+                        <mat-slide-toggle [formControlName]="'soloPerdidas'" color="warn">
+                            <span class="ml-2 text-sm font-medium">Solo mostrar pérdidas</span>
+                        </mat-slide-toggle>
+                    </div>
+
+                    <button class="mt-2 mb-8" mat-flat-button [color]="'primary'" (click)="getReporte(true)"
+                        [disabled]="filtroForm.invalid || disabledBuscar">
+                        <mat-icon *ngIf="!disabledBuscar" class="icon-size-2"
+                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                        <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
+                        <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24"
+                            [mode]="'indeterminate'"></mat-progress-spinner>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </mat-drawer>
+
+    <!-- Contenido -->
+    <mat-drawer-content class="flex flex-col">
+        <div class="flex flex-col flex-auto w-full">
+            <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+                <!-- Encabezado -->
+                <div class="flex items-center justify-between w-full">
+                    <div>
+                        <h2 class="text-2xl md:text-2xl font-semibold tracking-tight leading-8">
+                            Reporte de Pérdidas — Inventario Físico
+                        </h2>
+                        <div class="font-medium tracking-tight text-secondary">{{ filtroRangoFecha }}</div>
+                    </div>
+                    <div class="flex items-center ml-6">
+                        @if (isMobilSize()) {
+                        <button [matMenuTriggerFor]="actionsMenu" mat-icon-button>
+                            <mat-icon [svgIcon]="'heroicons_mini:ellipsis-vertical'"></mat-icon>
+                        </button>
+                        <mat-menu #actionsMenu="matMenu">
+                            <button mat-menu-item (click)="matDrawer.open()">
+                                <mat-icon [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                                <span class="ml-1">Filtrar</span>
+                            </button>
+                        </mat-menu>
+                        } @else {
+                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                            mat-stroked-button (click)="matDrawer.open()">
+                            <mat-icon class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                            <span class="ml-2">Filtrar</span>
+                        </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- Contenido Principal -->
+                <div class="grid grid-cols-1 xl:grid-cols-1 gap-8 w-full mt-6">
+
+                    <!-- SKELETON -->
+                    <ngx-skeleton-loader
+                        class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden"
+                        count="30" [theme]="{ 'border-radius': '0', height: '50px' }"
+                        *ngIf="skeleton"></ngx-skeleton-loader>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0"
+                        *ngIf="!skeleton && reporteData">
+
+                        <!-- Estado sin datos -->
+                        @if (!tieneHistorial()) {
+                        <div class="sm:col-span-2 md:col-span-4 flex flex-col overflow-hidden">
+                            <div class="flex flex-col items-center mt-8">
+                                <img [src]="imgNoDataHome" alt="Sin datos" class="w-72 object-cover" />
+                                <div
+                                    class="mt-4 sm:mt-8 text-2xl font-semibold tracking-tight leading-tight text-center">
+                                    {{ textoResultado }}</div>
+                                <p class="mt-2 text-gray-500 text-center">Aplique otros filtros de búsqueda</p>
+                            </div>
+                        </div>
+                        } @else {
+
+                        <!-- ===== TARJETAS RESUMEN ===== -->
+                        <!-- Total Tomas Físicas -->
+                        <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                            <div class="flex items-center">
+                                <div
+                                    class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-100">
+                                    <mat-icon class="text-blue-600"
+                                        [svgIcon]="'heroicons_outline:clipboard-document-list'"></mat-icon>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-2xl font-bold leading-none">{{ reporteData.totalRegistros }}</div>
+                                    <div class="mt-1 text-sm font-medium text-secondary">Tomas Físicas Registradas
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Unidades Perdidas -->
+                        <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                            <div class="flex items-center">
+                                <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100">
+                                    <mat-icon class="text-red-600"
+                                        [svgIcon]="'heroicons_outline:arrow-trending-down'"></mat-icon>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-2xl font-bold leading-none text-red-600">
+                                        {{ reporteData.totalUnidadesPerdidas }}</div>
+                                    <div class="mt-1 text-sm font-medium text-secondary">Unidades Perdidas</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Valor Estimado Perdido -->
+                        <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                            <div class="flex items-center">
+                                <div
+                                    class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-orange-100">
+                                    <mat-icon class="text-orange-600"
+                                        [svgIcon]="'heroicons_outline:banknotes'"></mat-icon>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-2xl font-bold leading-none text-orange-600">
+                                        {{ currencyNumberFormat.format(reporteData.totalValorPerdido) }}</div>
+                                    <div class="mt-1 text-sm font-medium text-secondary">Valor Estimado Perdido</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ajustados -->
+                        <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                            <div class="flex items-center">
+                                <div
+                                    class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100">
+                                    <mat-icon class="text-green-600"
+                                        [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-2xl font-bold leading-none text-green-600">
+                                        {{ reporteData.totalAjustados }}</div>
+                                    <div class="mt-1 text-sm font-medium text-secondary">Inventarios Ajustados</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ===== GRÁFICOS ===== -->
+                        <!-- Top Productos con Pérdidas -->
+                        <div
+                            class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                            <div class="text-lg font-medium tracking-tight leading-6 truncate mb-4">
+                                Top Productos con Mayores Pérdidas
+                            </div>
+                            <apx-chart [series]="chartTopPerdidas.series" [chart]="chartTopPerdidas.chart"
+                                [colors]="chartTopPerdidas.colors" [dataLabels]="chartTopPerdidas.dataLabels"
+                                [plotOptions]="chartTopPerdidas.plotOptions" [tooltip]="chartTopPerdidas.tooltip"
+                                [noData]="chartTopPerdidas.noData"
+                                [xaxis]="chartTopPerdidas.xaxis"></apx-chart>
+                        </div>
+
+                        <!-- Evolución de Pérdidas por Fecha -->
+                        <div
+                            class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                            <div class="text-lg font-medium tracking-tight leading-6 truncate mb-4">
+                                Evolución de Pérdidas por Fecha
+                            </div>
+                            <apx-chart [series]="chartEvolucionPerdidas.series"
+                                [chart]="chartEvolucionPerdidas.chart" [colors]="chartEvolucionPerdidas.colors"
+                                [stroke]="chartEvolucionPerdidas.stroke"
+                                [dataLabels]="chartEvolucionPerdidas.dataLabels"
+                                [tooltip]="chartEvolucionPerdidas.tooltip" [xaxis]="chartEvolucionPerdidas.xaxis"
+                                [yaxis]="chartEvolucionPerdidas.yaxis"
+                                [noData]="chartEvolucionPerdidas.noData"></apx-chart>
+                        </div>
+
+                        <!-- Distribución por Categoría -->
+                        <div
+                            class="sm:col-span-2 md:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                            <div class="text-lg font-medium tracking-tight leading-6 truncate mb-4">
+                                Distribución de Pérdidas por Categoría
+                            </div>
+                            <apx-chart class="flex-auto w-full h-80"
+                                [series]="chartDistribucionCategoria.series"
+                                [chart]="chartDistribucionCategoria.chart"
+                                [labels]="chartDistribucionCategoria.labels"
+                                [colors]="chartDistribucionCategoria.colors"
+                                [tooltip]="chartDistribucionCategoria.tooltip"
+                                [dataLabels]="chartDistribucionCategoria.dataLabels"
+                                [plotOptions]="chartDistribucionCategoria.plotOptions"
+                                [responsive]="chartDistribucionCategoria.responsive"
+                                [noData]="chartDistribucionCategoria.noData"></apx-chart>
+                        </div>
+
+                        <!-- ===== TABLA DETALLADA ===== -->
+                        <div
+                            class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                            <div class="text-lg font-medium tracking-tight leading-6 truncate mb-4">
+                                Detalle de Tomas Físicas
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <mat-table [dataSource]="reporteData.lstHistorial" class="w-full">
+
+                                    <!-- Columna Producto -->
+                                    <ng-container matColumnDef="producto">
+                                        <mat-header-cell *matHeaderCellDef class="font-semibold">Producto
+                                        </mat-header-cell>
+                                        <mat-cell *matCellDef="let row">
+                                            <div class="flex items-center gap-3">
+                                                <img [src]="row.urlFotoProducto || 'assets/images/logo/default-avatar.jpg'"
+                                                    class="w-10 h-10 rounded-full object-cover" alt="foto">
+                                                <div>
+                                                    <div class="font-medium text-sm">{{ row.nombreProducto }}</div>
+                                                    <div class="flex gap-1 mt-0.5">
+                                                        <span class="px-1.5 py-0.5 text-xs rounded-full text-white"
+                                                            [style.backgroundColor]="row.colorCategoria">
+                                                            {{ row.nombreCategoria }}
+                                                        </span>
+                                                        <span class="px-1.5 py-0.5 text-xs rounded-full text-white"
+                                                            [style.backgroundColor]="row.colorMarca">
+                                                            {{ row.nombreMarca }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <!-- Columna Lote -->
+                                    <ng-container matColumnDef="lote">
+                                        <mat-header-cell *matHeaderCellDef class="font-semibold">Lote
+                                        </mat-header-cell>
+                                        <mat-cell *matCellDef="let row">
+                                            <span class="text-sm">{{ row.numeroLote || '—' }}</span>
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <!-- Columna Stock Sistema -->
+                                    <ng-container matColumnDef="stockSistema">
+                                        <mat-header-cell *matHeaderCellDef class="font-semibold">Stock Sistema
+                                        </mat-header-cell>
+                                        <mat-cell *matCellDef="let row">
+                                            <span class="font-medium">{{ row.stockSistema }}</span>
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <!-- Columna Cantidad Física -->
+                                    <ng-container matColumnDef="cantidadFisica">
+                                        <mat-header-cell *matHeaderCellDef class="font-semibold">Cant. Física
+                                        </mat-header-cell>
+                                        <mat-cell *matCellDef="let row">
+                                            <span class="font-medium">{{ row.cantidadFisica }}</span>
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <!-- Columna Diferencia -->
+                                    <ng-container matColumnDef="diferencia">
+                                        <mat-header-cell *matHeaderCellDef class="font-semibold">Diferencia
+                                        </mat-header-cell>
+                                        <mat-cell *matCellDef="let row">
+                                            <span class="font-bold text-sm px-2 py-1 rounded-full"
+                                                [ngClass]="row.diferencia < 0 ? 'bg-red-100 text-red-700' : row.diferencia > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
+                                                {{ row.diferencia > 0 ? '+' : '' }}{{ row.diferencia }}
+                                            </span>
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <!-- Columna Valor Pérdida -->
+                                    <ng-container matColumnDef="valorPerdida">
+                                        <mat-header-cell *matHeaderCellDef class="font-semibold">Valor Perdido
+                                        </mat-header-cell>
+                                        <mat-cell *matCellDef="let row">
+                                            <span class="font-medium text-red-600"
+                                                *ngIf="row.valorPerdida > 0; else sinPerdida">
+                                                {{ currencyNumberFormat.format(row.valorPerdida) }}
+                                            </span>
+                                            <ng-template #sinPerdida><span class="text-gray-400">—</span></ng-template>
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <!-- Columna Usuario -->
+                                    <ng-container matColumnDef="usuario">
+                                        <mat-header-cell *matHeaderCellDef class="font-semibold">Responsable
+                                        </mat-header-cell>
+                                        <mat-cell *matCellDef="let row">
+                                            <div class="flex items-center gap-2">
+                                                <img [src]="row.urlFotoUsuario || 'assets/images/logo/default-avatar.jpg'"
+                                                    class="w-8 h-8 rounded-full object-cover" alt="usuario">
+                                                <div>
+                                                    <div class="text-sm font-medium">{{ row.nombreUsuario }}</div>
+                                                    <div class="text-xs text-secondary">{{ row.correoUsuario }}</div>
+                                                </div>
+                                            </div>
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <!-- Columna Fecha -->
+                                    <ng-container matColumnDef="fecha">
+                                        <mat-header-cell *matHeaderCellDef class="font-semibold">Fecha Toma
+                                        </mat-header-cell>
+                                        <mat-cell *matCellDef="let row">
+                                            <span class="text-sm">{{ row.fechaRegistro | date:'dd/MM/yyyy HH:mm'
+                                                }}</span>
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <!-- Columna Estado -->
+                                    <ng-container matColumnDef="estado">
+                                        <mat-header-cell *matHeaderCellDef class="font-semibold">Estado
+                                        </mat-header-cell>
+                                        <mat-cell *matCellDef="let row">
+                                            <span class="px-2 py-1 text-xs rounded-full font-medium"
+                                                [ngClass]="row.ajustado ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'">
+                                                {{ row.ajustado ? 'Ajustado' : 'Pendiente' }}
+                                            </span>
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <mat-header-row
+                                        *matHeaderRowDef="columnasMostradas; sticky: true"></mat-header-row>
+                                    <mat-row *matRowDef="let row; columns: columnasMostradas;"></mat-row>
+
+                                </mat-table>
+                            </div>
+                        </div>
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

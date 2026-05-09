@@ -10,6 +10,7 @@ import { DetalleVentaPageComponent } from './pages/historial-ventas-page/modals/
 import { ReporteVentasCategoriasPageComponent } from './pages/reporte-ventas-categorias-page/reporte-ventas-categorias-page.component';
 import { ReporteVentasMarcasPageComponent } from './pages/reporte-ventas-marcas-page/reporte-ventas-marcas-page.component';
 import { ReporteVentasProductosPageComponent } from './pages/reporte-ventas-productos-page/reporte-ventas-productos-page.component';
+import { ReporteGananciasPageComponent } from './pages/reporte-ganancias-page/reporte-ganancias-page.component';
 
 const BASE_MODULES = [CommonModule, SharedModule, VentasRoutingModule];
 
@@ -19,6 +20,7 @@ const BASE_COMPONENTS = [
   ReporteVentasMarcasPageComponent,
   RegistroVentasPageComponent,
   HistorialVentasPageComponent,
+  ReporteGananciasPageComponent,
 ];
 
 const DETALLE = [
