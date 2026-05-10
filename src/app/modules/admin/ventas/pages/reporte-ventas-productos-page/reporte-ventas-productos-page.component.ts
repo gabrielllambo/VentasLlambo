@@ -139,9 +139,10 @@ export class ReporteVentasProductosPageComponent implements OnInit, OnDestroy {
     }
 
     generarchartEvolucionVentasProductoFecha() {
-        const seriesData = this.ventasAnalisisDataSource.lstEvolucionVentasProductoFecha.map(Producto => {
+        const paletaColores = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#06B6D4', '#6366F1'];
+        const seriesData = this.ventasAnalisisDataSource.lstEvolucionVentasProductoFecha.map((Producto, index) => {
             return {
-                color: Producto.colorProducto,
+                color: paletaColores[index % paletaColores.length],
                 name: Producto.nombreProducto,
                 data: this.rangoFecha.map(fecha => {
                     const ventaEncontrado = Producto.datosVentasAgrupados.find(g => this._toolService.formatoFecha(g.fechaVenta) === fecha);
@@ -257,7 +258,7 @@ export class ReporteVentasProductosPageComponent implements OnInit, OnDestroy {
                     fontSize: '14px'
                 }
             },
-            colors: this.ventasAnalisisDataSource.distribucionVentasProducto.coloresProductos,
+            colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#06B6D4', '#6366F1'],
             tooltip: {
                 enabled: true,
                 y: {
@@ -321,7 +322,7 @@ export class ReporteVentasProductosPageComponent implements OnInit, OnDestroy {
                     fontSize: '14px'
                 }
             },
-            colors: this.ventasAnalisisDataSource.topDiezProductosVentas.colores,
+            colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#06B6D4', '#6366F1'],
             chart: {
                 type: "bar",
                 height: 350,

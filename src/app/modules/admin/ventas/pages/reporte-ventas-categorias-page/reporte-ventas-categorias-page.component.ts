@@ -7,7 +7,6 @@ import { SecurityService } from 'app/core/auth/auth.service';
 import { ToolService } from 'app/core/services/tool/tool.service';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';;
 import { ObtenerCategoriaRequest } from 'app/core/models/inventario/categoria/request/obtener-categoria-request.model';
-import { MatDrawer } from '@angular/material/sidenav';
 import { DecodedToken } from 'app/core/models/auth/response/decode-token-dto.model';
 import { CategoriaDTO } from 'app/core/models/inventario/categoria/response/categoria-dto.model';
 import { MatSelect } from '@angular/material/select';
@@ -29,7 +28,6 @@ import { ResponseDTO } from 'app/core/models/generic/response-dto.model';
 export class ReporteVentasCategoriasPageComponent implements OnInit, OnDestroy {
 
     @ViewChild('selectCategoriaItem') selectCategorias: MatSelect;
-    @ViewChild('matDrawer') matDrawer: MatDrawer;
 
     public disabledExportar: boolean = Flags.False;
 
@@ -77,7 +75,7 @@ export class ReporteVentasCategoriasPageComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.formFiltros();
         this.showSkeleton();
-        this.getResumen(Flags.False);
+        this.getResumen();
         this.getFilterComboConsulta();
     }
 
@@ -123,7 +121,7 @@ export class ReporteVentasCategoriasPageComponent implements OnInit, OnDestroy {
         });
     }
 
-    getResumen(hideFilter: boolean) {
+    getResumen() {
         this.showSkeleton();
         const request = this.obtenerRequest();
         this.disabledBuscar = Flags.True;
@@ -132,9 +130,6 @@ export class ReporteVentasCategoriasPageComponent implements OnInit, OnDestroy {
             this.disabledBuscar = Flags.False;
             this.getFechaFiltroCadena();
             this.generateCharts();
-            if (hideFilter) {
-                this.closedDrawer();
-            }
             this.hideSkeleton();
             if (response.distribucionVentasCategoria.totalVentasCategorias.length > Numeracion.Cero) {
                 this.disabledExportar = Flags.False;
@@ -145,9 +140,6 @@ export class ReporteVentasCategoriasPageComponent implements OnInit, OnDestroy {
             this._toolService.showError(DictionaryErrors.Transaction, DictionaryErrors.Tittle);
             this.disabledBuscar = Flags.False;
             console.log(err);
-            if (hideFilter) {
-                this.closedDrawer();
-            }
         });
     }
 
@@ -610,10 +602,6 @@ export class ReporteVentasCategoriasPageComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
-    }
-
-    closedDrawer() {
-        this.matDrawer.close();
     }
 
     showSkeleton() {

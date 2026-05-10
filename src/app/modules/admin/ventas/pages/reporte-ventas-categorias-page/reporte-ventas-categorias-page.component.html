@@ -1,136 +1,89 @@
-<mat-drawer-container class="flex-auto h-full">
-    <!-- Drawer -->
-    <mat-drawer class="w-90" [mode]="'over'" #matDrawer autoFocus="false">
-        <!-- Header -->
-        <div class="flex items-center justify-between m-4 mr-3 sm:my-5">
-            <!-- Title -->
-            <div class="text-3xl font-semibold tracking-tight leading-8">Filtrar por:</div>
-            <!-- Close Drawer -->
+<div class="flex flex-col flex-auto w-full h-full dark:bg-default">
+    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+        
+        <!-- Encabezado y botones de acción -->
+        <div class="flex items-center justify-between w-full">
             <div>
-                <button mat-icon-button (click)="matDrawer.close()">
-                    <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                <h2 class="text-2xl md:text-2xl font-semibold tracking-tight leading-8">Reporte de Ventas por Categorías</h2>
+                <div class="font-medium tracking-tight text-secondary">{{filtroRangoFecha}}</div>
+            </div>
+            
+            <div class="flex items-center ml-6">
+                <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
+                    mat-flat-button [color]="'primary'" (click)="getReportePorCategoriaAsync()"
+                    [disabled]="filtroAnalisisVentasForm.invalid || isExportingReport || disabledExportar">
+                    <mat-icon *ngIf="!isExportingReport" class="icon-size-5"
+                        [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
+                    <span class="ml-2" *ngIf="!isExportingReport">Exportar</span>
+                    <mat-progress-spinner *ngIf="isExportingReport" [diameter]="24" [mode]="'indeterminate'">
+                    </mat-progress-spinner>
                 </button>
             </div>
         </div>
-        <div class="flex flex-col flex-auto h-full dark:bg-default">
-            <!-- Filtros -->
-            <div class="flex flex-col flex-auto shrink-0 pt-6 bg-card dark:bg-transparent">
-                <form class="flex flex-col px-6" [formGroup]="filtroAnalisisVentasForm">
 
-                    <!-- Fecha Venta Inicio -->
-                    <mat-form-field class="w-full" [appearance]="'outline'">
-                        <mat-label>Fecha Venta Inicio</mat-label>
-                        <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off" matInput
-                            [matDatepicker]="pickerInicio" [formControlName]="'fechaVentaInicio'">
-                        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
-                        <mat-datepicker #pickerInicio></mat-datepicker>
-                        <mat-error *ngIf="filtroAnalisisVentasForm.get('fechaVentaInicio').hasError('required')">Fecha
-                            Venta inicio es requerido</mat-error>
-                    </mat-form-field>
+        <!-- Filtros del Reporte en la parte superior -->
+        <div class="w-full bg-card shadow rounded-2xl p-6 mt-6 border border-gray-100">
+            <form class="flex flex-col sm:flex-row flex-wrap gap-4 items-center" [formGroup]="filtroAnalisisVentasForm">
+                
+                <!-- Fecha Venta Inicio -->
+                <mat-form-field class="w-full sm:w-auto flex-1" [appearance]="'outline'">
+                    <mat-label>Fecha Venta Inicio</mat-label>
+                    <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off" matInput
+                        [matDatepicker]="pickerInicio" [formControlName]="'fechaVentaInicio'">
+                    <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerInicio></mat-datepicker>
+                    <mat-error *ngIf="filtroAnalisisVentasForm.get('fechaVentaInicio')?.hasError('required')">Fecha
+                        Venta inicio es requerido</mat-error>
+                </mat-form-field>
 
-                    <!-- Fecha Venta Fin -->
-                    <mat-form-field class="w-full" [appearance]="'outline'">
-                        <mat-label>Fecha Venta Fin</mat-label>
-                        <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off" matInput
-                            [matDatepicker]="pickerFin" [formControlName]="'fechaVentaFin'">
-                        <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
-                        <mat-datepicker #pickerFin></mat-datepicker>
-                        <mat-error *ngIf="filtroAnalisisVentasForm.get('fechaVentaFin').hasError('required')">Fecha
-                            Venta fin es requerido</mat-error>
-                    </mat-form-field>
+                <!-- Fecha Venta Fin -->
+                <mat-form-field class="w-full sm:w-auto flex-1" [appearance]="'outline'">
+                    <mat-label>Fecha Venta Fin</mat-label>
+                    <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off" matInput
+                        [matDatepicker]="pickerFin" [formControlName]="'fechaVentaFin'">
+                    <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerFin></mat-datepicker>
+                    <mat-error *ngIf="filtroAnalisisVentasForm.get('fechaVentaFin')?.hasError('required')">Fecha
+                        Venta fin es requerido</mat-error>
+                </mat-form-field>
 
-                    <!-- Categorías -->
-                    <mat-form-field class="w-full" [appearance]="'outline'">
-                        <mat-label>Categorías</mat-label>
-                        <mat-select [formControlName]="'categoria'" multiple #selectCategoriaItem>
-                            <mat-select-trigger>
-                                <ng-container *ngIf="selectCategoriaItem.value?.length > 0">
-                                    <span *ngFor="let categoria of selectCategoriaItem.value; let i = index">
-                                        <span class="color-indicator" [style.backgroundColor]="categoria?.color"></span>
-                                        {{ categoria.nombre || '' }}<ng-container
-                                            *ngIf="i < selectCategoriaItem.value.length - 1">, </ng-container>
-                                    </span>
-                                </ng-container>
-                            </mat-select-trigger>
-                            <app-selectAll [model]="filtroAnalisisVentasForm.get('categoria')"
-                                [values]="allCategoriaDataSource">
-                            </app-selectAll>
-                            <mat-option *ngFor="let option of allCategoriaDataSource" [value]="option">
-                                <span class="color-indicator" [style.backgroundColor]="option.color"></span>
-                                {{option.nombre }}</mat-option>
+                <!-- Categorías -->
+                <mat-form-field class="w-full sm:w-auto flex-1" [appearance]="'outline'">
+                    <mat-label>Categorías</mat-label>
+                    <mat-select [formControlName]="'categoria'" multiple #selectCategoriaItem>
+                        <mat-select-trigger>
+                            <ng-container *ngIf="selectCategoriaItem.value?.length > 0">
+                                <span *ngFor="let categoria of selectCategoriaItem.value; let i = index">
+                                    <span class="color-indicator" [style.backgroundColor]="categoria?.color"></span>
+                                    {{ categoria.nombre || '' }}<ng-container
+                                        *ngIf="i < selectCategoriaItem.value.length - 1">, </ng-container>
+                                </span>
+                            </ng-container>
+                        </mat-select-trigger>
+                        <app-selectAll [model]="filtroAnalisisVentasForm.get('categoria')"
+                            [values]="allCategoriaDataSource">
+                        </app-selectAll>
+                        <mat-option *ngFor="let option of allCategoriaDataSource" [value]="option">
+                            <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                            {{option.nombre }}</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="filtroAnalisisVentasForm.get('categoria')?.hasError('required')">Categoría es
+                        requerida</mat-error>
+                </mat-form-field>
 
-                        </mat-select>
-                        <mat-error *ngIf="filtroAnalisisVentasForm.get('categoria').hasError('required')">Categoría es
-                            requerido</mat-error>
-                    </mat-form-field>
-
-                    <button class="  mt-4 mb-8" mat-flat-button [color]="'primary'" (click)="getResumen(true)"
-                        [disabled]="filtroAnalisisVentasForm.invalid || disabledBuscar">
-                        <mat-icon *ngIf="!disabledBuscar" class="icon-size-2"
-                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
-                        <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
-                        <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24" [mode]="'indeterminate'">
-                        </mat-progress-spinner>
-                    </button>
-                </form>
-
-            </div>
+                <!-- Botón Buscar -->
+                <button class="w-full sm:w-auto mb-4" mat-flat-button [color]="'primary'" (click)="getResumen()"
+                    [disabled]="filtroAnalisisVentasForm.invalid || disabledBuscar">
+                    <mat-icon *ngIf="!disabledBuscar" class="icon-size-2"
+                        [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                    <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
+                    <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24" [mode]="'indeterminate'">
+                    </mat-progress-spinner>
+                </button>
+            </form>
         </div>
-    </mat-drawer>
-    <!-- Content -->
-    <mat-drawer-content class="flex flex-col">
-        <div class="flex flex-col flex-auto w-full">
-            <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
-                <!-- Title and action buttons -->
-                <div class="flex items-center justify-between w-full">
-                    <div>
-                        <h2 class="text-2xl md:text-2xl font-semibold tracking-tight leading-8">Reporte de Ventas por
-                            Categorías
-                        </h2>
-                        <div class="font-medium tracking-tight text-secondary">{{filtroRangoFecha}}
-                        </div>
-                    </div>
-                    <div class="flex items-center ml-6">
-                        @if (isMobilSize()) {
-                        <!-- Actions menu (visible on xs) -->
-                        <button [matMenuTriggerFor]="actionsMenu" mat-icon-button>
-                            <mat-icon [svgIcon]="'heroicons_mini:ellipsis-vertical'"></mat-icon>
-                        </button>
-                        <mat-menu #actionsMenu="matMenu">
-                            <button mat-menu-item (click)="matDrawer.open()">
-                                <mat-icon [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
-                                <span class="ml-1">Filtrar</span>
-                            </button>
-                            <button mat-menu-item (click)="getReportePorCategoriaAsync()"
-                                [disabled]="filtroAnalisisVentasForm.invalid || isExportingReport || disabledExportar">
-                                <mat-icon [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
-                                <span class="ml-1">Exportar</span>
-                            </button>
 
-                        </mat-menu>
-                        } @else {
-                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
-                            mat-stroked-button (click)="matDrawer.open()">
-                            <mat-icon class="icon-size-5"
-                                [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
-                            <span class="ml-2">Filtrar</span>
-                        </button>
-
-                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
-                            mat-flat-button [color]="'primary'" (click)="getReportePorCategoriaAsync()"
-                            [disabled]="filtroAnalisisVentasForm.invalid || isExportingReport || disabledExportar">
-                            <mat-icon *ngIf="!isExportingReport" class="icon-size-5"
-                                [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
-                            <span class="ml-2" *ngIf="!isExportingReport">Exportar</span>
-                            <mat-progress-spinner *ngIf="isExportingReport" [diameter]="24" [mode]="'indeterminate'">
-                            </mat-progress-spinner>
-                        </button>
-
-                        }
-
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 xl:grid-cols-1 gap-8 w-full mt-6">
+        <div class="grid grid-cols-1 xl:grid-cols-1 gap-8 w-full mt-6">
                     <!-- SKELETON -->
                     <ngx-skeleton-loader
                         class=" sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden"
@@ -236,7 +189,5 @@
                         }
                     </div>
                 </div>
-            </div>
-        </div>
-    </mat-drawer-content>
-</mat-drawer-container>
+    </div>
+</div>
