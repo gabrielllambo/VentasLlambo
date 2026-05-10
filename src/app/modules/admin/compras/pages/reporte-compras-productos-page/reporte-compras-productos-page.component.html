@@ -1,86 +1,6 @@
-<mat-drawer-container class="flex-auto h-full">
-    <!-- Drawer -->
-    <mat-drawer class="w-90" [mode]="'over'" #matDrawer autoFocus="false">
-        <!-- Header -->
-        <div class="flex items-center justify-between m-4 mr-3 sm:my-5">
-            <!-- Title -->
-            <div class="text-3xl font-semibold tracking-tight leading-8">Filtrar por:</div>
-            <!-- Close Drawer -->
-            <div>
-                <button mat-icon-button (click)="matDrawer.close()">
-                    <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
-                </button>
-            </div>
-        </div>
-        <div class="flex flex-col flex-auto h-full dark:bg-default">
-            <!-- Filtros -->
-            <div class="flex flex-col flex-auto shrink-0 pt-6 bg-card dark:bg-transparent">
-                <form class="flex flex-col px-6" [formGroup]="filtroAnalisisComprasForm">
-
-                    <!-- Fecha Compra Inicio -->
-                    <mat-form-field class="w-full" [appearance]="'outline'">
-                        <mat-label>Fecha Compra Inicio</mat-label>
-                        <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off" matInput
-                            [matDatepicker]="pickerInicio" [formControlName]="'fechaCompraInicio'">
-                        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
-                        <mat-datepicker #pickerInicio></mat-datepicker>
-                        <mat-error *ngIf="filtroAnalisisComprasForm.get('fechaCompraInicio')?.hasError('required')">Fecha
-                            Compra inicio es requerido</mat-error>
-                    </mat-form-field>
-
-                    <!-- Fecha Compra Fin -->
-                    <mat-form-field class="w-full" [appearance]="'outline'">
-                        <mat-label>Fecha Compra Fin</mat-label>
-                        <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off" matInput
-                            [matDatepicker]="pickerFin" [formControlName]="'fechaCompraFin'">
-                        <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
-                        <mat-datepicker #pickerFin></mat-datepicker>
-                        <mat-error *ngIf="filtroAnalisisComprasForm.get('fechaCompraFin')?.hasError('required')">Fecha
-                            Compra fin es requerido</mat-error>
-                    </mat-form-field>
-
-                    <!-- Productos -->
-                    <mat-form-field class="w-full" [appearance]="'outline'">
-                        <mat-label>Productos</mat-label>
-                        <mat-select [formControlName]="'productos'" multiple #selectProductoItem>
-                            <mat-select-trigger>
-                                <ng-container *ngIf="selectProductoItem.value?.length > 0">
-                                    <span *ngFor="let producto of selectProductoItem.value; let i = index">
-                                        <span class="color-indicator" [style.backgroundColor]="producto?.color"></span>
-                                        {{ producto.nombre || '' }}<ng-container
-                                            *ngIf="i < selectProductoItem.value.length - 1">, </ng-container>
-                                    </span>
-                                </ng-container>
-                            </mat-select-trigger>
-                            <app-selectAll [model]="filtroAnalisisComprasForm.get('productos')"
-                                [values]="allProductosDataSource">
-                            </app-selectAll>
-                            <mat-option *ngFor="let option of allProductosDataSource" [value]="option">
-                                <span class="color-indicator" [style.backgroundColor]="option.color"></span>
-                                {{option.nombre }}</mat-option>
-
-                        </mat-select>
-                        <mat-error *ngIf="filtroAnalisisComprasForm.get('productos')?.hasError('required')">Producto es
-                            requerido</mat-error>
-                    </mat-form-field>
-
-                    <button class="  mt-4 mb-8" mat-flat-button [color]="'primary'" (click)="getResumen(true)"
-                        [disabled]="filtroAnalisisComprasForm.invalid || disabledBuscar">
-                        <mat-icon *ngIf="!disabledBuscar" class="icon-size-2"
-                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
-                        <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
-                        <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24" [mode]="'indeterminate'">
-                        </mat-progress-spinner>
-                    </button>
-                </form>
-
-            </div>
-        </div>
-    </mat-drawer>
-    <!-- Content -->
-    <mat-drawer-content class="flex flex-col">
-        <div class="flex flex-col flex-auto w-full">
-            <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+<div class="flex flex-col flex-auto w-full h-full">
+    <div class="flex flex-col flex-auto w-full">
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto p-6 md:p-8">
                 <!-- Title and action buttons -->
                 <div class="flex items-center justify-between w-full">
                     <div>
@@ -97,10 +17,6 @@
                             <mat-icon [svgIcon]="'heroicons_mini:ellipsis-vertical'"></mat-icon>
                         </button>
                         <mat-menu #actionsMenu="matMenu">
-                            <button mat-menu-item (click)="matDrawer.open()">
-                                <mat-icon [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
-                                <span class="ml-1">Filtrar</span>
-                            </button>
                             <button mat-menu-item (click)="getReportePorProductoAsync()"
                                 [disabled]="filtroAnalisisComprasForm.invalid || isExportingReport || disabledExportar">
                                 <mat-icon [svgIcon]="'heroicons_solid:arrow-up-tray'"></mat-icon>
@@ -108,13 +24,6 @@
                             </button>
                         </mat-menu>
                         } @else {
-                            <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
-                            mat-stroked-button (click)="matDrawer.open()">
-                            <mat-icon class="icon-size-5"
-                                [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
-                            <span class="ml-2">Filtrar</span>
-                        </button>
-
                         <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
                             mat-flat-button [color]="'primary'" (click)="getReportePorProductoAsync()"
                             [disabled]="filtroAnalisisComprasForm.invalid || isExportingReport || disabledExportar">
@@ -129,6 +38,66 @@
 
                     </div>
                 </div>
+
+                <!-- Filtros en la parte superior -->
+                <div class="flex flex-col flex-auto w-full mt-6 bg-card shadow rounded-2xl p-6 overflow-hidden">
+                    <form class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full" [formGroup]="filtroAnalisisComprasForm">
+    
+                        <!-- Fecha Compra Inicio -->
+                        <mat-form-field class="w-full sm:w-1/4" [appearance]="'outline'">
+                            <mat-label>Fecha Compra Inicio</mat-label>
+                            <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off" matInput
+                                [matDatepicker]="pickerInicio" [formControlName]="'fechaCompraInicio'">
+                            <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerInicio></mat-datepicker>
+                            <mat-error *ngIf="filtroAnalisisComprasForm.get('fechaCompraInicio')?.hasError('required')">Fecha
+                                Compra inicio es requerido</mat-error>
+                        </mat-form-field>
+    
+                        <!-- Fecha Compra Fin -->
+                        <mat-form-field class="w-full sm:w-1/4" [appearance]="'outline'">
+                            <mat-label>Fecha Compra Fin</mat-label>
+                            <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off" matInput
+                                [matDatepicker]="pickerFin" [formControlName]="'fechaCompraFin'">
+                            <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerFin></mat-datepicker>
+                            <mat-error *ngIf="filtroAnalisisComprasForm.get('fechaCompraFin')?.hasError('required')">Fecha
+                                Compra fin es requerido</mat-error>
+                        </mat-form-field>
+    
+                        <!-- Productos -->
+                        <mat-form-field class="w-full sm:w-2/4" [appearance]="'outline'">
+                            <mat-label>Productos</mat-label>
+                            <mat-select [formControlName]="'productos'" multiple #selectProductoItem>
+                                <mat-select-trigger>
+                                    <ng-container *ngIf="selectProductoItem.value?.length > 0">
+                                        <span *ngFor="let producto of selectProductoItem.value; let i = index">
+                                            <span class="color-indicator" [style.backgroundColor]="producto?.color"></span>
+                                            {{ producto.nombre || '' }}<ng-container
+                                                *ngIf="i < selectProductoItem.value.length - 1">, </ng-container>
+                                        </span>
+                                    </ng-container>
+                                </mat-select-trigger>
+                                <app-selectAll [model]="filtroAnalisisComprasForm.get('productos')"
+                                    [values]="allProductosDataSource">
+                                </app-selectAll>
+                                <mat-option *ngFor="let option of allProductosDataSource" [value]="option">
+                                    <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                                    {{option.nombre }}</mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="filtroAnalisisComprasForm.get('productos')?.hasError('required')">Producto es
+                                requerido</mat-error>
+                        </mat-form-field>
+    
+                        <button class="w-full sm:w-auto mb-4 sm:mb-0 sm:mt-0 mt-4" mat-flat-button [color]="'primary'" (click)="getResumen(true)"
+                            [disabled]="filtroAnalisisComprasForm.invalid || disabledBuscar">
+                            <mat-icon *ngIf="!disabledBuscar" class="icon-size-5" [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                            <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
+                            <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                        </button>
+                    </form>
+                </div>
+
                 <div class="grid grid-cols-1 xl:grid-cols-1 gap-8 w-full mt-6">
                     <!-- SKELETON -->
                     <ngx-skeleton-loader
@@ -236,5 +205,4 @@
                 </div>
             </div>
         </div>
-    </mat-drawer-content>
-</mat-drawer-container>
+    </div>

@@ -258,7 +258,7 @@ export class ReporteComprasProductosPageComponent implements OnInit, OnDestroy {
     }
 
     isMobilSize(): boolean { return this._toolService.isMobilSize(); }
-    closedDrawer() { this.matDrawer.close(); }
+    closedDrawer() { this.matDrawer?.close(); }
     showSkeleton() { this.skeleton = Flags.Show; }
     hideSkeleton() { this.skeleton = Flags.Hide; }
     obtenerInfouserInfoLogueado(): DecodedToken { return this._securityService.getDecodetoken(); }
