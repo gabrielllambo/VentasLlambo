@@ -1,55 +1,5 @@
-<mat-drawer-container class="flex-auto h-full">
-    <!-- Drawer Filtros -->
-    <mat-drawer class="w-90" [mode]="'over'" #matDrawer autoFocus="false">
-        <div class="flex items-center justify-between m-4 mr-3 sm:my-5">
-            <div class="text-3xl font-semibold tracking-tight leading-8">Filtrar por:</div>
-            <button mat-icon-button (click)="matDrawer.close()">
-                <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
-            </button>
-        </div>
-        <div class="flex flex-col flex-auto h-full dark:bg-default">
-            <div class="flex flex-col flex-auto shrink-0 pt-6 bg-card dark:bg-transparent">
-                <form class="flex flex-col px-6" [formGroup]="filtroForm">
-
-                    <!-- Fecha Inicio -->
-                    <mat-form-field class="w-full" [appearance]="'outline'">
-                        <mat-label>Fecha Inicio</mat-label>
-                        <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off"
-                            matInput [matDatepicker]="pickerInicio" [formControlName]="'fechaInicio'">
-                        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
-                        <mat-datepicker #pickerInicio></mat-datepicker>
-                        <mat-error *ngIf="filtroForm.get('fechaInicio').hasError('required')">Fecha inicio es
-                            requerido</mat-error>
-                    </mat-form-field>
-
-                    <!-- Fecha Fin -->
-                    <mat-form-field class="w-full" [appearance]="'outline'">
-                        <mat-label>Fecha Fin</mat-label>
-                        <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off"
-                            matInput [matDatepicker]="pickerFin" [formControlName]="'fechaFin'">
-                        <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
-                        <mat-datepicker #pickerFin></mat-datepicker>
-                        <mat-error *ngIf="filtroForm.get('fechaFin').hasError('required')">Fecha fin es
-                            requerido</mat-error>
-                    </mat-form-field>
-
-                    <button class="mt-4 mb-8" mat-flat-button [color]="'primary'" (click)="getReporte(true)"
-                        [disabled]="filtroForm.invalid || disabledBuscar">
-                        <mat-icon *ngIf="!disabledBuscar" class="icon-size-2"
-                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
-                        <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
-                        <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24"
-                            [mode]="'indeterminate'"></mat-progress-spinner>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </mat-drawer>
-
-    <!-- Contenido -->
-    <mat-drawer-content class="flex flex-col">
-        <div class="flex flex-col flex-auto w-full">
-            <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+<div class="flex flex-col flex-auto w-full">
+    <div class="flex flex-col w-full max-w-screen-xl mx-auto p-6 md:p-8">
 
                 <!-- Encabezado -->
                 <div class="flex items-center justify-between w-full">
@@ -59,26 +9,42 @@
                         </h2>
                         <div class="font-medium tracking-tight text-secondary">{{ filtroRangoFecha }}</div>
                     </div>
-                    <div class="flex items-center ml-6">
-                        @if (isMobilSize()) {
-                        <button [matMenuTriggerFor]="actionsMenu" mat-icon-button>
-                            <mat-icon [svgIcon]="'heroicons_mini:ellipsis-vertical'"></mat-icon>
-                        </button>
-                        <mat-menu #actionsMenu="matMenu">
-                            <button mat-menu-item (click)="matDrawer.open()">
-                                <mat-icon [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
-                                <span class="ml-1">Filtrar</span>
+                </div>
+
+                <!-- Filtros en la parte superior -->
+                <div class="flex flex-col w-full mt-6 bg-card shadow rounded-2xl p-6">
+                    <div class="text-lg font-medium tracking-tight leading-6 truncate mb-4">Filtros de Búsqueda</div>
+                    <form class="flex flex-col sm:flex-row gap-4" [formGroup]="filtroForm">
+                        
+                        <!-- Fecha Inicio -->
+                        <mat-form-field class="w-full sm:w-1/3" [appearance]="'outline'">
+                            <mat-label>Fecha Inicio</mat-label>
+                            <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off"
+                                matInput [matDatepicker]="pickerInicio" [formControlName]="'fechaInicio'">
+                            <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerInicio></mat-datepicker>
+                            <mat-error *ngIf="filtroForm.get('fechaInicio').hasError('required')">Fecha inicio es requerido</mat-error>
+                        </mat-form-field>
+
+                        <!-- Fecha Fin -->
+                        <mat-form-field class="w-full sm:w-1/3" [appearance]="'outline'">
+                            <mat-label>Fecha Fin</mat-label>
+                            <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off"
+                                matInput [matDatepicker]="pickerFin" [formControlName]="'fechaFin'">
+                            <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerFin></mat-datepicker>
+                            <mat-error *ngIf="filtroForm.get('fechaFin').hasError('required')">Fecha fin es requerido</mat-error>
+                        </mat-form-field>
+
+                        <div class="flex items-center pt-2">
+                            <button class="w-full sm:w-auto h-12 px-6" mat-flat-button [color]="'primary'" (click)="getReporte(false)"
+                                [disabled]="filtroForm.invalid || disabledBuscar">
+                                <mat-icon *ngIf="!disabledBuscar" class="icon-size-5" [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                                <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
+                                <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
                             </button>
-                        </mat-menu>
-                        } @else {
-                        <button class="hidden sm:inline-flex ml-3 sm:w-40 sm:h-10 sm:items-center sm:justify-center"
-                            mat-stroked-button (click)="matDrawer.open()">
-                            <mat-icon class="icon-size-5"
-                                [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
-                            <span class="ml-2">Filtrar</span>
-                        </button>
-                        }
-                    </div>
+                        </div>
+                    </form>
                 </div>
 
                 <!-- Contenido Principal -->
@@ -305,5 +271,4 @@
                 </div>
             </div>
         </div>
-    </mat-drawer-content>
-</mat-drawer-container>
+

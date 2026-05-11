@@ -1,31 +1,5 @@
-<mat-drawer-container class="flex-auto h-full">
-    <mat-drawer class="w-90" [mode]="'over'" #matDrawer autoFocus="false">
-        <div class="flex items-center justify-between m-4 mr-3 sm:my-5">
-            <div class="text-3xl font-semibold tracking-tight leading-8">Filtros de Conteo</div>
-            <button mat-icon-button (click)="matDrawer.close()">
-                <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
-            </button>
-        </div>
-        <div class="flex flex-col flex-auto h-full dark:bg-default">
-            <div class="flex flex-col flex-auto shrink-0 pt-6 bg-card dark:bg-transparent">
-                <form class="flex flex-col px-6" [formGroup]="filtroInventarioForm">
-                    <mat-form-field class="w-full" [appearance]="'outline'">
-                        <mat-label>Buscar Producto / Lote</mat-label>
-                        <input matInput formControlName="terminoBusqueda" placeholder="Ej: Agua Mineral o Lote 001" autocomplete="off">
-                    </mat-form-field>
-
-                    <button class="mt-4 mb-8" mat-flat-button [color]="'primary'" (click)="btnBuscar()">
-                        <mat-icon class="icon-size-2" [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
-                        <span class="ml-2">Buscar para contar</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </mat-drawer>
-
-    <mat-drawer-content class="flex flex-col">
-        <div class="flex flex-col flex-auto w-full">
-            <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+<div class="flex flex-col flex-auto w-full h-full">
+    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
                 
                 <div class="flex items-center justify-between w-full">
                     <div class="flex-1 min-w-0">
@@ -36,19 +10,29 @@
                             <span class="text-secondary">Conteo Físico</span>
                         </div>
                     </div>
-                    
+
                     <div class="flex items-center ml-6">
-                        <button class="hidden sm:inline-flex ml-3 px-6 h-10 items-center justify-center"
-                                mat-flat-button [color]="'warn'" (click)="onFinalizarAjuste()" 
-                                [disabled]="dataSource.data.length === 0">
-                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
-                            <span class="ml-2">Finalizar y Ajustar Stock</span>
-                        </button>
-                        
-                        <button class="ml-3 sm:w-10 sm:h-10" mat-stroked-button (click)="matDrawer.open()">
-                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:adjustments-horizontal'"></mat-icon>
+                        <button mat-flat-button [color]="'accent'" (click)="exportarReporte()" [disabled]="dataSource.data.length === 0">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:document-arrow-down'"></mat-icon>
+                            <span class="ml-2">Exportar Reporte</span>
                         </button>
                     </div>
+                </div>
+
+                <!-- Sección del filtro en la parte superior -->
+                <div class="w-full mt-6 bg-card shadow rounded-2xl p-6 dark:bg-transparent">
+                    <div class="text-lg font-semibold tracking-tight mb-4">Filtros de Conteo</div>
+                    <form class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full" [formGroup]="filtroInventarioForm">
+                        <mat-form-field class="w-full sm:flex-1" [appearance]="'outline'">
+                            <mat-label>Buscar Producto / Lote</mat-label>
+                            <input matInput formControlName="terminoBusqueda" placeholder="Ej: Agua Mineral o Lote 001" autocomplete="off">
+                        </mat-form-field>
+
+                        <button mat-flat-button [color]="'primary'" (click)="btnBuscar()" class="w-full sm:w-auto mb-4 sm:mb-5 px-8">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                            <span class="ml-2">Buscar para contar</span>
+                        </button>
+                    </form>
                 </div>
 
                 <div class="w-full mt-6">
@@ -89,6 +73,15 @@
                                     </td>
                                 </ng-container>
 
+                                <ng-container matColumnDef="observacion">
+                                    <th mat-header-cell *matHeaderCellDef> Motivo / Observación </th>
+                                    <td mat-cell *matCellDef="let item">
+                                        <mat-form-field class="w-48 mt-4" [appearance]="'outline'">
+                                            <input matInput type="text" [(ngModel)]="item.observacion" placeholder="Ej: Pérdida, dañado...">
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
                                 <ng-container matColumnDef="acciones">
                                     <th mat-header-cell *matHeaderCellDef> </th>
                                     <td mat-cell *matCellDef="let item">
@@ -106,6 +99,4 @@
                 </div>
 
             </div>
-        </div>
-    </mat-drawer-content>
-</mat-drawer-container>
+</div>

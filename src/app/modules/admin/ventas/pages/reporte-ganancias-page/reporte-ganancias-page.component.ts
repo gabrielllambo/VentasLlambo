@@ -21,6 +21,12 @@ interface FilaGanancia {
     ganancia: number;
 }
 
+// Definimos una paleta de colores vibrante y profesional
+const PALETA_COLORES = [
+    '#6366F1', '#10B981', '#F59E0B', '#3B82F6', '#EC4899', 
+    '#8B5CF6', '#14B8A6', '#F43F5E', '#0EA5E9', '#F97316'
+];
+
 @Component({
     selector: 'app-reporte-ganancias-page',
     templateUrl: './reporte-ganancias-page.component.html',
@@ -135,12 +141,12 @@ export class ReporteGananciasPageComponent implements OnInit, OnDestroy {
                 {
                     name: 'Ingresos (Ventas)',
                     data: this.ventasResumen.evolucionVentasFecha?.totalVenta ?? [],
-                    color: '#22C55E',
+                    color: '#10B981', // Verde Esmeralda
                 },
                 {
                     name: 'Costo de Venta',
                     data: this.ventasResumen.totalCostosVentasPorFecha ?? [],
-                    color: '#EF4444',
+                    color: '#F43F5E', // Rosa/Rojo
                 },
             ],
             chart: {
@@ -148,9 +154,9 @@ export class ReporteGananciasPageComponent implements OnInit, OnDestroy {
                 type: 'line',
                 zoom: { enabled: false },
                 toolbar: { show: false },
-                animations: { enabled: false },
+                animations: { enabled: true, easing: 'easeinout', speed: 800 },
             },
-            stroke: { show: true, width: 2, curve: 'smooth' },
+            stroke: { show: true, width: 3, curve: 'smooth' },
             dataLabels: { enabled: false },
             tooltip: {
                 enabled: true,
@@ -185,20 +191,25 @@ export class ReporteGananciasPageComponent implements OnInit, OnDestroy {
             series: [{ name: 'Total Vendido', data: top?.totalMontos ?? [] }],
             chart: { type: 'bar', height: 350, toolbar: { show: false } },
             plotOptions: {
-                bar: { barHeight: '100%', distributed: true, horizontal: true, dataLabels: { position: 'top' } },
+                bar: { 
+                    barHeight: '85%', 
+                    distributed: true, // Esto hace que cada barra use un color distinto
+                    horizontal: true, 
+                    dataLabels: { position: 'top' } 
+                },
             },
-            colors: top?.colores ?? [],
+            colors: PALETA_COLORES, // Aplicamos la paleta personalizada
             dataLabels: {
                 enabled: true,
-                textAnchor: 'middle',
+                textAnchor: 'start',
                 formatter: (val: number) => currencyFormat.format(val),
-                offsetY: -6,
-                style: { colors: ['#FFFFFF'], fontSize: '12px', fontWeight: 'bold' },
-                dropShadow: { enabled: true, top: 1, left: 1, blur: 2, color: '#000', opacity: 0.5 },
+                offsetX: 10,
+                style: { colors: ['#333'], fontSize: '11px', fontWeight: '600' },
             },
             stroke: { width: 1, colors: ['#fff'] },
             tooltip: { enabled: true, y: { formatter: (val: number) => currencyFormat.format(val) } },
             xaxis: { categories: top?.productos ?? [], labels: { show: false } },
+            legend: { show: false }, // Ocultamos leyenda porque los nombres ya están en el eje Y
             noData: {
                 text: 'Sin ventas en el período',
                 align: 'center',
@@ -216,20 +227,25 @@ export class ReporteGananciasPageComponent implements OnInit, OnDestroy {
             series: [{ name: 'Costo de Venta', data: top?.totalCostosProductos ?? [] }],
             chart: { type: 'bar', height: 350, toolbar: { show: false } },
             plotOptions: {
-                bar: { barHeight: '100%', distributed: true, horizontal: true, dataLabels: { position: 'top' } },
+                bar: { 
+                    barHeight: '85%', 
+                    distributed: true, 
+                    horizontal: true, 
+                    dataLabels: { position: 'top' } 
+                },
             },
-            colors: top?.colores ?? [],
+            colors: [...PALETA_COLORES].reverse(), // Invertimos la paleta para diferenciar visualmente
             dataLabels: {
                 enabled: true,
-                textAnchor: 'middle',
+                textAnchor: 'start',
                 formatter: (val: number) => currencyFormat.format(val),
-                offsetY: -6,
-                style: { colors: ['#FFFFFF'], fontSize: '12px', fontWeight: 'bold' },
-                dropShadow: { enabled: true, top: 1, left: 1, blur: 2, color: '#000', opacity: 0.5 },
+                offsetX: 10,
+                style: { colors: ['#333'], fontSize: '11px', fontWeight: '600' },
             },
             stroke: { width: 1, colors: ['#fff'] },
             tooltip: { enabled: true, y: { formatter: (val: number) => currencyFormat.format(val) } },
             xaxis: { categories: top?.productos ?? [], labels: { show: false } },
+            legend: { show: false },
             noData: {
                 text: 'Sin datos de costo en el período',
                 align: 'center',
@@ -246,24 +262,35 @@ export class ReporteGananciasPageComponent implements OnInit, OnDestroy {
         const ganancias = (top?.productos ?? []).map((nombre, idx) => {
             const totalVendido = top.totalMontos?.[idx] ?? Numeracion.Cero;
             const totalCosto = top.totalCostosProductos?.[idx] ?? Numeracion.Cero;
-            return { nombre, ganancia: totalVendido - totalCosto, color: top.colores?.[idx] ?? '#6366F1' };
+            return { nombre, ganancia: totalVendido - totalCosto };
         });
+        
         ganancias.sort((a, b) => b.ganancia - a.ganancia);
 
         this.chartGananciaProductos = {
             series: [{ name: 'Ganancia Bruta', data: ganancias.map(g => g.ganancia) }],
             chart: { type: 'bar', height: 350, toolbar: { show: false } },
-            plotOptions: { bar: { distributed: true, horizontal: false, columnWidth: '60%' } },
-            colors: ganancias.map(g => g.ganancia >= Numeracion.Cero ? '#22C55E' : '#EF4444'),
+            plotOptions: { 
+                bar: { 
+                    distributed: true, 
+                    horizontal: false, 
+                    columnWidth: '55%',
+                    borderRadius: 4
+                } 
+            },
+            // Verde si es ganancia, Rojo si es pérdida
+            colors: ganancias.map(g => g.ganancia >= 0 ? '#10B981' : '#F43F5E'),
             dataLabels: {
                 enabled: true,
                 formatter: (val: number) => currencyFormat.format(val),
-                style: { fontSize: '11px' },
+                style: { fontSize: '10px' },
+                offsetY: -20
             },
             stroke: { show: true, width: 2, colors: ['transparent'] },
             tooltip: { enabled: true, y: { formatter: (val: number) => currencyFormat.format(val) } },
-            xaxis: { categories: ganancias.map(g => g.nombre), labels: { rotateAlways: true, rotate: -45 } },
+            xaxis: { categories: ganancias.map(g => g.nombre), labels: { rotateAlways: true, rotate: -45, style: { fontSize: '10px' } } },
             yaxis: { labels: { formatter: (val: number) => currencyFormat.format(val) } },
+            legend: { show: false },
             noData: {
                 text: 'Sin datos para calcular ganancia',
                 align: 'center',
@@ -281,7 +308,8 @@ export class ReporteGananciasPageComponent implements OnInit, OnDestroy {
             const totalCosto = top.totalCostosProductos?.[idx] ?? Numeracion.Cero;
             return {
                 nombre,
-                color: top.colores?.[idx] ?? '#6366F1',
+                // Asignamos el color de la paleta basado en el índice
+                color: PALETA_COLORES[idx % PALETA_COLORES.length],
                 totalVendido,
                 totalCosto,
                 ganancia: totalVendido - totalCosto,

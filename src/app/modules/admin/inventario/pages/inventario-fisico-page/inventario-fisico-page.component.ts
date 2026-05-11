@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatDrawer } from '@angular/material/sidenav';
 import { InventarioService } from 'app/core/services/inventario/inventario.service';
 import { SecurityService } from 'app/core/auth/auth.service';
 import { ResponseDTO } from 'app/core/models/generic/response-dto.model';
@@ -14,10 +13,9 @@ import { forkJoin } from 'rxjs';
   templateUrl: './inventario-fisico-page.component.html'
 })
 export class InventarioFisicoPageComponent implements OnInit {
-  @ViewChild('matDrawer') matDrawer!: MatDrawer;
 
   dataSource = new MatTableDataSource<any>([]);
-  displayedColumns: string[] = ['estado', 'producto', 'stockSistema', 'cantidadFisica', 'diferencia', 'acciones'];
+  displayedColumns: string[] = ['producto', 'stockSistema', 'cantidadFisica', 'diferencia', 'observacion', 'acciones'];
 
   filtroInventarioForm!: UntypedFormGroup;
   idUsuarioLogueado: string = '';
@@ -54,7 +52,6 @@ export class InventarioFisicoPageComponent implements OnInit {
         }));
 
         this.dataSource.data = [...this.dataSource.data, ...nuevosItems];
-        this.matDrawer.close();
       } else {
         Swal.fire('No encontrado', 'No hay lotes que coincidan con la búsqueda', 'warning');
       }
@@ -71,7 +68,7 @@ export class InventarioFisicoPageComponent implements OnInit {
       idLoteProducto: item.idLoteProducto,
       cantidadFisica: Number(item.cantidadFisica),
       idUsuarioGuid: this.idUsuarioLogueado,
-      observacion: 'Conteo rápido desde página'
+      observacion: item.observacion || 'Conteo rápido desde página'
     };
 
     this._inventarioService.RegistrarInventarioFisicoAsync(request).subscribe({
@@ -101,6 +98,42 @@ export class InventarioFisicoPageComponent implements OnInit {
   get itemsGuardados(): number { return this.dataSource.data.filter(i => i.idInventarioFisico).length; }
   get itemsIngresados(): number { return this.dataSource.data.filter(i => this.getEstadoItem(i) === 'ingresado').length; }
   get itemsSinContar(): number { return this.dataSource.data.filter(i => this.getEstadoItem(i) === 'sin_contar').length; }
+
+  exportarReporte(): void {
+    if (this.dataSource.data.length === 0) {
+      Swal.fire('Sin datos', 'No hay información en la tabla para exportar.', 'info');
+      return;
+    }
+
+    // 1. Definimos las cabeceras del reporte
+    const cabeceras = ['Producto', 'Lote', 'Stock Sistema', 'Cantidad Contada', 'Diferencia', 'Motivo / Observación'];
+    
+    // 2. Mapeamos las filas de datos asegurándonos de usar comillas por si hay comas internas
+    const filas = this.dataSource.data.map(item => [
+      `"${item.nombreProducto || ''}"`,
+      `"${item.codigoLote || ''}"`,
+      item.cantidadSistema || 0,
+      item.cantidadFisica !== null ? item.cantidadFisica : '',
+      item.diferencia || 0,
+      `"${item.observacion || ''}"`
+    ]);
+
+    // 3. Unimos todo en un gran texto separado por comas y saltos de línea (\n)
+    const csvContent = [cabeceras.join(','), ...filas.map(f => f.join(','))].join('\n');
+    
+    // 4. Creamos el archivo Blob en UTF-8 (\uFEFF sirve para que Excel reconozca tildes y eñes)
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    // 5. Forzamos la descarga nativa en el navegador
+    const link = document.createElement('a');
+    link.href = url;
+    const fechaString = new Date().toISOString().split('T')[0];
+    link.download = `Reporte_Inventario_Fisico_${fechaString}.csv`;
+    link.click();
+    
+    URL.revokeObjectURL(url);
+  }
 
   onFinalizarAjuste(): void {
     // Filas con cantidad ingresada pero sin guardar borrador
