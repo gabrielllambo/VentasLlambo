@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1779937221584,
+  "timestamp": 1779942002389,
   "index": "https://gabrielllambo.github.io/VentasLlambo/index.html",
   "assetGroups": [
     {
@@ -30,7 +30,7 @@
         "https://gabrielllambo.github.io/VentasLlambo/983.38e0e5b0a19d4834.js",
         "https://gabrielllambo.github.io/VentasLlambo/common.53c5a499ebf0a870.js",
         "https://gabrielllambo.github.io/VentasLlambo/index.html",
-        "https://gabrielllambo.github.io/VentasLlambo/main.48595db7e5470088.js",
+        "https://gabrielllambo.github.io/VentasLlambo/main.cbd570bedbafaf21.js",
         "https://gabrielllambo.github.io/VentasLlambo/manifest.webmanifest",
         "https://gabrielllambo.github.io/VentasLlambo/polyfills.a72e73a758e49829.js",
         "https://gabrielllambo.github.io/VentasLlambo/runtime.8e6605af251820e7.js",
@@ -174,8 +174,8 @@
     "https://gabrielllambo.github.io/VentasLlambo/common.53c5a499ebf0a870.js": "6282cf13ef6a64a57d90a231e1a85af303cdec34",
     "https://gabrielllambo.github.io/VentasLlambo/favicon-16x16.png": "4463b7db3b5da7262d436ffe1dac5092b713cc8c",
     "https://gabrielllambo.github.io/VentasLlambo/favicon-32x32.png": "644e41a811f1b2d0f8b8b2841f9f8e80ed8cbdbd",
-    "https://gabrielllambo.github.io/VentasLlambo/index.html": "29a344b1d3d8708a4ea055158113d4529d5ee5ac",
-    "https://gabrielllambo.github.io/VentasLlambo/main.48595db7e5470088.js": "2f721ed0f60907ba44c8d40edeaaa73343078b44",
+    "https://gabrielllambo.github.io/VentasLlambo/index.html": "d6023a6c755e190e0ed52b203c8a54c3d759d025",
+    "https://gabrielllambo.github.io/VentasLlambo/main.cbd570bedbafaf21.js": "e7ab3a2c2f719a4d896d890ee9dad7f6077becbf",
     "https://gabrielllambo.github.io/VentasLlambo/manifest.webmanifest": "53d610a3cc964e70c15e67c5e2511cca1b9dc034",
     "https://gabrielllambo.github.io/VentasLlambo/polyfills.a72e73a758e49829.js": "7853c5071790d99f4b96b6a0b7d45c6509a7db8b",
     "https://gabrielllambo.github.io/VentasLlambo/runtime.8e6605af251820e7.js": "6872fa6086724faf6d977747357648f8a5fe9e12",
