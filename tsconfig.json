@@ -3,7 +3,9 @@
     "compileOnSave": false,
     "compilerOptions": {
         "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true,
         "baseUrl": "./src",
+        "rootDir": "./src",
         "outDir": "./dist/out-tsc",
         "sourceMap": true,
         "declaration": false,
@@ -33,4 +35,8 @@
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false
     },
+    "exclude": [
+        "server.ts",
+        "src/main.server.ts"
+    ]
 }

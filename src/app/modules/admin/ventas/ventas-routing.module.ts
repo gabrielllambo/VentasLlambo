@@ -6,6 +6,8 @@ import { ReporteVentasCategoriasPageComponent } from './pages/reporte-ventas-cat
 import { ReporteVentasMarcasPageComponent } from './pages/reporte-ventas-marcas-page/reporte-ventas-marcas-page.component';
 import { ReporteVentasProductosPageComponent } from './pages/reporte-ventas-productos-page/reporte-ventas-productos-page.component';
 import { ReporteGananciasPageComponent } from './pages/reporte-ganancias-page/reporte-ganancias-page.component';
+import { ReporteFlujosCajaPageComponent } from './pages/reporte-flujo-caja-page/reporte-flujo-caja-page.component';
+import { ReporteTendenciaPageComponent } from './pages/reporte-tendencia-page/reporte-tendencia-page.component';
 
 const routes: Routes = [
   {
@@ -17,6 +19,8 @@ const routes: Routes = [
       { path: 'reporte-marcas', component: ReporteVentasMarcasPageComponent, data: { title: 'Reporte de Ventas Por Marcas' } },
       { path: 'reporte-productos', component: ReporteVentasProductosPageComponent, data: { title: 'Reporte de Ventas Por Productos' } },
       { path: 'reporte-ganancias', component: ReporteGananciasPageComponent, data: { title: 'Dashboard de Ganancias' } },
+      { path: 'reporte-flujo-caja', component: ReporteFlujosCajaPageComponent, data: { title: 'Flujo de Caja' } },
+      { path: 'reporte-tendencia', component: ReporteTendenciaPageComponent, data: { title: 'Tendencia de Ventas' } },
     ]
   }
 ];

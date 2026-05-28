@@ -18,4 +18,6 @@ export class HistorialInventarioFisicoDTO {
     urlFotoUsuario: string;
     ajustado: boolean;
     fechaAjuste?: Date;
+    motivo: string;
+    nombreRegistro: string;
 }

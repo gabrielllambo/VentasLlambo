@@ -349,8 +349,8 @@ export class RegistroComprasPageComponent implements OnInit, OnDestroy {
 
     validarPeso(producto: any): void {
 
-        // Solo aplica para productos por PESO
-        if (producto.tipoMedida !== 1) {
+        // Solo aplica para productos por PESO (kg o libras)
+        if (producto.tipoMedida < 2) {
             return;
         }
 

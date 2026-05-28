@@ -13,31 +13,77 @@
 
                 <!-- Filtros en la parte superior -->
                 <div class="flex flex-col w-full mt-6 bg-card shadow rounded-2xl p-6">
-                    <div class="text-lg font-medium tracking-tight leading-6 truncate mb-4">Filtros de Búsqueda</div>
-                    <form class="flex flex-col sm:flex-row gap-4" [formGroup]="filtroForm">
-                        
-                        <!-- Fecha Inicio -->
-                        <mat-form-field class="w-full sm:w-1/3" [appearance]="'outline'">
-                            <mat-label>Fecha Inicio</mat-label>
-                            <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off"
-                                matInput [matDatepicker]="pickerInicio" [formControlName]="'fechaInicio'">
-                            <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
-                            <mat-datepicker #pickerInicio></mat-datepicker>
-                            <mat-error *ngIf="filtroForm.get('fechaInicio').hasError('required')">Fecha inicio es requerido</mat-error>
-                        </mat-form-field>
+                    <form [formGroup]="filtroForm">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
 
-                        <!-- Fecha Fin -->
-                        <mat-form-field class="w-full sm:w-1/3" [appearance]="'outline'">
-                            <mat-label>Fecha Fin</mat-label>
-                            <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off"
-                                matInput [matDatepicker]="pickerFin" [formControlName]="'fechaFin'">
-                            <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
-                            <mat-datepicker #pickerFin></mat-datepicker>
-                            <mat-error *ngIf="filtroForm.get('fechaFin').hasError('required')">Fecha fin es requerido</mat-error>
-                        </mat-form-field>
+                            <!-- Fecha Inicio -->
+                            <mat-form-field [appearance]="'outline'">
+                                <mat-label>Fecha Inicio</mat-label>
+                                <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off"
+                                    matInput [matDatepicker]="pickerInicio" [formControlName]="'fechaInicio'">
+                                <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                                <mat-datepicker #pickerInicio></mat-datepicker>
+                                <mat-error *ngIf="filtroForm.get('fechaInicio').hasError('required')">Fecha inicio es requerido</mat-error>
+                            </mat-form-field>
 
-                        <div class="flex items-center pt-2">
-                            <button class="w-full sm:w-auto h-12 px-6" mat-flat-button [color]="'primary'" (click)="getReporte(false)"
+                            <!-- Fecha Fin -->
+                            <mat-form-field [appearance]="'outline'">
+                                <mat-label>Fecha Fin</mat-label>
+                                <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off"
+                                    matInput [matDatepicker]="pickerFin" [formControlName]="'fechaFin'">
+                                <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                                <mat-datepicker #pickerFin></mat-datepicker>
+                                <mat-error *ngIf="filtroForm.get('fechaFin').hasError('required')">Fecha fin es requerido</mat-error>
+                            </mat-form-field>
+
+                            <!-- Categorías -->
+                            <mat-form-field [appearance]="'outline'">
+                                <mat-label>Categorías</mat-label>
+                                <mat-select [formControlName]="'categoria'" multiple #selectCategoriaItem>
+                                    <mat-select-trigger>
+                                        <ng-container *ngIf="selectCategoriaItem.value?.length > 0">
+                                            <span *ngFor="let cat of selectCategoriaItem.value; let i = index">
+                                                <span class="color-indicator" [style.backgroundColor]="cat?.color"></span>
+                                                {{ cat.nombre || '' }}<ng-container
+                                                    *ngIf="i < selectCategoriaItem.value.length - 1">, </ng-container>
+                                            </span>
+                                        </ng-container>
+                                    </mat-select-trigger>
+                                    <app-selectAll [model]="filtroForm.get('categoria')"
+                                        [values]="allCategoriaDataSource"></app-selectAll>
+                                    <mat-option *ngFor="let option of allCategoriaDataSource" [value]="option">
+                                        <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                                        {{ option.nombre }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <!-- Marcas -->
+                            <mat-form-field [appearance]="'outline'">
+                                <mat-label>Marcas</mat-label>
+                                <mat-select [formControlName]="'marca'" multiple #selectMarcaItem>
+                                    <mat-select-trigger>
+                                        <ng-container *ngIf="selectMarcaItem.value?.length > 0">
+                                            <span *ngFor="let marca of selectMarcaItem.value; let i = index">
+                                                <span class="color-indicator" [style.backgroundColor]="marca?.color"></span>
+                                                {{ marca.nombre || '' }}<ng-container
+                                                    *ngIf="i < selectMarcaItem.value.length - 1">, </ng-container>
+                                            </span>
+                                        </ng-container>
+                                    </mat-select-trigger>
+                                    <app-selectAll [model]="filtroForm.get('marca')"
+                                        [values]="allMarcasDataSource"></app-selectAll>
+                                    <mat-option *ngFor="let option of allMarcasDataSource" [value]="option">
+                                        <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                                        {{ option.nombre }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                        </div>
+
+                        <div class="flex justify-end mt-2">
+                            <button class="sm:w-40 sm:h-10" mat-flat-button [color]="'primary'" (click)="getReporte()"
                                 [disabled]="filtroForm.invalid || disabledBuscar">
                                 <mat-icon *ngIf="!disabledBuscar" class="icon-size-5" [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
                                 <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
@@ -161,8 +207,24 @@
                         <!-- Ganancia Estimada por Producto -->
                         <div
                             class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
-                            <div class="text-lg font-medium tracking-tight leading-6 truncate mb-2">
-                                Ganancia Estimada por Producto
+                            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+                                <div class="text-lg font-medium tracking-tight leading-6 truncate">
+                                    Ganancia Estimada por Producto
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-secondary italic" *ngIf="!productoSeleccionado">
+                                        Haz clic en una barra para ver el detalle
+                                    </span>
+                                    <div *ngIf="productoSeleccionado"
+                                        class="flex items-center gap-1 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-sm font-medium">
+                                        <mat-icon class="icon-size-4">bar_chart</mat-icon>
+                                        <span>{{ productoSeleccionado.nombre }}</span>
+                                        <button mat-icon-button class="icon-size-5 -mr-2" (click)="limpiarSeleccionGanancia()"
+                                            matTooltip="Quitar selección">
+                                            <mat-icon class="icon-size-4">close</mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="text-sm text-secondary mb-4">
                                 Comparación entre lo vendido y lo comprado por cada producto
@@ -176,7 +238,39 @@
                                 [tooltip]="chartGananciaProductos.tooltip"
                                 [xaxis]="chartGananciaProductos.xaxis"
                                 [yaxis]="chartGananciaProductos.yaxis"
+                                [states]="chartGananciaProductos.states"
                                 [noData]="chartGananciaProductos.noData"></apx-chart>
+
+                            <!-- Detalle del producto seleccionado -->
+                            <div *ngIf="productoSeleccionado"
+                                class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl border border-indigo-200 bg-indigo-50">
+                                <div class="flex flex-col items-center text-center">
+                                    <span class="text-xs text-secondary mb-1">Total Vendido</span>
+                                    <span class="text-lg font-bold text-green-600">
+                                        {{ currencyNumberFormat.format(productoSeleccionado.totalVendido) }}
+                                    </span>
+                                </div>
+                                <div class="flex flex-col items-center text-center">
+                                    <span class="text-xs text-secondary mb-1">Costo de Venta</span>
+                                    <span class="text-lg font-bold text-red-600">
+                                        {{ currencyNumberFormat.format(productoSeleccionado.totalCosto) }}
+                                    </span>
+                                </div>
+                                <div class="flex flex-col items-center text-center">
+                                    <span class="text-xs text-secondary mb-1">Ganancia Bruta</span>
+                                    <span class="text-lg font-bold"
+                                        [ngClass]="productoSeleccionado.ganancia >= 0 ? 'text-blue-600' : 'text-orange-600'">
+                                        {{ currencyNumberFormat.format(productoSeleccionado.ganancia) }}
+                                    </span>
+                                </div>
+                                <div class="flex flex-col items-center text-center">
+                                    <span class="text-xs text-secondary mb-1">Margen</span>
+                                    <span class="text-lg font-bold"
+                                        [ngClass]="productoSeleccionado.margen >= 0 ? 'text-purple-600' : 'text-red-600'">
+                                        {{ productoSeleccionado.margen | number: '1.1-1' }}%
+                                    </span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Top Productos Más Vendidos -->

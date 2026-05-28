@@ -114,6 +114,21 @@
             </div> -->
 
             <div class="w-full">
+                <!-- Tipo de medida -->
+                <mat-form-field class="w-full" appearance="outline">
+                    <mat-label>Tipo de medida</mat-label>
+                    <mat-select formControlName="tipoMedida" required>
+                        <mat-option [value]="2">Unidad</mat-option>
+                        <mat-option [value]="1">Peso (kg)</mat-option>
+                        <mat-option [value]="3">Peso (lb)</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="registroProductoForm.get('tipoMedida')?.hasError('required')">
+                        Tipo de medida es requerido
+                    </mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="w-full">
                 <!-- Descripción -->
                 <mat-form-field class="w-full" [appearance]="'outline'">
                     <mat-label>Descripción</mat-label>
@@ -279,6 +294,7 @@
                 <mat-select formControlName="tipoMedida" required>
                     <mat-option [value]="2">Unidad</mat-option>
                     <mat-option [value]="1">Peso (kg)</mat-option>
+                    <mat-option [value]="3">Peso (lb)</mat-option>
                 </mat-select>
 
                 <mat-error *ngIf="registroProductoForm.get('tipoMedida')?.hasError('required')">

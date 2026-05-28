@@ -11,6 +11,7 @@ import { MarcaDTO } from "../../marca/response/marca-dto.model";
     stock: number;
     urlFoto: string;
     cantidad: number;
+    tipoMedida?: number;
     categoria: CategoriaDTO;
     marca: MarcaDTO;
     fechaCaducidad: Date | null;

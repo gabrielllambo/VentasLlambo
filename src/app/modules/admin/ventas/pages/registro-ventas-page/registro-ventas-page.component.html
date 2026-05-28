@@ -24,6 +24,7 @@
                             <th class="p-2 text-sm font-semibold">Código</th>
                             <th class="p-2 text-sm font-semibold">Nombre</th>
                             <th class="p-2 text-sm font-semibold">Stock</th>
+                            <th class="p-2 text-sm font-semibold">Vencimiento</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -52,6 +53,17 @@
                         'bg-green-200 text-green-800 dark:bg-green-600 dark:text-green-50': producto?.stock > 5
                         }"> <span class="leading-relaxed whitespace-nowrap">{{producto?.stock}}</span>
                                 </span>
+                            </td>
+                            <td class="p-2 text-sm">
+                                <div *ngIf="producto.fechaCaducidadProxima; else noFechaVenc"
+                                     class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border"
+                                     [ngClass]="getSemaforoVencimiento(producto.fechaCaducidadProxima).clase">
+                                    <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 mr-1.5 rounded-full" [ngClass]="getSemaforoVencimiento(producto.fechaCaducidadProxima).dot"></span>
+                                    {{ producto.fechaCaducidadProxima | date:'dd/MM/yyyy' }}
+                                </div>
+                                <ng-template #noFechaVenc>
+                                    <span class="text-xs text-gray-400 font-medium">N/A</span>
+                                </ng-template>
                             </td>
                         </tr>
                     </tbody>
@@ -98,8 +110,15 @@
                                 Nombre
                             </th>
                             <td mat-cell *matCellDef="let producto" class="min-w-30">
-                                <span class="flex items-center">
+                                <span class="flex flex-col justify-center py-2">
                                     <span class="ml-3 break-words max-w-[150px]">{{producto.nombre}}</span>
+                                    <span class="ml-3 mt-1" *ngIf="producto.fechaCaducidadProxima">
+                                        <div class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border"
+                                             [ngClass]="getSemaforoVencimiento(producto.fechaCaducidadProxima).clase">
+                                            <span class="w-1.5 h-1.5 mr-1 rounded-full" [ngClass]="getSemaforoVencimiento(producto.fechaCaducidadProxima).dot"></span>
+                                            Vence: {{ producto.fechaCaducidadProxima | date:'dd/MM/yyyy' }}
+                                        </div>
+                                    </span>
                                 </span>
                             </td>
                         </ng-container>
@@ -127,12 +146,38 @@
                             <td mat-cell *matCellDef="let producto">
                             <div class="flex items-center space-x-1 pr-4">
                                 <span class="text-sm font-medium" style="color: #056DB6;">{{ monedaInfo.codigoMoneda === 'PEN' ? 'S/' : '$' }}</span>
-                                <input type="number" class="w-20 text-center border border-gray-300 rounded-md py-1 px-2 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                <input type="number" class="w-20 text-center border border-gray-200 rounded-md py-1 px-2 bg-gray-50 cursor-not-allowed text-gray-600"
                                     [(ngModel)]="producto.precioVenta" min="0" step="0.01"
-                                    (keydown)="bloquearCaracteresInvalidosPrecio($event)"
-                                    (input)="validarPrecio(producto)"
-                                    [disabled]="isCallingInsertService" />
+                                    disabled />
                             </div>
+                            </td>
+                        </ng-container>
+
+                        <!-- Descuento -->
+                        <ng-container matColumnDef="descuento">
+                            <th mat-header-cell *matHeaderCellDef class="text-center">Descuento</th>
+                            <td mat-cell *matCellDef="let producto" class="min-w-[140px] py-2">
+                                <ng-container *ngIf="producto.promocionId; else sinPromo">
+                                    <!-- Badge PROMO -->
+                                    <div class="flex items-center gap-1 mb-1 px-2 py-0.5 rounded-full bg-orange-100 border border-orange-300 text-orange-700 text-[10px] font-bold w-fit">
+                                        <mat-icon class="icon-size-3">local_offer</mat-icon>
+                                        PROMO
+                                    </div>
+                                    <!-- Porcentaje + ahorro -->
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-base font-bold text-green-600">{{ producto.descuentoPorcentaje }}%</span>
+                                        <span class="text-xs text-green-600 font-semibold whitespace-nowrap">
+                                            -{{ monedaInfo.codigoMoneda === 'PEN' ? 'S/' : '$' }}{{ (producto.precioVenta * producto.descuentoPorcentaje / 100) | number:'1.2-2' }}
+                                        </span>
+                                    </div>
+                                    <!-- Motivo -->
+                                    <div class="text-xs text-gray-500 italic truncate max-w-[135px] mt-0.5">
+                                        {{ producto.observacionDescuento }}
+                                    </div>
+                                </ng-container>
+                                <ng-template #sinPromo>
+                                    <span class="text-xs text-gray-400">Sin descuento</span>
+                                </ng-template>
                             </td>
                         </ng-container>
 
@@ -160,7 +205,7 @@
                                     </button>
                                 </div>
 
-                                <!-- PRODUCTO POR PESO -->
+                                <!-- PRODUCTO POR PESO (kg) -->
                                 <div *ngIf="producto.tipoMedida === 2" class="flex items-center space-x-2">
 
                                     <input type="number" class="w-24 text-center border rounded-md"
@@ -169,19 +214,35 @@
 
                                     <span class="text-xs text-gray-500">kg</span>
                                 </div>
+
+                                <!-- PRODUCTO POR LIBRAS -->
+                                <div *ngIf="producto.tipoMedida === 3" class="flex items-center space-x-2">
+
+                                    <input type="number" class="w-24 text-center border rounded-md"
+                                        [(ngModel)]="producto.cantidad" min="0.01" step="0.01"
+                                        (blur)="validarPeso(producto)" [disabled]="isCallingInsertService" />
+
+                                    <span class="text-xs text-gray-500">lb</span>
+                                </div>
                             </td>
                         </ng-container>
 
                         <!-- Total -->
                         <ng-container matColumnDef="total">
-                            <th mat-header-cell mat-sort-header *matHeaderCellDef>
-                                Total
-                            </th>
+                            <th mat-header-cell mat-sort-header *matHeaderCellDef>Total</th>
                             <td mat-cell *matCellDef="let producto">
-                                <span style="color: #056DB6;" class="pr-6 w-auto h-auto rounded-full">
-                                    {{ calcularTotalProducto(producto) | currency: monedaInfo.codigoMoneda:'code':'':
-                                    monedaInfo.cultureInfo }}
-                                </span>
+                                <div class="flex flex-col pr-4">
+                                    <!-- Precio original tachado (solo si hay descuento) -->
+                                    <span *ngIf="producto.aplicarDescuento && producto.descuentoPorcentaje > 0"
+                                          class="text-xs text-gray-400 line-through">
+                                        {{ (producto.cantidad * producto.precioVenta) | currency: monedaInfo.codigoMoneda:'code':'': monedaInfo.cultureInfo }}
+                                    </span>
+                                    <!-- Precio con descuento -->
+                                    <span [style.color]="producto.aplicarDescuento && producto.descuentoPorcentaje > 0 ? '#16a34a' : '#056DB6'"
+                                          class="font-semibold">
+                                        {{ calcularTotalProducto(producto) | currency: monedaInfo.codigoMoneda:'code':'': monedaInfo.cultureInfo }}
+                                    </span>
+                                </div>
                             </td>
                         </ng-container>
                         <!-- Acciones -->
@@ -228,6 +289,14 @@
                         }">
                                 Stock: {{ producto.stock }}
                             </p>
+                            <!-- Vencimiento -->
+                            <div class="mt-2" *ngIf="producto.fechaCaducidadProxima">
+                                <div class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border"
+                                     [ngClass]="getSemaforoVencimiento(producto.fechaCaducidadProxima).clase">
+                                    <span class="w-1.5 h-1.5 mr-1 rounded-full" [ngClass]="getSemaforoVencimiento(producto.fechaCaducidadProxima).dot"></span>
+                                    {{ producto.fechaCaducidadProxima | date:'dd/MM/yyyy' }}
+                                </div>
+                            </div>
                             <!-- Botón Agregar -->
                             <button [disabled]="isCallingInsertService" (click)="seleccionarProducto(producto)"
                                 class="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl shadow hover:bg-blue-700 transition-colors">

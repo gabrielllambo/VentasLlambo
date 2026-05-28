@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subject, forkJoin } from 'rxjs';
 import { DictionaryErrors } from 'app/core/resource/dictionaryError.constants';
 import { DictionaryInfo, Flags, ImagenesUrl, Numeracion } from 'app/core/resource/dictionary.constants';
@@ -6,7 +6,6 @@ import { InventarioService } from 'app/core/services/inventario/inventario.servi
 import { SecurityService } from 'app/core/auth/auth.service';
 import { ToolService } from 'app/core/services/tool/tool.service';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { MatDrawer } from '@angular/material/sidenav';
 import { MatSelect } from '@angular/material/select';
 import { DecodedToken } from 'app/core/models/auth/response/decode-token-dto.model';
 import { MonedaDTO } from 'app/core/models/parametro/moneda-dto.model';
@@ -26,7 +25,6 @@ import { ReportePerdidasResumenDTO } from 'app/core/models/inventario/inventario
 })
 export class ReportePerdidasPageComponent implements OnInit, OnDestroy {
 
-    @ViewChild('matDrawer') matDrawer!: MatDrawer;
     @ViewChild('selectCategoriaItem') selectCategorias!: MatSelect;
     @ViewChild('selectMarcaItem') selectMarcas!: MatSelect;
     @ViewChild('selectProductoItem') selectProductos!: MatSelect;
@@ -66,18 +64,29 @@ export class ReportePerdidasPageComponent implements OnInit, OnDestroy {
         'diferencia', 'valorPerdida', 'usuario', 'fecha', 'estado'
     ];
 
+    public productoFiltro: string | null = null;
+    private _topProductosNombres: string[] = [];
+
     constructor(
         private _securityService: SecurityService,
         private _formBuilder: UntypedFormBuilder,
         private _toolService: ToolService,
         private _inventarioService: InventarioService,
+        private _ngZone: NgZone,
     ) { }
+
+    get historialFiltrado() {
+        if (!this.productoFiltro || !this.reporteData?.lstHistorial) return this.reporteData?.lstHistorial ?? [];
+        return this.reporteData.lstHistorial.filter(r => r.nombreProducto === this.productoFiltro);
+    }
+
+    limpiarFiltro() { this.productoFiltro = null; }
 
     ngOnInit(): void {
         this.formFiltros();
         this.getFilterComboConsulta();
         this.showSkeleton();
-        this.getReporte(Flags.False);
+        this.getReporte();
     }
 
     formFiltros() {
@@ -119,7 +128,7 @@ export class ReportePerdidasPageComponent implements OnInit, OnDestroy {
         });
     }
 
-    getReporte(hideFilter: boolean) {
+    getReporte() {
         this.showSkeleton();
         const request = this.construirRequest();
         this.disabledBuscar = Flags.True;
@@ -131,13 +140,11 @@ export class ReportePerdidasPageComponent implements OnInit, OnDestroy {
                 this.getFechaFiltroCadena();
                 this.generateCharts();
                 this.hideSkeleton();
-                if (hideFilter) { this.closedDrawer(); }
             },
             error: () => {
                 this._toolService.showError(DictionaryErrors.Transaction, DictionaryErrors.Tittle);
                 this.disabledBuscar = Flags.False;
                 this.hideSkeleton();
-                if (hideFilter) { this.closedDrawer(); }
             },
         });
     }
@@ -149,10 +156,22 @@ export class ReportePerdidasPageComponent implements OnInit, OnDestroy {
     }
 
     generarChartTopPerdidas() {
+        const self = this;
         const top = this.reporteData.topProductosPerdidas;
+        this._topProductosNombres = top.productos ?? [];
         this.chartTopPerdidas = {
             series: [{ name: 'Unidades Perdidas', data: top.cantidadesPerdidas }],
-            chart: { type: 'bar', height: 350, toolbar: { show: false } },
+            chart: {
+                type: 'bar', height: 260, toolbar: { show: false },
+                events: {
+                    dataPointSelection: (_e: any, _ctx: any, config: any) => {
+                        self._ngZone.run(() => {
+                            const nombre = self._topProductosNombres[config.dataPointIndex] ?? null;
+                            self.productoFiltro = self.productoFiltro === nombre ? null : nombre;
+                        });
+                    },
+                },
+            },
             plotOptions: {
                 bar: { barHeight: '100%', distributed: true, horizontal: true, dataLabels: { position: 'top' } },
             },
@@ -168,6 +187,7 @@ export class ReportePerdidasPageComponent implements OnInit, OnDestroy {
             stroke: { width: 1, colors: ['#fff'] },
             tooltip: { enabled: true, y: { formatter: (val: number) => `${val} unidades perdidas` } },
             xaxis: { categories: top.productos, labels: { show: false } },
+            states: { active: { filter: { type: 'darken', value: 0.75 } } },
             noData: {
                 text: 'Sin pérdidas en el período',
                 align: 'center',
@@ -187,7 +207,7 @@ export class ReportePerdidasPageComponent implements OnInit, OnDestroy {
                 { name: 'Unidades Perdidas', data: evolucion.cantidadesPerdidas },
                 { name: 'Valor Perdido', data: evolucion.valoresPerdidos },
             ],
-            chart: { height: 350, type: 'line', zoom: { enabled: false }, toolbar: { show: false }, animations: { enabled: false } },
+            chart: { height: 260, type: 'line', zoom: { enabled: false }, toolbar: { show: false }, animations: { enabled: false } },
             colors: ['#EF4444', '#F97316'],
             stroke: { show: true, width: 2, curve: 'smooth' },
             dataLabels: { enabled: false },
@@ -227,7 +247,7 @@ export class ReportePerdidasPageComponent implements OnInit, OnDestroy {
         const totalPerdido = distribucion.valoresPerdidosCategorias.reduce((a, b) => a + b, 0);
 
         this.chartDistribucionCategoria = {
-            chart: { type: 'donut', fontFamily: 'inherit', foreColor: 'inherit', height: '95%' },
+            chart: { type: 'donut', fontFamily: 'inherit', foreColor: 'inherit', height: 260 },
             labels: distribucion.nombreCategorias,
             series: distribucion.valoresPerdidosCategorias,
             colors: distribucion.coloresCategorias?.length ? distribucion.coloresCategorias : undefined,
@@ -304,7 +324,6 @@ export class ReportePerdidasPageComponent implements OnInit, OnDestroy {
         return this.reporteData?.lstHistorial?.length > Numeracion.Cero;
     }
 
-    closedDrawer() { this.matDrawer.close(); }
     showSkeleton() { this.skeleton = Flags.Show; }
     hideSkeleton() { this.skeleton = Flags.Hide; }
     isMobilSize(): boolean { return this._toolService.isMobilSize(); }

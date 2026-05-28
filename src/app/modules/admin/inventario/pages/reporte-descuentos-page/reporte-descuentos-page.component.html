@@ -1,0 +1,150 @@
+<div class="flex flex-col flex-auto w-full">
+    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+        <div class="flex flex-col w-full mb-6">
+            <h2 class="text-2xl font-semibold tracking-tight leading-8">Impacto de Promociones y Descuentos</h2>
+            <div class="font-medium tracking-tight text-secondary">Análisis de las promociones registradas en el sistema</div>
+        </div>
+
+        <ng-container *ngIf="skeleton">
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div *ngFor="let i of [1,2,3,4]" class="h-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl"></div>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="!skeleton">
+
+            <!-- Cards -->
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40">
+                            <mat-icon class="text-purple-600">local_offer</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight">{{ totalPromociones }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Total promociones</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40">
+                            <mat-icon class="text-green-600">check_circle</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight text-green-600">{{ activasHoy }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Activas hoy</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/40">
+                            <mat-icon class="text-indigo-600">percent</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight">{{ descuentoPromedio.toFixed(1) }}%</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Descuento promedio</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40">
+                            <mat-icon class="text-blue-600">inventory_2</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight">{{ totalProductosEnPromo }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Productos en promo activa</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sin promociones -->
+            <ng-container *ngIf="promociones.length === 0">
+                <div class="w-full p-12 bg-card shadow rounded-2xl flex flex-col items-center justify-center text-center">
+                    <mat-icon class="text-gray-400 mb-4" style="font-size:64px;width:64px;height:64px">local_offer</mat-icon>
+                    <h3 class="text-xl font-semibold text-secondary mb-2">Sin promociones registradas</h3>
+                    <p class="text-secondary">Crea tus primeras promociones en la sección <strong>Inventario → Promociones</strong>.</p>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="promociones.length > 0">
+                <!-- Gráfico -->
+                <div class="w-full p-6 bg-card shadow rounded-2xl mb-6">
+                    <div class="text-lg font-semibold mb-2">Descuentos por Promoción (%)</div>
+                    <apx-chart
+                        [series]="chartDescuentos.series"
+                        [chart]="chartDescuentos.chart"
+                        [plotOptions]="chartDescuentos.plotOptions"
+                        [colors]="chartDescuentos.colors"
+                        [dataLabels]="chartDescuentos.dataLabels"
+                        [xaxis]="chartDescuentos.xaxis"
+                        [tooltip]="chartDescuentos.tooltip"
+                        [noData]="chartDescuentos.noData">
+                    </apx-chart>
+                </div>
+
+                <!-- Filtro de estado -->
+                <div class="w-full mb-4 flex gap-2 flex-wrap">
+                    <button *ngFor="let opt of [['todos','Todas'],['activa','Activas'],['pendiente','Pendientes'],['vencida','Vencidas'],['inactiva','Inactivas']]"
+                        mat-stroked-button [color]="filtroEstado === opt[0] ? 'primary' : ''" (click)="setFiltro(opt[0])">
+                        {{ opt[1] }}
+                    </button>
+                </div>
+
+                <!-- Lista de promociones -->
+                <div class="w-full space-y-4">
+                    <div *ngFor="let promo of promocionesFiltradas"
+                        class="bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="flex items-center gap-4 p-5 cursor-pointer" (click)="toggleExpand(promo.id)">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40">
+                                <mat-icon class="text-purple-600">local_offer</mat-icon>
+                            </div>
+                            <div class="flex-auto min-w-0">
+                                <div class="font-semibold text-base">{{ promo.motivo }}</div>
+                                <div class="text-sm text-secondary mt-0.5">
+                                    {{ formatFecha(promo.fechaInicio) }} — {{ formatFecha(promo.fechaFin) }} · {{ promo.productos.length }} productos
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 shrink-0">
+                                <span class="text-2xl font-bold text-purple-600">{{ promo.descuentoPorcentaje }}%</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                    [ngClass]="getEstadoBadge(promo.estado)">{{ getEstadoLabel(promo.estado) }}</span>
+                                <mat-icon class="text-secondary transition-transform"
+                                    [ngClass]="expandedId === promo.id ? 'rotate-180' : ''">expand_more</mat-icon>
+                            </div>
+                        </div>
+
+                        <!-- Detalle expandido -->
+                        <div *ngIf="expandedId === promo.id" class="border-t px-5 pb-5 pt-4">
+                            <div class="text-sm font-semibold text-secondary mb-3">Productos incluidos</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                <div *ngFor="let pp of promo.productosConPrecio"
+                                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                                    <span class="text-sm font-medium truncate mr-2">{{ pp.nombre }}</span>
+                                    <div class="text-right shrink-0">
+                                        <div class="text-xs text-secondary line-through">{{ formatCurrency(pp.precioOriginal) }}</div>
+                                        <div class="text-sm font-bold text-green-600">{{ formatCurrency(pp.precioConDescuento) }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                                <span class="text-sm font-medium text-purple-700 dark:text-purple-300">
+                                    Ahorro por unidad estimado: <strong>{{ formatCurrency(promo.ahorroEstimado) }}</strong>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="promocionesFiltradas.length === 0"
+                        class="p-8 text-center text-secondary bg-card shadow rounded-2xl">
+                        Sin promociones con el estado seleccionado
+                    </div>
+                </div>
+            </ng-container>
+        </ng-container>
+    </div>
+</div>

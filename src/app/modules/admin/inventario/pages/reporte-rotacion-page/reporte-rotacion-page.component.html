@@ -1,0 +1,158 @@
+<div class="flex flex-col flex-auto w-full">
+    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+        <div class="flex flex-col w-full mb-6">
+            <h2 class="text-2xl font-semibold tracking-tight leading-8">Rotación de Inventario</h2>
+            <div class="font-medium tracking-tight text-secondary" *ngIf="filtroRangoFecha">{{ filtroRangoFecha }}</div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="w-full mb-6 p-6 bg-card shadow rounded-2xl">
+            <form [formGroup]="filtroForm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <mat-form-field [appearance]="'outline'">
+                        <mat-label>Fecha Inicio</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerI.open()" autocomplete="off"
+                            matInput [matDatepicker]="pickerI" formControlName="fechaInicio">
+                        <mat-datepicker-toggle matSuffix [for]="pickerI"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerI></mat-datepicker>
+                    </mat-form-field>
+                    <mat-form-field [appearance]="'outline'">
+                        <mat-label>Fecha Fin</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerF.open()" autocomplete="off"
+                            matInput [matDatepicker]="pickerF" formControlName="fechaFin">
+                        <mat-datepicker-toggle matSuffix [for]="pickerF"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerF></mat-datepicker>
+                    </mat-form-field>
+                    <button mat-flat-button color="primary" [disabled]="disabledBuscar" (click)="buscar()">
+                        <mat-icon class="mr-1">search</mat-icon> Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <ng-container *ngIf="skeleton">
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div *ngFor="let i of [1,2,3,4]" class="h-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl"></div>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="!skeleton">
+            <!-- Cards clickeables -->
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden cursor-pointer ring-2 transition-all"
+                    [ngClass]="filtroClasif === 'alta' ? 'ring-green-500' : 'ring-transparent hover:ring-green-300'"
+                    (click)="setFiltroClasif(filtroClasif === 'alta' ? 'todos' : 'alta')">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40">
+                            <mat-icon class="text-green-600">rocket_launch</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight text-green-600">{{ totalAlta }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Rotación alta</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden cursor-pointer ring-2 transition-all"
+                    [ngClass]="filtroClasif === 'media' ? 'ring-blue-500' : 'ring-transparent hover:ring-blue-300'"
+                    (click)="setFiltroClasif(filtroClasif === 'media' ? 'todos' : 'media')">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40">
+                            <mat-icon class="text-blue-600">trending_flat</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight text-blue-600">{{ totalMedia }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Rotación media</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden cursor-pointer ring-2 transition-all"
+                    [ngClass]="filtroClasif === 'baja' ? 'ring-yellow-500' : 'ring-transparent hover:ring-yellow-300'"
+                    (click)="setFiltroClasif(filtroClasif === 'baja' ? 'todos' : 'baja')">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/40">
+                            <mat-icon class="text-yellow-600">trending_down</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight text-yellow-600">{{ totalBaja }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Rotación baja</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden cursor-pointer ring-2 transition-all"
+                    [ngClass]="filtroClasif === 'muerto' ? 'ring-red-500' : 'ring-transparent hover:ring-red-300'"
+                    (click)="setFiltroClasif(filtroClasif === 'muerto' ? 'todos' : 'muerto')">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40">
+                            <mat-icon class="text-red-600">block</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight text-red-600">{{ totalMuerto }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Inventario muerto</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="w-full p-6 bg-card shadow rounded-2xl mb-6">
+                <div class="text-lg font-semibold mb-2">Top 10 Mayor Rotación</div>
+                <apx-chart
+                    [series]="chartRotacion.series"
+                    [chart]="chartRotacion.chart"
+                    [plotOptions]="chartRotacion.plotOptions"
+                    [colors]="chartRotacion.colors"
+                    [dataLabels]="chartRotacion.dataLabels"
+                    [xaxis]="chartRotacion.xaxis"
+                    [tooltip]="chartRotacion.tooltip"
+                    [noData]="chartRotacion.noData">
+                </apx-chart>
+            </div>
+
+            <!-- Tabla -->
+            <div class="w-full bg-card shadow rounded-2xl overflow-hidden">
+                <div class="flex items-center px-6 py-4 border-b">
+                    <mat-icon class="text-indigo-600 mr-2">table_chart</mat-icon>
+                    <span class="font-semibold text-lg">Productos</span>
+                    <span class="ml-2 text-secondary text-sm">({{ productosFiltrados.length }})</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table mat-table [dataSource]="productosFiltrados" class="w-full">
+                        <ng-container matColumnDef="nombre">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Producto</th>
+                            <td mat-cell *matCellDef="let p" class="font-medium">{{ p.nombre }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="categoria">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Categoría</th>
+                            <td mat-cell *matCellDef="let p">{{ p.categoria }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="stockActual">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Stock</th>
+                            <td mat-cell *matCellDef="let p" class="text-right">{{ p.stockActual }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="totalVendido">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Vendido ($)</th>
+                            <td mat-cell *matCellDef="let p" class="text-right">{{ formatCurrency(p.totalVendido) }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="rotacion">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Rotación</th>
+                            <td mat-cell *matCellDef="let p" class="text-right font-bold">{{ p.rotacion.toFixed(2) }}x</td>
+                        </ng-container>
+                        <ng-container matColumnDef="clasificacion">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Clasificación</th>
+                            <td mat-cell *matCellDef="let p" class="text-center">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                    [ngClass]="getClasifBadge(p.clasificacion)">{{ getClasifLabel(p.clasificacion) }}</span>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="columnas; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell text-center py-8 text-secondary" [attr.colspan]="columnas.length">Sin productos</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</div>

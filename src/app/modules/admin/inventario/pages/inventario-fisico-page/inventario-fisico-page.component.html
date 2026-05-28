@@ -1,102 +1,857 @@
 <div class="flex flex-col flex-auto w-full h-full">
-    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
-                
-                <div class="flex items-center justify-between w-full">
-                    <div class="flex-1 min-w-0">
-                        <h2 class="text-2xl font-semibold tracking-tight leading-8">Toma Física de Inventario</h2>
-                        <div class="flex items-center font-medium">
-                            <a class="text-primary-500">Inventario</a>
-                            <mat-icon class="icon-size-5 text-secondary" [svgIcon]="'heroicons_mini:chevron-right'"></mat-icon>
-                            <span class="text-secondary">Conteo Físico</span>
-                        </div>
-                    </div>
+  <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
 
-                    <div class="flex items-center ml-6">
-                        <button mat-flat-button [color]="'accent'" (click)="exportarReporte()" [disabled]="dataSource.data.length === 0">
-                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:document-arrow-down'"></mat-icon>
-                            <span class="ml-2">Exportar Reporte</span>
-                        </button>
-                    </div>
-                </div>
+    <!-- ════════════ CABECERA ════════════ -->
+    <div class="flex items-center justify-between w-full mb-4">
+      <div>
+        <h2 class="text-2xl font-semibold tracking-tight leading-8">Toma Física de Inventario</h2>
+        <div class="flex items-center font-medium text-sm">
+          <a class="text-primary-500">Inventario</a>
+          <mat-icon class="icon-size-4 text-secondary" [svgIcon]="'heroicons_mini:chevron-right'"></mat-icon>
+          <span class="text-secondary">Conteo Físico</span>
+        </div>
+      </div>
+    </div>
 
-                <!-- Sección del filtro en la parte superior -->
-                <div class="w-full mt-6 bg-card shadow rounded-2xl p-6 dark:bg-transparent">
-                    <div class="text-lg font-semibold tracking-tight mb-4">Filtros de Conteo</div>
-                    <form class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full" [formGroup]="filtroInventarioForm">
-                        <mat-form-field class="w-full sm:flex-1" [appearance]="'outline'">
-                            <mat-label>Buscar Producto / Lote</mat-label>
-                            <input matInput formControlName="terminoBusqueda" placeholder="Ej: Agua Mineral o Lote 001" autocomplete="off">
-                        </mat-form-field>
+    <!-- ════════════ TABS ════════════ -->
+    <mat-tab-group class="w-full" animationDuration="200ms" [selectedIndex]="tabActual" (selectedIndexChange)="onTabChange($event)">
 
-                        <button mat-flat-button [color]="'primary'" (click)="btnBuscar()" class="w-full sm:w-auto mb-4 sm:mb-5 px-8">
-                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
-                            <span class="ml-2">Buscar para contar</span>
-                        </button>
-                    </form>
-                </div>
+      <!-- ══════════════════════════════════════════════════════════════
+           TAB 1 — NUEVA TOMA
+      ══════════════════════════════════════════════════════════════ -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+          Nueva Toma
+        </ng-template>
 
-                <div class="w-full mt-6">
-                    <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden">
-                        <div class="overflow-x-auto mx-6 mt-4">
-                            <table class="w-full bg-transparent mb-3" mat-table [dataSource]="dataSource">
+        <div class="pt-4">
 
-                                <ng-container matColumnDef="producto">
-                                    <th mat-header-cell *matHeaderCellDef> Producto / Lote </th>
-                                    <td mat-cell *matCellDef="let item">
-                                        <div class="flex flex-col">
-                                            <span class="font-semibold text-gray-700">{{item.nombreProducto}}</span>
-                                            <span class="text-xs text-secondary">Lote: {{item.codigoLote}}</span>
-                                        </div>
-                                    </td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="stockSistema">
-                                    <th mat-header-cell *matHeaderCellDef> Stock Sistema </th>
-                                    <td mat-cell *matCellDef="let item" class="text-blue-600 font-medium">
-                                        {{item.cantidadSistema | number:'1.2-2'}}
-                                    </td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="cantidadFisica">
-                                    <th mat-header-cell *matHeaderCellDef> Cantidad Contada </th>
-                                    <td mat-cell *matCellDef="let item">
-                                        <mat-form-field class="w-32 mt-4" [appearance]="'outline'">
-                                            <input matInput type="number" [(ngModel)]="item.cantidadFisica" (input)="calcularDiferencia(item)">
-                                        </mat-form-field>
-                                    </td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="diferencia">
-                                    <th mat-header-cell *matHeaderCellDef> Diferencia </th>
-                                    <td mat-cell *matCellDef="let item" [ngClass]="item.diferencia < 0 ? 'text-red-500' : 'text-green-500'">
-                                        {{item.diferencia | number:'1.2-2'}}
-                                    </td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="observacion">
-                                    <th mat-header-cell *matHeaderCellDef> Motivo / Observación </th>
-                                    <td mat-cell *matCellDef="let item">
-                                        <mat-form-field class="w-48 mt-4" [appearance]="'outline'">
-                                            <input matInput type="text" [(ngModel)]="item.observacion" placeholder="Ej: Pérdida, dañado...">
-                                        </mat-form-field>
-                                    </td>
-                                </ng-container>
-
-                                <ng-container matColumnDef="acciones">
-                                    <th mat-header-cell *matHeaderCellDef> </th>
-                                    <td mat-cell *matCellDef="let item">
-                                        <button mat-icon-button (click)="guardarBorrador(item)" matTooltip="Guardar Conteo">
-                                            <mat-icon class="text-primary" [svgIcon]="'heroicons_solid:arrow-path'"></mat-icon>
-                                        </button>
-                                    </td>
-                                </ng-container>
-
-                                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
+          <!-- Indicador de pasos -->
+          <div class="flex justify-center mb-6">
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1.5">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                     [ngClass]="paso >= 1 ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-500'">1</div>
+                <span class="text-xs hidden sm:inline" [ngClass]="paso === 1 ? 'font-semibold text-primary-600' : 'text-gray-400'">Registro</span>
+              </div>
+              <div class="w-8 h-0.5" [ngClass]="paso >= 2 ? 'bg-primary-400' : 'bg-gray-200'"></div>
+              <div class="flex items-center gap-1.5">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                     [ngClass]="paso >= 2 ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-500'">2</div>
+                <span class="text-xs hidden sm:inline" [ngClass]="paso === 2 ? 'font-semibold text-primary-600' : 'text-gray-400'">Filtros</span>
+              </div>
+              <div class="w-8 h-0.5" [ngClass]="paso >= 3 ? 'bg-primary-400' : 'bg-gray-200'"></div>
+              <div class="flex items-center gap-1.5">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                     [ngClass]="paso >= 3 ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-500'">3</div>
+                <span class="text-xs hidden sm:inline" [ngClass]="paso === 3 ? 'font-semibold text-primary-600' : 'text-gray-400'">Conteo</span>
+              </div>
             </div>
+          </div>
+
+          <!-- ── PASO 1 — MAESTRO ── -->
+          <ng-container *ngIf="paso === 1">
+            <div class="flex justify-center">
+              <div class="w-full max-w-lg bg-card shadow rounded-2xl p-8 dark:bg-transparent">
+                <div class="flex items-center gap-3 mb-6">
+                  <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                    <mat-icon class="text-primary-600" [svgIcon]="'heroicons_outline:clipboard-document-list'"></mat-icon>
+                  </div>
+                  <div>
+                    <div class="text-lg font-semibold">Nueva Toma Física</div>
+                    <div class="text-sm text-secondary">Ingresa el nombre y la fecha del conteo</div>
+                  </div>
+                </div>
+
+                <form [formGroup]="maestroForm" class="flex flex-col gap-4">
+                  <mat-form-field [appearance]="'outline'" class="w-full">
+                    <mat-label>Nombre del registro</mat-label>
+                    <input matInput formControlName="motivoTomaFisica"
+                           placeholder="Ej: Conteo mensual, revisión de vencidos..." autocomplete="off">
+                    <mat-error>El nombre es obligatorio</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field [appearance]="'outline'" class="w-full">
+                    <mat-label>Fecha de la Toma Física</mat-label>
+                    <input matInput [matDatepicker]="pickerMaestro" formControlName="fechaTomaFisica"
+                           [min]="minDate" [max]="maxDate" (click)="pickerMaestro.open()" autocomplete="off">
+                    <mat-datepicker-toggle matSuffix [for]="pickerMaestro"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerMaestro></mat-datepicker>
+                    <mat-error>La fecha es obligatoria</mat-error>
+                  </mat-form-field>
+
+                  <button mat-flat-button [color]="'primary'" class="w-full mt-2" (click)="crearRegistro()">
+                    <span>Crear Registro</span>
+                    <mat-icon class="icon-size-5 ml-2" [svgIcon]="'heroicons_solid:arrow-right'"></mat-icon>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- ── PASO 2 — FILTROS ── -->
+          <ng-container *ngIf="paso === 2">
+            <!-- Banner maestro -->
+            <div class="bg-primary-50 dark:bg-primary-900 border border-primary-200 rounded-2xl px-5 py-3 flex flex-wrap items-center gap-3 mb-4">
+              <mat-icon class="text-primary-500" [svgIcon]="'heroicons_outline:clipboard-document-check'"></mat-icon>
+              <span class="text-sm text-primary-700 dark:text-primary-300 flex-1">
+                <strong>{{ maestroData.fecha | date:'dd/MM/yyyy' }}</strong> — {{ maestroData.motivo }}
+              </span>
+              <button mat-stroked-button class="text-xs" (click)="volver()">
+                <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_mini:pencil'"></mat-icon> Editar
+              </button>
+            </div>
+
+            <div class="bg-card shadow rounded-2xl p-6 dark:bg-transparent">
+              <div class="text-lg font-semibold mb-1">
+                {{ modoAgregarProductos ? 'Agregar más productos' : 'Configurar el Conteo' }}
+              </div>
+              <div class="text-sm text-secondary mb-5">
+                {{ modoAgregarProductos ? 'Filtra por categoría para agregar más lotes al conteo actual' : 'Filtra opcionalmente por vencimiento y/o categorías. Sin filtros se muestran todos los lotes con stock.' }}
+              </div>
+
+              <!-- Banner fechas ya seleccionadas (solo en modo agregar) -->
+              <div *ngIf="modoAgregarProductos" class="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 rounded-xl px-4 py-3 mb-4 text-sm text-blue-700 dark:text-blue-300">
+                <mat-icon class="icon-size-4 flex-shrink-0" [svgIcon]="'heroicons_mini:calendar'"></mat-icon>
+                <span>
+                  Fecha de compra:
+                  <strong>{{ filtroForm.get('fechaVencimientoInicio').value | date:'dd/MM/yyyy' }}</strong>
+                  —
+                  <strong>{{ filtroForm.get('fechaVencimientoFin').value | date:'dd/MM/yyyy' }}</strong>
+                </span>
+              </div>
+
+              <form [formGroup]="filtroForm" class="flex flex-col gap-4">
+                <div *ngIf="!modoAgregarProductos" class="flex flex-col sm:flex-row gap-4">
+                  <mat-form-field [appearance]="'outline'" class="w-full sm:flex-1">
+                    <mat-label>Compra Desde</mat-label>
+                    <input matInput [matDatepicker]="pickerInicio" formControlName="fechaVencimientoInicio"
+                           [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off">
+                    <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerInicio></mat-datepicker>
+                  </mat-form-field>
+                  <mat-form-field [appearance]="'outline'" class="w-full sm:flex-1">
+                    <mat-label>Compra Hasta</mat-label>
+                    <input matInput [matDatepicker]="pickerFin" formControlName="fechaVencimientoFin"
+                           [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off">
+                    <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerFin></mat-datepicker>
+                  </mat-form-field>
+                </div>
+
+                <mat-form-field [appearance]="'outline'" class="w-full">
+                  <mat-label>Categorías de Productos</mat-label>
+                  <mat-select formControlName="categorias" multiple #selectCategoriasToma>
+                    <mat-select-trigger>
+                      <ng-container *ngIf="selectCategoriasToma.value?.length > 0; else todasCats">
+                        <span *ngFor="let cat of selectCategoriasToma.value; let i = index">
+                          {{ cat.nombre }}<ng-container *ngIf="i < selectCategoriasToma.value.length - 1">, </ng-container>
+                        </span>
+                      </ng-container>
+                      <ng-template #todasCats><span class="text-secondary">Todas las categorías</span></ng-template>
+                    </mat-select-trigger>
+                    <mat-option *ngFor="let cat of allCategorias" [value]="cat">
+                      <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full" [style.background]="cat.color || '#6366f1'"></span>
+                        {{ cat.nombre }}
+                      </div>
+                    </mat-option>
+                  </mat-select>
+                  <mat-hint>Deja vacío para incluir todas las categorías</mat-hint>
+                </mat-form-field>
+
+                <div class="flex justify-between gap-3 mt-2">
+                  <button mat-stroked-button (click)="volver()">
+                    <mat-icon class="icon-size-5 mr-1" [svgIcon]="'heroicons_solid:arrow-left'"></mat-icon>
+                    {{ modoAgregarProductos ? 'Volver al conteo' : 'Volver' }}
+                  </button>
+                  <button mat-flat-button [color]="'primary'" (click)="buscarLotes()" [disabled]="skeleton" class="px-8">
+                    <mat-progress-spinner *ngIf="skeleton" [diameter]="18" mode="indeterminate" class="mr-2"></mat-progress-spinner>
+                    <mat-icon *ngIf="!skeleton" class="icon-size-5 mr-1" [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                    {{ skeleton ? 'Buscando...' : 'Buscar Lotes' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </ng-container>
+
+          <!-- ── PASO 3 — TABLA CONTEO ── -->
+          <ng-container *ngIf="paso === 3">
+            <!-- Barra de acciones -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <button mat-stroked-button (click)="volver()">
+                <mat-icon class="icon-size-5 mr-1" [svgIcon]="'heroicons_solid:arrow-left'"></mat-icon>
+                {{ esContinuacion ? 'Volver a Registros' : 'Cambiar filtros' }}
+              </button>
+              <div class="flex gap-2 flex-wrap">
+                <button mat-stroked-button (click)="exportarReporte()" [disabled]="dataSource.data.length === 0">
+                  <mat-icon class="icon-size-5 mr-1" [svgIcon]="'heroicons_outline:document-arrow-down'"></mat-icon>Exportar
+                </button>
+                <button mat-flat-button [color]="'primary'" (click)="onFinalizarAjuste()" [disabled]="itemsGuardados === 0">
+                  <mat-icon class="icon-size-5 mr-1" [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>Finalizar Ajuste
+                </button>
+              </div>
+            </div>
+
+            <!-- Banner maestro -->
+            <div class="bg-primary-50 dark:bg-primary-900 border border-primary-200 rounded-2xl px-5 py-3 flex flex-wrap items-center gap-3 mb-4 text-sm">
+              <mat-icon class="icon-size-4 text-primary-500" [svgIcon]="'heroicons_mini:information-circle'"></mat-icon>
+              <span class="text-primary-700 dark:text-primary-300">
+                <strong>{{ maestroData.fecha | date:'dd/MM/yyyy' }}</strong> — {{ maestroData.motivo }}
+              </span>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid gap-3 mb-4"
+                 [ngClass]="itemsYaAjustados > 0 ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-4'">
+              <div class="bg-card shadow rounded-xl p-4 text-center dark:bg-transparent">
+                <div class="text-2xl font-bold text-gray-700">{{ totalItems }}</div>
+                <div class="text-xs text-secondary mt-1">Pendientes</div>
+              </div>
+              <div class="bg-card shadow rounded-xl p-4 text-center dark:bg-transparent">
+                <div class="text-2xl font-bold text-green-600">{{ itemsGuardados }}</div>
+                <div class="text-xs text-secondary mt-1">Guardados</div>
+              </div>
+              <div class="bg-card shadow rounded-xl p-4 text-center dark:bg-transparent">
+                <div class="text-2xl font-bold text-yellow-500">{{ itemsIngresados }}</div>
+                <div class="text-xs text-secondary mt-1">Sin guardar</div>
+              </div>
+              <div class="bg-card shadow rounded-xl p-4 text-center dark:bg-transparent">
+                <div class="text-2xl font-bold text-gray-400">{{ itemsSinContar }}</div>
+                <div class="text-xs text-secondary mt-1">Sin contar</div>
+              </div>
+              <div *ngIf="itemsYaAjustados > 0"
+                   class="bg-green-50 border border-green-200 shadow rounded-xl p-4 text-center dark:bg-green-900/20">
+                <div class="text-2xl font-bold text-green-600">{{ itemsYaAjustados }}</div>
+                <div class="text-xs text-green-700 mt-1">Ya ajustados</div>
+              </div>
+            </div>
+
+            <!-- Tabla de conteo -->
+            <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden dark:bg-transparent">
+              <div class="overflow-x-auto mx-4 mt-2">
+                <table class="w-full bg-transparent mb-3" mat-table [dataSource]="dataSource">
+
+                  <ng-container matColumnDef="producto">
+                    <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Producto / Lote</th>
+                    <td mat-cell *matCellDef="let item">
+                      <div class="flex items-center gap-2 py-1">
+                        <div class="w-2 h-2 rounded-full flex-shrink-0"
+                             [ngClass]="{
+                               'bg-green-600': item.yaAjustado,
+                               'bg-green-500': !item.yaAjustado && getEstadoItem(item)==='guardado',
+                               'bg-yellow-400': !item.yaAjustado && getEstadoItem(item)==='ingresado',
+                               'bg-gray-300': !item.yaAjustado && getEstadoItem(item)==='sin_contar'
+                             }">
+                        </div>
+                        <div class="flex flex-col">
+                          <span class="font-semibold text-sm">{{ item.nombreProducto }}</span>
+                          <span class="text-xs text-secondary">{{ item.codigoLote }}</span>
+                        </div>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="vencimiento">
+                    <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Vencimiento</th>
+                    <td mat-cell *matCellDef="let item">
+                      <div *ngIf="item.fechaVencimiento; else noFecha"
+                           class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border"
+                           [ngClass]="getSemaforoVencimiento(item.fechaVencimiento).clase">
+                        <span class="w-1.5 h-1.5 mr-1.5 rounded-full" [ngClass]="getSemaforoVencimiento(item.fechaVencimiento).dot"></span>
+                        {{ item.fechaVencimiento | date:'dd/MM/yyyy' }}
+                      </div>
+                      <ng-template #noFecha><span class="text-xs text-gray-400">N/A</span></ng-template>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="stockSistema">
+                    <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Stock Sistema</th>
+                    <td mat-cell *matCellDef="let item" class="text-blue-600 font-semibold">{{ item.cantidadSistema | number:'1.2-2' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="cantidadFisica">
+                    <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Cantidad Contada</th>
+                    <td mat-cell *matCellDef="let item">
+                      <mat-form-field class="w-28 mt-4" [appearance]="'outline'">
+                        <input matInput type="number" min="0" [(ngModel)]="item.cantidadFisica"
+                               (input)="calcularDiferencia(item)" [disabled]="item.idInventarioFisico || item.yaAjustado" placeholder="0">
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="diferencia">
+                    <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Diferencia</th>
+                    <td mat-cell *matCellDef="let item" class="font-semibold"
+                        [ngClass]="item.diferencia < 0 ? 'text-red-500' : (item.diferencia > 0 ? 'text-green-500' : 'text-gray-500')">
+                      {{ item.diferencia | number:'1.2-2' }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="observacion">
+                    <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Motivo / Observación</th>
+                    <td mat-cell *matCellDef="let item">
+                      <mat-form-field class="w-44 mt-4" [appearance]="'outline'">
+                        <input matInput type="text" [(ngModel)]="item.observacion"
+                               [disabled]="item.idInventarioFisico || item.yaAjustado" placeholder="Ej: Pérdida, dañado...">
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let item">
+                      <!-- Ya ajustado (de sesión anterior) — solo lectura -->
+                      <div *ngIf="item.yaAjustado" class="flex items-center gap-1 text-green-700 text-xs font-medium px-2">
+                        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_mini:check-badge'"></mat-icon>
+                        <span class="hidden sm:inline">Ajustado</span>
+                      </div>
+                      <!-- Ya guardado en sesión actual -->
+                      <div *ngIf="!item.yaAjustado && item.idInventarioFisico" class="flex items-center gap-1 text-green-600 text-xs font-medium px-2">
+                        <mat-icon class="icon-size-4" [svgIcon]="'heroicons_mini:check-circle'"></mat-icon>
+                        <span class="hidden sm:inline">Guardado</span>
+                      </div>
+                      <!-- Borrador existente (modo continuar) — editable -->
+                      <div *ngIf="!item.yaAjustado && !item.idInventarioFisico && item.idBorradorExistente" class="flex flex-col items-center gap-1 px-2">
+                        <span class="text-xs text-primary-600 font-medium">Editable</span>
+                        <button mat-icon-button (click)="guardarBorrador(item)" matTooltip="Actualizar conteo"
+                                [disabled]="item.cantidadFisica === null || item.cantidadFisica === undefined || item.cantidadFisica === ''">
+                          <mat-icon class="text-primary" [svgIcon]="'heroicons_solid:arrow-path'"></mat-icon>
+                        </button>
+                      </div>
+                      <!-- Sin borrador previo — guardar por primera vez -->
+                      <button *ngIf="!item.yaAjustado && !item.idInventarioFisico && !item.idBorradorExistente"
+                              mat-icon-button (click)="guardarBorrador(item)" matTooltip="Guardar Conteo"
+                              [disabled]="item.cantidadFisica === null || item.cantidadFisica === undefined || item.cantidadFisica === ''">
+                        <mat-icon class="text-primary" [svgIcon]="'heroicons_solid:arrow-path'"></mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                      [ngClass]="{
+                        'bg-green-100/60 dark:bg-green-900/30 opacity-70': row.yaAjustado,
+                        'bg-green-50 dark:bg-green-900/20': !row.yaAjustado && getEstadoItem(row)==='guardado',
+                        'bg-yellow-50 dark:bg-yellow-900/20': !row.yaAjustado && getEstadoItem(row)==='ingresado'
+                      }">
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Leyenda -->
+              <div class="flex flex-wrap items-center gap-4 px-6 py-3 border-t text-xs text-secondary">
+                <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-green-500"></span>Guardado</div>
+                <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-yellow-400"></span>Ingresado sin guardar</div>
+                <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-300"></span>Sin contar</div>
+              </div>
+            </div>
+
+
+          </ng-container>
+        </div>
+      </mat-tab>
+
+      <!-- ══════════════════════════════════════════════════════════════
+           TAB 2 — REGISTROS
+      ══════════════════════════════════════════════════════════════ -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:clipboard-document-list'"></mat-icon>
+          Registros
+          <span *ngIf="tomasGrupos.length > 0"
+                class="ml-2 px-1.5 py-0.5 rounded-full text-xs font-bold bg-primary-100 text-primary-700">
+            {{ tomasGrupos.length }}
+          </span>
+        </ng-template>
+
+        <div class="pt-4">
+
+          <!-- Filtros del historial -->
+          <div class="bg-card shadow rounded-2xl p-5 dark:bg-transparent mb-4">
+            <form [formGroup]="historialForm" class="flex flex-wrap gap-3 items-end">
+
+              <!-- Nombre del registro (filtra en tiempo real) -->
+              <mat-form-field [appearance]="'outline'" class="flex-1 min-w-48">
+                <mat-label>Nombre del registro</mat-label>
+                <input matInput formControlName="nombre"
+                       placeholder="Ej: Conteo mensual..." autocomplete="off">
+                <mat-icon matSuffix class="icon-size-5 text-secondary"
+                          [svgIcon]="'heroicons_mini:magnifying-glass'"></mat-icon>
+              </mat-form-field>
+
+              <!-- Fecha de la toma física -->
+              <mat-form-field [appearance]="'outline'" class="flex-1 min-w-44">
+                <mat-label>Fecha de la toma física</mat-label>
+                <input matInput [matDatepicker]="pickerHFecha" formControlName="fecha"
+                       [min]="minDate" [max]="maxDate" (click)="pickerHFecha.open()"
+                       autocomplete="off" placeholder="Todas las fechas">
+                <mat-datepicker-toggle matSuffix [for]="pickerHFecha"></mat-datepicker-toggle>
+                <mat-datepicker #pickerHFecha></mat-datepicker>
+                <mat-hint *ngIf="!historialForm.get('fecha').value">Deja vacío para ver todas</mat-hint>
+              </mat-form-field>
+
+              <!-- Categoría -->
+              <mat-form-field [appearance]="'outline'" class="flex-1 min-w-48">
+                <mat-label>Categoría</mat-label>
+                <mat-select formControlName="categoria" multiple>
+                  <mat-select-trigger>
+                    <ng-container *ngIf="historialForm.get('categoria').value?.length > 0; else todasH">
+                      <span *ngFor="let c of historialForm.get('categoria').value; let i = index">
+                        {{ c.nombre }}<ng-container *ngIf="i < historialForm.get('categoria').value.length - 1">, </ng-container>
+                      </span>
+                    </ng-container>
+                    <ng-template #todasH><span class="text-secondary">Todas las categorías</span></ng-template>
+                  </mat-select-trigger>
+                  <mat-option *ngFor="let cat of allCategorias" [value]="cat">
+                    <div class="flex items-center gap-2">
+                      <span class="w-2.5 h-2.5 rounded-full" [style.background]="cat.color || '#6366f1'"></span>
+                      {{ cat.nombre }}
+                    </div>
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <button mat-flat-button [color]="'primary'" (click)="loadHistorial()" [disabled]="skeletonHistorial" class="mb-4">
+                <mat-progress-spinner *ngIf="skeletonHistorial" [diameter]="18" mode="indeterminate" class="mr-2"></mat-progress-spinner>
+                <mat-icon *ngIf="!skeletonHistorial" class="icon-size-5 mr-1" [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                {{ skeletonHistorial ? 'Buscando...' : 'Buscar' }}
+              </button>
+
+            </form>
+          </div>
+
+          <!-- Skeleton -->
+          <ngx-skeleton-loader *ngIf="skeletonHistorial" count="4" appearance="line"
+            [theme]="{'height': '72px', 'border-radius': '12px', 'margin-bottom': '10px'}">
+          </ngx-skeleton-loader>
+
+          <!-- Lista de Tomas Físicas agrupadas -->
+          <ng-container *ngIf="!skeletonHistorial">
+
+            <!-- Sin datos -->
+            <div *ngIf="tomasGruposFiltrados.length === 0"
+                 class="flex flex-col items-center justify-center py-16 bg-card shadow rounded-2xl dark:bg-transparent">
+              <mat-icon class="icon-size-16 text-gray-300" [svgIcon]="'heroicons_outline:clipboard-document-list'"></mat-icon>
+              <span class="mt-4 text-secondary text-sm">No hay registros para mostrar</span>
+            </div>
+
+            <!-- Resumen rápido -->
+            <div *ngIf="tomasGruposFiltrados.length > 0" class="flex flex-wrap gap-4 mb-4 text-sm">
+              <div class="bg-card shadow rounded-xl px-4 py-3 flex items-center gap-2 dark:bg-transparent">
+                <span class="text-secondary">Total tomas:</span>
+                <span class="font-bold text-lg">{{ tomasGruposFiltrados.length }}</span>
+              </div>
+              <div class="bg-card shadow rounded-xl px-4 py-3 flex items-center gap-2 dark:bg-transparent">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                <span class="text-secondary">Finalizadas:</span>
+                <span class="font-bold text-lg text-green-600">{{ totalAjustados }}</span>
+              </div>
+              <div class="bg-card shadow rounded-xl px-4 py-3 flex items-center gap-2 dark:bg-transparent">
+                <span class="w-2 h-2 rounded-full bg-yellow-400"></span>
+                <span class="text-secondary">Pendientes / En proceso:</span>
+                <span class="font-bold text-lg text-yellow-600">{{ totalPendientes }}</span>
+              </div>
+            </div>
+
+            <!-- Tarjetas de tomas físicas -->
+            <div class="flex flex-col gap-3">
+              <div *ngFor="let grupo of tomasGruposFiltrados"
+                   class="bg-card shadow rounded-2xl overflow-hidden dark:bg-transparent border border-transparent"
+                   [ngClass]="{
+                     'border-green-200':  grupo.estado === 'Finalizado',
+                     'border-blue-200':   grupo.estado === 'En Proceso',
+                     'border-yellow-200': grupo.estado === 'Pendiente'
+                   }">
+
+                <!-- Cabecera de la tarjeta (siempre visible, clickeable) -->
+                <div class="w-full px-6 py-4 flex flex-wrap items-center gap-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors select-none"
+                     (click)="toggleGrupo(grupo)">
+
+                  <!-- Ícono de estado -->
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                       [ngClass]="{
+                         'bg-green-100':  grupo.estado === 'Finalizado',
+                         'bg-blue-100':   grupo.estado === 'En Proceso',
+                         'bg-yellow-100': grupo.estado === 'Pendiente'
+                       }">
+                    <mat-icon class="icon-size-5"
+                              [ngClass]="{
+                                'text-green-600':  grupo.estado === 'Finalizado',
+                                'text-blue-600':   grupo.estado === 'En Proceso',
+                                'text-yellow-600': grupo.estado === 'Pendiente'
+                              }"
+                              [svgIcon]="grupo.estado === 'Finalizado'
+                                ? 'heroicons_solid:check-circle'
+                                : grupo.estado === 'En Proceso'
+                                  ? 'heroicons_solid:arrow-path'
+                                  : 'heroicons_solid:clock'">
+                    </mat-icon>
+                  </div>
+
+                  <!-- Nombre del registro -->
+                  <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-base truncate">{{ grupo.nombre }}</div>
+                    <div class="text-sm text-secondary mt-0.5">
+                      <mat-icon class="icon-size-3.5 mr-0.5 align-middle" [svgIcon]="'heroicons_mini:calendar'"></mat-icon>
+                      {{ grupo.fecha | date:'dd/MM/yyyy' }}
+                    </div>
+                  </div>
+
+                  <!-- Progreso -->
+                  <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                          [ngClass]="{
+                            'bg-green-100 text-green-700':  grupo.estado === 'Finalizado',
+                            'bg-blue-100 text-blue-700':    grupo.estado === 'En Proceso',
+                            'bg-yellow-100 text-yellow-700':grupo.estado === 'Pendiente'
+                          }">
+                      {{ grupo.estado }}
+                    </span>
+                    <div class="text-xs text-secondary">
+                      {{ grupo.totalAjustados }} / {{ grupo.totalProductos }} productos ajustados
+                    </div>
+                    <div class="w-32 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full rounded-full transition-all"
+                           [ngClass]="{
+                             'bg-green-500':  grupo.estado === 'Finalizado',
+                             'bg-blue-500':   grupo.estado === 'En Proceso',
+                             'bg-yellow-400': grupo.estado === 'Pendiente'
+                           }"
+                           [style.width.%]="grupo.totalProductos > 0 ? (grupo.totalAjustados / grupo.totalProductos * 100) : 0">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Acciones -->
+                  <div class="flex items-center gap-2 flex-shrink-0">
+
+                    <!-- Botón eliminar (solo Pendiente / En Proceso) -->
+                    <button *ngIf="grupo.estado !== 'Finalizado'"
+                            mat-icon-button
+                            class="text-red-400 hover:text-red-600"
+                            (click)="$event.stopPropagation(); eliminarGrupo(grupo)"
+                            matTooltip="Eliminar toma física">
+                      <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                    </button>
+
+                    <!-- Botón continuar (solo Pendiente / En Proceso) -->
+                    <button *ngIf="grupo.estado !== 'Finalizado'"
+                            mat-flat-button [color]="'primary'"
+                            class="text-xs"
+                            (click)="$event.stopPropagation(); continuarToma(grupo)"
+                            matTooltip="Continuar con el ajuste de este conteo">
+                      <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_solid:play'"></mat-icon>
+                      Continuar
+                    </button>
+
+                  </div>
+
+                  <!-- Chevron -->
+                  <mat-icon class="icon-size-5 text-secondary flex-shrink-0 transition-transform"
+                            [ngClass]="{'rotate-180': grupo.expandido}"
+                            [svgIcon]="'heroicons_mini:chevron-down'">
+                  </mat-icon>
+                </div>
+
+                <!-- Detalle expandible -->
+                <div *ngIf="grupo.expandido" class="border-t">
+                  <div class="overflow-x-auto">
+                    <table class="w-full bg-transparent" mat-table [dataSource]="grupo.registros">
+
+                      <ng-container matColumnDef="nombreProducto">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary px-6">Producto</th>
+                        <td mat-cell *matCellDef="let r" class="px-6">
+                          <div class="flex items-center gap-2 py-2">
+                            <img *ngIf="r.urlFotoProducto" [src]="r.urlFotoProducto" class="w-8 h-8 rounded object-cover flex-shrink-0" alt="">
+                            <div class="flex flex-col">
+                              <span class="font-semibold text-sm">{{ r.nombreProducto }}</span>
+                              <div class="flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full" [style.background]="r.colorCategoria || '#6366f1'"></span>
+                                <span class="text-xs text-secondary">{{ r.nombreCategoria }}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="numeroLote">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Lote</th>
+                        <td mat-cell *matCellDef="let r" class="text-xs font-mono text-secondary">{{ r.numeroLote }}</td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="stockSistema">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Stock Sistema</th>
+                        <td mat-cell *matCellDef="let r" class="text-blue-600 font-semibold">{{ r.stockSistema | number:'1.2-2' }}</td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="cantidadFisica">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Cant. Contada</th>
+                        <td mat-cell *matCellDef="let r" class="font-semibold">{{ r.cantidadFisica | number:'1.2-2' }}</td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="diferencia">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Diferencia</th>
+                        <td mat-cell *matCellDef="let r" class="font-semibold"
+                            [ngClass]="r.diferencia < 0 ? 'text-red-500' : (r.diferencia > 0 ? 'text-green-500' : 'text-gray-400')">
+                          {{ r.diferencia | number:'1.2-2' }}
+                        </td>
+                      </ng-container>
+
+                      <ng-container matColumnDef="estado">
+                        <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Estado</th>
+                        <td mat-cell *matCellDef="let r">
+                          <span *ngIf="r.ajustado"
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            <mat-icon class="icon-size-3" [svgIcon]="'heroicons_mini:check-circle'"></mat-icon> Ajustado
+                          </span>
+                          <span *ngIf="!r.ajustado"
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                            <mat-icon class="icon-size-3" [svgIcon]="'heroicons_mini:clock'"></mat-icon> Pendiente
+                          </span>
+                        </td>
+                      </ng-container>
+
+                      <tr mat-header-row *matHeaderRowDef="detalleColumns"></tr>
+                      <tr mat-row *matRowDef="let row; columns: detalleColumns;" class="hover:bg-gray-50 dark:hover:bg-gray-800/30"></tr>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </ng-container>
+        </div>
+      </mat-tab>
+
+      <!-- TAB 3 ELIMINADO — Reportes movido a Reportes > Inventario > Tomas Físicas -->
+      <mat-tab *ngIf="false">
+        <ng-template mat-tab-label>Reportes</ng-template>
+
+        <div class="pt-4">
+
+          <!-- Filtros -->
+          <div class="bg-card shadow rounded-2xl p-5 dark:bg-transparent mb-4">
+            <form [formGroup]="reporteForm" class="flex flex-wrap gap-3 items-end">
+
+              <mat-form-field [appearance]="'outline'" class="flex-1 min-w-48">
+                <mat-label>Nombre del registro</mat-label>
+                <input matInput formControlName="nombre" placeholder="Filtrar por nombre..." autocomplete="off">
+                <mat-icon matSuffix class="icon-size-5 text-secondary" [svgIcon]="'heroicons_mini:magnifying-glass'"></mat-icon>
+              </mat-form-field>
+
+              <mat-form-field [appearance]="'outline'" class="flex-1 min-w-44">
+                <mat-label>Desde</mat-label>
+                <input matInput [matDatepicker]="pickerRInicio" formControlName="fechaInicio"
+                       [min]="minDate" [max]="maxDate" (click)="pickerRInicio.open()" autocomplete="off">
+                <mat-datepicker-toggle matSuffix [for]="pickerRInicio"></mat-datepicker-toggle>
+                <mat-datepicker #pickerRInicio></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field [appearance]="'outline'" class="flex-1 min-w-44">
+                <mat-label>Hasta</mat-label>
+                <input matInput [matDatepicker]="pickerRFin" formControlName="fechaFin"
+                       [min]="minDate" [max]="maxDate" (click)="pickerRFin.open()" autocomplete="off">
+                <mat-datepicker-toggle matSuffix [for]="pickerRFin"></mat-datepicker-toggle>
+                <mat-datepicker #pickerRFin></mat-datepicker>
+              </mat-form-field>
+
+              <div class="flex items-center gap-2 mb-4 px-1">
+                <mat-checkbox formControlName="soloAjustados" color="primary">Solo ajustados</mat-checkbox>
+              </div>
+
+              <div class="flex gap-2 mb-4">
+                <button mat-flat-button [color]="'primary'" (click)="loadReporte()" [disabled]="skeletonReporte">
+                  <mat-progress-spinner *ngIf="skeletonReporte" [diameter]="18" mode="indeterminate" class="mr-2"></mat-progress-spinner>
+                  <mat-icon *ngIf="!skeletonReporte" class="icon-size-5 mr-1" [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                  {{ skeletonReporte ? 'Buscando...' : 'Buscar' }}
+                </button>
+                <button mat-stroked-button (click)="exportarReporteCompleto()" [disabled]="reporteGrupos.length === 0">
+                  <mat-icon class="icon-size-5 mr-1" [svgIcon]="'heroicons_outline:document-arrow-down'"></mat-icon>Exportar CSV
+                </button>
+              </div>
+
+            </form>
+          </div>
+
+          <!-- Skeleton -->
+          <ngx-skeleton-loader *ngIf="skeletonReporte" count="4" appearance="line"
+            [theme]="{'height': '72px', 'border-radius': '12px', 'margin-bottom': '10px'}">
+          </ngx-skeleton-loader>
+
+          <ng-container *ngIf="!skeletonReporte">
+
+            <!-- Tarjetas resumen -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              <div class="bg-card shadow rounded-xl p-4 text-center dark:bg-transparent">
+                <div class="text-2xl font-bold text-gray-700">{{ reporteResumen.totalTomas }}</div>
+                <div class="text-xs text-secondary mt-1">Total Tomas</div>
+              </div>
+              <div class="bg-card shadow rounded-xl p-4 text-center dark:bg-transparent">
+                <div class="text-2xl font-bold text-blue-600">{{ reporteResumen.totalProductos }}</div>
+                <div class="text-xs text-secondary mt-1">Productos Contados</div>
+              </div>
+              <div class="bg-card shadow rounded-xl p-4 text-center dark:bg-transparent">
+                <div class="text-2xl font-bold text-green-600">{{ reporteResumen.totalAjustados }}</div>
+                <div class="text-xs text-secondary mt-1">Ajustados</div>
+              </div>
+              <div class="bg-card shadow rounded-xl p-4 text-center dark:bg-transparent">
+                <div class="text-2xl font-bold text-red-500">{{ formatCurrency(reporteResumen.totalValorPerdido) }}</div>
+                <div class="text-xs text-secondary mt-1">Valor Pérdidas</div>
+              </div>
+            </div>
+
+            <!-- Sin datos -->
+            <div *ngIf="reporteGruposFiltrados.length === 0"
+                 class="flex flex-col items-center justify-center py-16 bg-card shadow rounded-2xl dark:bg-transparent">
+              <mat-icon class="icon-size-16 text-gray-300" [svgIcon]="'heroicons_outline:chart-bar'"></mat-icon>
+              <span class="mt-4 text-secondary text-sm">No hay registros para el período seleccionado</span>
+            </div>
+
+            <!-- Lista de tomas agrupadas -->
+            <div class="flex flex-col gap-3">
+              <div *ngFor="let grupo of reporteGruposFiltrados"
+                   class="bg-card shadow rounded-2xl overflow-hidden dark:bg-transparent border border-transparent"
+                   [ngClass]="{
+                     'border-green-200':  grupo.estado === 'Finalizado',
+                     'border-blue-200':   grupo.estado === 'En Proceso',
+                     'border-yellow-200': grupo.estado === 'Pendiente'
+                   }">
+
+                <!-- Cabecera clickeable -->
+                <div class="w-full px-6 py-4 flex flex-wrap items-center gap-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors select-none"
+                     (click)="toggleGrupo(grupo)">
+
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                       [ngClass]="{
+                         'bg-green-100':  grupo.estado === 'Finalizado',
+                         'bg-blue-100':   grupo.estado === 'En Proceso',
+                         'bg-yellow-100': grupo.estado === 'Pendiente'
+                       }">
+                    <mat-icon class="icon-size-5"
+                              [ngClass]="{
+                                'text-green-600': grupo.estado === 'Finalizado',
+                                'text-blue-600':  grupo.estado === 'En Proceso',
+                                'text-yellow-600':grupo.estado === 'Pendiente'
+                              }"
+                              [svgIcon]="grupo.estado === 'Finalizado' ? 'heroicons_solid:check-circle' : grupo.estado === 'En Proceso' ? 'heroicons_solid:arrow-path' : 'heroicons_solid:clock'">
+                    </mat-icon>
+                  </div>
+
+                  <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-base truncate">{{ grupo.nombre }}</div>
+                    <div class="text-sm text-secondary mt-0.5">
+                      <mat-icon class="icon-size-3.5 mr-0.5 align-middle" [svgIcon]="'heroicons_mini:calendar'"></mat-icon>
+                      {{ grupo.fecha | date:'dd/MM/yyyy' }}
+                    </div>
+                  </div>
+
+                  <div class="flex flex-col items-end gap-1 flex-shrink-0 text-right">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                          [ngClass]="{
+                            'bg-green-100 text-green-700':  grupo.estado === 'Finalizado',
+                            'bg-blue-100 text-blue-700':    grupo.estado === 'En Proceso',
+                            'bg-yellow-100 text-yellow-700':grupo.estado === 'Pendiente'
+                          }">
+                      {{ grupo.estado }}
+                    </span>
+                    <div class="text-xs text-secondary">{{ grupo.totalAjustados }} / {{ grupo.totalProductos }} ajustados</div>
+                    <div class="text-xs text-red-500 font-medium" *ngIf="getValorPerdidaGrupo(grupo) > 0">
+                      Pérdida: {{ formatCurrency(getValorPerdidaGrupo(grupo)) }}
+                    </div>
+                  </div>
+
+                  <mat-icon class="icon-size-5 text-secondary flex-shrink-0 transition-transform"
+                            [ngClass]="{'rotate-180': grupo.expandido}"
+                            [svgIcon]="'heroicons_mini:chevron-down'">
+                  </mat-icon>
+                </div>
+
+                <!-- Detalle expandible -->
+                <div *ngIf="grupo.expandido" class="border-t overflow-x-auto">
+                  <table class="w-full bg-transparent" mat-table [dataSource]="grupo.registros">
+
+                    <ng-container matColumnDef="nombreProducto">
+                      <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary px-4">Producto</th>
+                      <td mat-cell *matCellDef="let r" class="px-4">
+                        <div class="flex items-center gap-2 py-2">
+                          <img *ngIf="r.urlFotoProducto" [src]="r.urlFotoProducto" class="w-8 h-8 rounded object-cover flex-shrink-0" alt="">
+                          <div class="flex flex-col">
+                            <span class="font-semibold text-sm">{{ r.nombreProducto }}</span>
+                            <span class="text-xs text-secondary">{{ r.nombreCategoria }}</span>
+                          </div>
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="numeroLote">
+                      <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Lote</th>
+                      <td mat-cell *matCellDef="let r" class="text-xs font-mono text-secondary">{{ r.numeroLote }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="stockSistema">
+                      <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Stock Sistema</th>
+                      <td mat-cell *matCellDef="let r" class="text-blue-600 font-semibold">{{ r.stockSistema | number:'1.2-2' }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="cantidadFisica">
+                      <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Cant. Contada</th>
+                      <td mat-cell *matCellDef="let r" class="font-semibold">{{ r.cantidadFisica | number:'1.2-2' }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="diferencia">
+                      <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Diferencia</th>
+                      <td mat-cell *matCellDef="let r" class="font-semibold"
+                          [ngClass]="r.diferencia < 0 ? 'text-red-500' : (r.diferencia > 0 ? 'text-green-500' : 'text-gray-400')">
+                        {{ r.diferencia | number:'1.2-2' }}
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="precioCompra">
+                      <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Precio</th>
+                      <td mat-cell *matCellDef="let r" class="text-secondary text-sm">{{ formatCurrency(r.precioCompra) }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="valorPerdida">
+                      <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Valor Pérdida</th>
+                      <td mat-cell *matCellDef="let r">
+                        <span *ngIf="r.valorPerdida > 0" class="text-red-600 font-semibold">{{ formatCurrency(r.valorPerdida) }}</span>
+                        <span *ngIf="!r.valorPerdida || r.valorPerdida === 0" class="text-gray-400 text-xs">—</span>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="estado">
+                      <th mat-header-cell *matHeaderCellDef class="text-xs font-semibold uppercase text-secondary">Estado</th>
+                      <td mat-cell *matCellDef="let r">
+                        <span *ngIf="r.ajustado"
+                              class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                          <mat-icon class="icon-size-3" [svgIcon]="'heroicons_mini:check-circle'"></mat-icon> Ajustado
+                        </span>
+                        <span *ngIf="!r.ajustado"
+                              class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                          <mat-icon class="icon-size-3" [svgIcon]="'heroicons_mini:clock'"></mat-icon> Pendiente
+                        </span>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="detalleReporteColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: detalleReporteColumns;"
+                        class="hover:bg-gray-50 dark:hover:bg-gray-800/30"
+                        [ngClass]="{'bg-red-50 dark:bg-red-900/10': row.valorPerdida > 0}">
+                    </tr>
+                  </table>
+                </div>
+
+              </div>
+            </div>
+
+          </ng-container>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+
+  </div>
 </div>

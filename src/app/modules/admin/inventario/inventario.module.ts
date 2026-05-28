@@ -20,6 +20,16 @@ import { LotesPageComponent } from './pages/lotes-page/lotes-page.component';
 import { DetalleCompraPageComponent } from './pages/lotes-page/modals/detalle-producto-page/detalle-compra-page.component';
 import { InventarioFisicoPageComponent } from './pages/inventario-fisico-page/inventario-fisico-page.component';
 import { ReportePerdidasPageComponent } from './pages/reporte-perdidas-page/reporte-perdidas-page.component';
+import { ReporteTomasFisicasPageComponent } from './pages/reporte-tomas-fisicas-page/reporte-tomas-fisicas-page.component';
+import { PromocionesPageComponent } from './pages/promociones-page/promociones-page.component';
+import { ReporteStockPageComponent } from './pages/reporte-stock-page/reporte-stock-page.component';
+import { ReporteVencimientosPageComponent } from './pages/reporte-vencimientos-page/reporte-vencimientos-page.component';
+import { ReporteMargenPageComponent } from './pages/reporte-margen-page/reporte-margen-page.component';
+import { ReporteRotacionPageComponent } from './pages/reporte-rotacion-page/reporte-rotacion-page.component';
+import { ReporteSinMovimientoPageComponent } from './pages/reporte-sin-movimiento-page/reporte-sin-movimiento-page.component';
+import { ReporteDescuentosPageComponent } from './pages/reporte-descuentos-page/reporte-descuentos-page.component';
+import { ReportesHubPageComponent } from './pages/reportes-hub-page/reportes-hub-page.component';
+import { DevolucionDialogComponent } from './pages/reportes-hub-page/devolucion-dialog/devolucion-dialog.component';
 
 const BASE_MODULES = [CommonModule, SharedModule, InventarioRoutingModule];
 
@@ -30,7 +40,17 @@ const BASE_COMPONENTS = [
   LotesPageComponent,
   DetalleCompraPageComponent,
   InventarioFisicoPageComponent,
-  ReportePerdidasPageComponent
+  ReportePerdidasPageComponent,
+  ReporteTomasFisicasPageComponent,
+  PromocionesPageComponent,
+  ReporteStockPageComponent,
+  ReporteVencimientosPageComponent,
+  ReporteMargenPageComponent,
+  ReporteRotacionPageComponent,
+  ReporteSinMovimientoPageComponent,
+  ReporteDescuentosPageComponent,
+  ReportesHubPageComponent,
+  DevolucionDialogComponent,
 ];
 
 const PRODUCTO = [RegistroProductoPageComponent,

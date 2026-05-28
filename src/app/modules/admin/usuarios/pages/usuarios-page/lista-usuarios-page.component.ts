@@ -29,6 +29,9 @@ import { FuseValidators } from '@fuse/validators';
 import { EliminarUsuarioRequest } from 'app/core/models/usuario/request/eliminar-usuario-request.model';
 import { ResponseDTO } from 'app/core/models/generic/response-dto.model';
 import { ActualizarActivoUsuarioRequest } from 'app/core/models/usuario/request/actualizar-activo-usuario-request.model';
+import { AuthService } from 'app/core/services/auth/auth.service';
+import { NotifyOlvideContraseniaRequest } from 'app/core/models/usuario/request/notify-olvide-contrasenia-request.model';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-lista-usuarios-page',
@@ -89,7 +92,8 @@ export class ListaUsuariosPageComponent implements OnInit, AfterViewInit, OnDest
         private _parametroGeneralService: ParametroGeneralService,
         private _matDialog: MatDialog,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _toolService: ToolService,) {
+        private _toolService: ToolService,
+        private _authService: AuthService,) {
     }
 
     ngAfterViewInit() {
@@ -398,6 +402,47 @@ export class ListaUsuariosPageComponent implements OnInit, AfterViewInit, OnDest
                 console.log(err);
             });
 
+        });
+    }
+
+    resetearContrasenia(usuario: UsuarioDTO): void {
+        Swal.fire({
+            title: 'Restablecer contraseña',
+            html: `¿Enviar enlace de restablecimiento a <strong>${usuario.correoElectronico}</strong>?<br><span style="font-size:13px;color:#6b7280">El usuario recibirá un correo para crear una nueva contraseña.</span>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4f46e5',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: 'Sí, enviar enlace',
+            cancelButtonText: 'Cancelar',
+        }).then(result => {
+            if (!result.isConfirmed) return;
+
+            const request = new NotifyOlvideContraseniaRequest();
+            request.correo = usuario.correoElectronico;
+            request.destinationTimeZone = this._toolService.getTimeZone();
+
+            this.disabledAcciones = true;
+            this._authService.NotifyOlvideContraseniaAsync(request).subscribe({
+                next: (response: ResponseDTO) => {
+                    this.disabledAcciones = false;
+                    if (response.success) {
+                        Swal.fire({
+                            title: '¡Enlace enviado!',
+                            text: `Se envió el correo a ${usuario.correoElectronico}`,
+                            icon: 'success',
+                            timer: 2500,
+                            showConfirmButton: false,
+                        });
+                    } else {
+                        this._toolService.showError(response.message || 'No se pudo enviar el correo.', response.titleMessage);
+                    }
+                },
+                error: () => {
+                    this.disabledAcciones = false;
+                    this._toolService.showError('Error al enviar el enlace. Intenta de nuevo.', 'Error');
+                },
+            });
         });
     }
 

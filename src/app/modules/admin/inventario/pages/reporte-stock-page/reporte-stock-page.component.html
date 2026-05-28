@@ -1,0 +1,248 @@
+<div class="flex flex-col flex-auto w-full">
+    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+        <!-- Encabezado -->
+        <div class="flex flex-col w-full mb-6">
+            <h2 class="text-2xl font-semibold tracking-tight leading-8">
+                Stock y Valorización del Inventario
+            </h2>
+            <div class="font-medium tracking-tight text-secondary">
+                Valorización actual de productos según precio de compra
+            </div>
+        </div>
+
+        <!-- Skeleton -->
+        <ng-container *ngIf="skeleton">
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div *ngFor="let i of [1,2,3,4]" class="h-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl"></div>
+            </div>
+            <div class="w-full h-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl mb-6"></div>
+        </ng-container>
+
+        <ng-container *ngIf="!skeleton">
+
+            <!-- Panel de Filtros -->
+            <div class="w-full mb-6 p-6 bg-card shadow rounded-2xl">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+
+                    <!-- Buscar por nombre/código -->
+                    <mat-form-field [appearance]="'outline'" class="w-full">
+                        <mat-label>Nombre o Código</mat-label>
+                        <input matInput [(ngModel)]="textoBusqueda" placeholder="Buscar producto...">
+                        <mat-icon matSuffix>search</mat-icon>
+                    </mat-form-field>
+
+                    <!-- Categorías -->
+                    <mat-form-field [appearance]="'outline'" class="w-full">
+                        <mat-label>Categorías</mat-label>
+                        <mat-select multiple #selectCategoriaItem>
+                            <mat-select-trigger>
+                                <ng-container *ngIf="selectCategoriaItem.value?.length > 0">
+                                    <span *ngFor="let cat of selectCategoriaItem.value; let i = index">
+                                        <span class="color-indicator" [style.backgroundColor]="cat?.color"></span>
+                                        {{ cat.nombre || '' }}<ng-container *ngIf="i < selectCategoriaItem.value.length - 1">, </ng-container>
+                                    </span>
+                                </ng-container>
+                            </mat-select-trigger>
+                            <mat-option *ngFor="let option of allCategoriasSource" [value]="option">
+                                <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                                {{ option.nombre }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Marcas -->
+                    <mat-form-field [appearance]="'outline'" class="w-full">
+                        <mat-label>Marcas</mat-label>
+                        <mat-select multiple #selectMarcaItem>
+                            <mat-select-trigger>
+                                <ng-container *ngIf="selectMarcaItem.value?.length > 0">
+                                    <span *ngFor="let marca of selectMarcaItem.value; let i = index">
+                                        <span class="color-indicator" [style.backgroundColor]="marca?.color"></span>
+                                        {{ marca.nombre || '' }}<ng-container *ngIf="i < selectMarcaItem.value.length - 1">, </ng-container>
+                                    </span>
+                                </ng-container>
+                            </mat-select-trigger>
+                            <mat-option *ngFor="let option of allMarcasSource" [value]="option">
+                                <span class="color-indicator" [style.backgroundColor]="option.color"></span>
+                                {{ option.nombre }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Acciones -->
+                    <div class="flex items-center gap-3">
+                        <mat-slide-toggle [(ngModel)]="soloSinStock" color="warn">Sin stock</mat-slide-toggle>
+                        <button mat-flat-button color="primary" (click)="buscar()">
+                            <mat-icon class="mr-1">search</mat-icon>
+                            Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjetas resumen -->
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+
+                <!-- Total Productos -->
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40">
+                            <mat-icon class="text-blue-600 dark:text-blue-400">inventory_2</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight">{{ totalProductos }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Productos</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Unidades -->
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/40">
+                            <mat-icon class="text-indigo-600 dark:text-indigo-400">format_list_numbered</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight">{{ totalUnidades }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Unidades en stock</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Valorización -->
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40">
+                            <mat-icon class="text-green-600 dark:text-green-400">attach_money</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-lg font-bold leading-none tracking-tight">{{ formatCurrency(valorizacionTotal) }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Valorización total</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sin Stock -->
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40">
+                            <mat-icon class="text-red-600 dark:text-red-400">remove_shopping_cart</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight">{{ sinStock }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Sin stock</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mb-6" *ngIf="productosFiltrados.length > 0">
+
+                <!-- Donut por categoría -->
+                <div class="flex flex-col p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="text-lg font-semibold mb-4">Valorización por Categoría</div>
+                    <apx-chart
+                        [series]="chartValorCategoria.series"
+                        [chart]="chartValorCategoria.chart"
+                        [labels]="chartValorCategoria.labels"
+                        [colors]="chartValorCategoria.colors"
+                        [tooltip]="chartValorCategoria.tooltip"
+                        [dataLabels]="chartValorCategoria.dataLabels"
+                        [plotOptions]="chartValorCategoria.plotOptions"
+                        [responsive]="chartValorCategoria.responsive"
+                        [noData]="chartValorCategoria.noData">
+                    </apx-chart>
+                </div>
+
+                <!-- Top 10 por valor -->
+                <div class="flex flex-col p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="text-lg font-semibold mb-4">Top 10 por Valorización</div>
+                    <apx-chart
+                        [series]="chartTopValor.series"
+                        [chart]="chartTopValor.chart"
+                        [plotOptions]="chartTopValor.plotOptions"
+                        [colors]="chartTopValor.colors"
+                        [dataLabels]="chartTopValor.dataLabels"
+                        [xaxis]="chartTopValor.xaxis"
+                        [tooltip]="chartTopValor.tooltip"
+                        [noData]="chartTopValor.noData">
+                    </apx-chart>
+                </div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="w-full bg-card shadow rounded-2xl overflow-hidden">
+                <div class="flex items-center px-6 py-4 border-b">
+                    <mat-icon class="text-blue-600 mr-2">table_chart</mat-icon>
+                    <span class="font-semibold text-lg">Detalle de Productos</span>
+                    <span class="ml-2 text-secondary text-sm">({{ productosFiltrados.length }} resultados)</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table mat-table [dataSource]="productosFiltrados" class="w-full">
+
+                        <ng-container matColumnDef="codigo">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Código</th>
+                            <td mat-cell *matCellDef="let p">{{ p.codigo }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="nombre">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Producto</th>
+                            <td mat-cell *matCellDef="let p" class="font-medium">{{ p.nombre }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="categoria">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Categoría</th>
+                            <td mat-cell *matCellDef="let p">
+                                <span class="color-indicator" [style.backgroundColor]="p.categoria?.color"></span>
+                                {{ p.categoria?.nombre ?? '—' }}
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="marca">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Marca</th>
+                            <td mat-cell *matCellDef="let p">{{ p.marca?.nombre ?? '—' }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="stock">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Stock</th>
+                            <td mat-cell *matCellDef="let p" class="text-right">
+                                <span [ngClass]="(p.stock ?? 0) === 0 ? 'text-red-600 font-bold' : ''">
+                                    {{ p.stock ?? 0 }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="precioCompra">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Precio Compra</th>
+                            <td mat-cell *matCellDef="let p" class="text-right">
+                                {{ p.precioCompra != null ? formatCurrency(p.precioCompra) : '—' }}
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="valorTotal">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Valor Total</th>
+                            <td mat-cell *matCellDef="let p" class="text-right font-medium text-blue-700 dark:text-blue-400">
+                                {{ formatCurrency((p.stock ?? 0) * (p.precioCompra ?? 0)) }}
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="columnas; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: columnas;"
+                            [ngClass]="(row.stock ?? 0) === 0 ? 'bg-red-50 dark:bg-red-900/10' : ''">
+                        </tr>
+
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell text-center py-8 text-secondary" [attr.colspan]="columnas.length">
+                                No se encontraron productos con los filtros aplicados
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+        </ng-container>
+    </div>
+</div>

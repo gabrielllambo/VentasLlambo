@@ -1,10 +1,10 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
 import { DictionaryErrors } from 'app/core/resource/dictionaryError.constants';
 import { DictionaryInfo, Flags, ImagenesUrl, Numeracion } from 'app/core/resource/dictionary.constants';
 import { SecurityService } from 'app/core/auth/auth.service';
 import { ToolService } from 'app/core/services/tool/tool.service';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';;
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDrawer } from '@angular/material/sidenav';
 import { DecodedToken } from 'app/core/models/auth/response/decode-token-dto.model';
 import { MatSelect } from '@angular/material/select';
@@ -44,6 +44,9 @@ export class InicioPageComponent implements OnInit, OnDestroy {
     public chartEvolucionVentasFecha: ApexOptions = {};
     public chartTopDiezMarcas: ApexOptions = {};
 
+    public productoInicioSeleccionado: { nombre: string; total: number } | null = null;
+    public marcaInicioSeleccionada: { nombre: string; total: number } | null = null;
+
     public disabledBuscar: boolean = Flags.False;
 
     public _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -69,7 +72,8 @@ export class InicioPageComponent implements OnInit, OnDestroy {
         private _formBuilder: UntypedFormBuilder,
         private _toolService: ToolService,
         private _detalleVentaService: DetalleVentaService,
-        private _usuarioService: UsuarioService
+        private _usuarioService: UsuarioService,
+        private _ngZone: NgZone,
     ) { }
 
     ngOnInit(): void {
@@ -243,13 +247,15 @@ export class InicioPageComponent implements OnInit, OnDestroy {
     }
 
     generarChartTopDiezProductos() {
-
+        const self = this;
         const currencyFormat = this._toolService.getCurrencyNumberFormat(this.monedaInfo.codigoMoneda);
+        const productos = this.reporteResumenDataSource.topDiezProductosVentas.productos;
+        const montos = this.reporteResumenDataSource.topDiezProductosVentas.totalMontos;
 
         this.chartTopDiezProductos = {
             series: [{
                 name: "Total",
-                data: this.reporteResumenDataSource.topDiezProductosVentas.totalMontos
+                data: montos
             }],
             noData: {
                 text: 'Seleccione una categoría',
@@ -265,10 +271,19 @@ export class InicioPageComponent implements OnInit, OnDestroy {
             chart: {
                 type: "bar",
                 height: 350,
-                toolbar: {
-                    show: false,
+                toolbar: { show: false },
+                events: {
+                    dataPointSelection: (_e: any, _ctx: any, config: any) => {
+                        self._ngZone.run(() => {
+                            const idx = config.dataPointIndex;
+                            const nombre = productos[idx] ?? null;
+                            const total = montos[idx] ?? 0;
+                            self.productoInicioSeleccionado = self.productoInicioSeleccionado?.nombre === nombre ? null : { nombre, total };
+                        });
+                    },
                 },
             },
+            states: { active: { filter: { type: 'darken', value: 0.75 } } },
             plotOptions: {
                 bar: {
                     barHeight: "100%",
@@ -312,17 +327,14 @@ export class InicioPageComponent implements OnInit, OnDestroy {
                     },
                 },
             },
+            legend: { show: false },
             xaxis: {
                 categories: this.reporteResumenDataSource.topDiezProductosVentas.productos,
                 labels: {
                     show: false,
-                    style: {
-                        fontSize: "12px",
-                    },
+                    style: { fontSize: "12px" },
                     formatter: function (val: any) {
-                        if (typeof val === 'number') {
-                            return currencyFormat.format(val);
-                        }
+                        if (typeof val === 'number') { return currencyFormat.format(val); }
                         return val;
                     },
                 },
@@ -331,13 +343,15 @@ export class InicioPageComponent implements OnInit, OnDestroy {
     }
 
     generarChartTopDiezMarcas() {
-
+        const self = this;
         const currencyFormat = this._toolService.getCurrencyNumberFormat(this.monedaInfo.codigoMoneda);
+        const marcas = this.reporteResumenDataSource.topDiezMarcasVentas.marcas;
+        const montosMarcas = this.reporteResumenDataSource.topDiezMarcasVentas.totalMontos;
 
         this.chartTopDiezMarcas = {
             series: [{
                 name: "Total",
-                data: this.reporteResumenDataSource.topDiezMarcasVentas.totalMontos
+                data: montosMarcas
             }],
             noData: {
                 text: 'Seleccione una categoría',
@@ -353,10 +367,19 @@ export class InicioPageComponent implements OnInit, OnDestroy {
             chart: {
                 type: "bar",
                 height: 350,
-                toolbar: {
-                    show: false,
+                toolbar: { show: false },
+                events: {
+                    dataPointSelection: (_e: any, _ctx: any, config: any) => {
+                        self._ngZone.run(() => {
+                            const idx = config.dataPointIndex;
+                            const nombre = String(marcas[idx] ?? '');
+                            const total = montosMarcas[idx] ?? 0;
+                            self.marcaInicioSeleccionada = self.marcaInicioSeleccionada?.nombre === nombre ? null : { nombre, total };
+                        });
+                    },
                 },
             },
+            states: { active: { filter: { type: 'darken', value: 0.75 } } },
             plotOptions: {
                 bar: {
                     barHeight: "100%",
@@ -400,6 +423,7 @@ export class InicioPageComponent implements OnInit, OnDestroy {
                     },
                 },
             },
+            legend: { show: false },
             xaxis: {
                 categories: this.reporteResumenDataSource.topDiezMarcasVentas.marcas,
                 labels: {
@@ -418,6 +442,9 @@ export class InicioPageComponent implements OnInit, OnDestroy {
         };
     }
 
+
+    limpiarSeleccionProducto() { this.productoInicioSeleccionado = null; }
+    limpiarSeleccionMarca() { this.marcaInicioSeleccionada = null; }
 
     getAnalisisVentasReporteAsync() {
 

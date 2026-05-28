@@ -1,0 +1,122 @@
+<div class="flex flex-col flex-auto w-full">
+    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+        <div class="flex flex-col w-full mb-6">
+            <h2 class="text-2xl font-semibold tracking-tight leading-8">Tendencia de Ventas</h2>
+            <div class="font-medium tracking-tight text-secondary" *ngIf="filtroRangoFecha">{{ filtroRangoFecha }}</div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="w-full mb-6 p-6 bg-card shadow rounded-2xl">
+            <form [formGroup]="filtroForm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <mat-form-field [appearance]="'outline'">
+                        <mat-label>Fecha Inicio</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerI.open()" autocomplete="off"
+                            matInput [matDatepicker]="pickerI" formControlName="fechaInicio">
+                        <mat-datepicker-toggle matSuffix [for]="pickerI"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerI></mat-datepicker>
+                    </mat-form-field>
+                    <mat-form-field [appearance]="'outline'">
+                        <mat-label>Fecha Fin</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerF.open()" autocomplete="off"
+                            matInput [matDatepicker]="pickerF" formControlName="fechaFin">
+                        <mat-datepicker-toggle matSuffix [for]="pickerF"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerF></mat-datepicker>
+                    </mat-form-field>
+                    <button mat-flat-button color="primary" [disabled]="disabledBuscar" (click)="buscar()">
+                        <mat-icon class="mr-1">search</mat-icon> Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <ng-container *ngIf="skeleton">
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div *ngFor="let i of [1,2,3,4]" class="h-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl"></div>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="!skeleton">
+            <!-- Cards -->
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40">
+                            <mat-icon class="text-blue-600">receipt_long</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight">{{ totalVentas }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Total Ventas</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/40">
+                            <mat-icon class="text-indigo-600">schedule</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-xl font-bold leading-none tracking-tight">{{ horaPico }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Hora pico</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40">
+                            <mat-icon class="text-purple-600">calendar_today</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-xl font-bold leading-none tracking-tight">{{ diaPico }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Día más activo</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40">
+                            <mat-icon class="text-green-600">attach_money</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-lg font-bold leading-none tracking-tight">{{ formatCurrency(ticketPromedio) }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Ticket promedio</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-6 bg-card shadow rounded-2xl">
+                    <div class="text-lg font-semibold mb-4">Ventas por Hora del Día</div>
+                    <apx-chart
+                        [series]="chartPorHora.series"
+                        [chart]="chartPorHora.chart"
+                        [colors]="chartPorHora.colors"
+                        [plotOptions]="chartPorHora.plotOptions"
+                        [dataLabels]="chartPorHora.dataLabels"
+                        [xaxis]="chartPorHora.xaxis"
+                        [yaxis]="chartPorHora.yaxis"
+                        [tooltip]="chartPorHora.tooltip"
+                        [noData]="chartPorHora.noData">
+                    </apx-chart>
+                </div>
+                <div class="p-6 bg-card shadow rounded-2xl">
+                    <div class="text-lg font-semibold mb-4">Ventas por Día de la Semana</div>
+                    <apx-chart
+                        [series]="chartPorDia.series"
+                        [chart]="chartPorDia.chart"
+                        [colors]="chartPorDia.colors"
+                        [plotOptions]="chartPorDia.plotOptions"
+                        [dataLabels]="chartPorDia.dataLabels"
+                        [xaxis]="chartPorDia.xaxis"
+                        [yaxis]="chartPorDia.yaxis"
+                        [tooltip]="chartPorDia.tooltip"
+                        [noData]="chartPorDia.noData">
+                    </apx-chart>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</div>

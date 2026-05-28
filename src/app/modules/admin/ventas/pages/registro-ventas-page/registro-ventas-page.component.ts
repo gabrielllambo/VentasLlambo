@@ -24,6 +24,7 @@ import { FuseConfirmationService } from '@fuse/services/confirmation';
 import { VentaService } from 'app/core/services/venta/venta.service';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { CategoriaConConteoDTO } from 'app/core/models/inventario/producto/response/categoria-con-conteo-dto.model';
+import { PromocionService } from 'app/core/services/promocion/promocion.service';
 
 @Component({
     selector: 'app-registro-ventas-page',
@@ -44,7 +45,7 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
     public isbuscandoProductosDisabled: boolean = false;
     public hayCliente: boolean = Flags.False;
     public filtroRegistroVentasForm: UntypedFormGroup;
-    public productoTableColumns: string[] = ['foto', 'nombre', 'stock', 'precioVenta', 'cantidad', 'total', 'acciones'];
+    public productoTableColumns: string[] = ['foto', 'nombre', 'stock', 'precioVenta', 'descuento', 'cantidad', 'total', 'acciones'];
     public parametroBusquedaProducto: string = '';
     public parametroBusquedaCliente: string = '';
     public notaAdicional: string;
@@ -57,7 +58,7 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
     public flgEnviarComprobante: boolean;
     get totalVenta(): number {
         return this.lstProductosSeleccionados.data.reduce((total, producto) => {
-            return total + (producto.precioVenta * producto.cantidad);
+            return total + this.calcularTotalProducto(producto);
         }, 0);
     }
 
@@ -68,7 +69,8 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
         private _inventarioService: InventarioService,
         private _clienteService: ClienteService,
         private _ventaService: VentaService,
-        private _toolService: ToolService
+        private _toolService: ToolService,
+        private _promocionService: PromocionService,
     ) {
     }
 
@@ -129,9 +131,13 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
             nombreMarca: producto?.marca.nombre,
             colorMarca: producto?.marca.color,
             cantidad: producto?.cantidad,
-            nombreMedida: producto?.categoria.medida?.nombre,
+            nombreMedida: (producto as any)?.categoria?.medida?.nombre,
             precioCompra: producto?.precioCompra,
-            precioVenta: producto?.precioVenta,
+            precioVenta: producto.aplicarDescuento && producto.descuentoPorcentaje > 0
+                ? +(producto.precioVenta * (1 - producto.descuentoPorcentaje / 100)).toFixed(2)
+                : producto?.precioVenta,
+            descuentoPorcentaje: producto.aplicarDescuento ? (producto.descuentoPorcentaje || 0) : 0,
+            observacionDescuento: producto.aplicarDescuento ? (producto.observacionDescuento || '') : '',
         }));
 
         if (this.lstProductosSeleccionados.data.length == Numeracion.Cero) {
@@ -303,7 +309,10 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
     }
 
     calcularTotalProducto(producto: ProductoSeleccionadosVenta): number {
-        return producto.cantidad * producto.precioVenta;
+        const factor = (producto.aplicarDescuento && producto.descuentoPorcentaje > 0)
+            ? (1 - producto.descuentoPorcentaje / 100)
+            : 1;
+        return +(producto.cantidad * producto.precioVenta * factor).toFixed(2);
     }
 
     filtrarProductos(event: Event) {
@@ -356,12 +365,26 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
         const index = this.lstProductosSeleccionados.data.findIndex(p => p.codigo === producto.codigo);
 
         if (index === -1) {
-            producto.cantidad = Numeracion.Uno;
-            this.lstProductosSeleccionados.data = [...this.lstProductosSeleccionados.data, producto];
+            const item = producto as any as ProductoSeleccionadosVenta;
+            item.cantidad = Numeracion.Uno;
+            item.aplicarDescuento = false;
+            item.descuentoPorcentaje = 0;
+            item.observacionDescuento = '';
+            item.promocionId = undefined;
+
+            const promo = this._promocionService.getActivaParaProducto(producto.id);
+            if (promo) {
+                item.aplicarDescuento = true;
+                item.descuentoPorcentaje = promo.descuentoPorcentaje;
+                item.observacionDescuento = promo.motivo;
+                item.promocionId = promo.id;
+            }
+
+            this.lstProductosSeleccionados.data = [...this.lstProductosSeleccionados.data, item];
         } else {
             const cantidadActual = this.lstProductosSeleccionados.data[index].cantidad;
 
-            if (cantidadActual >= producto.stock) {
+            if (cantidadActual >= (producto.stock ?? 0)) {
                 this._toolService.showWarning(DictionaryWarning.StockLimite, DictionaryErrors.Tittle);
                 return;
             }
@@ -372,6 +395,21 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
         this.lstProductosSeleccionados._updateChangeSubscription();
         this.parametroBusquedaProducto = "";
         this.allProductoDataSource.data = [];
+    }
+
+    onDescuentoChange(producto: ProductoSeleccionadosVenta): void {
+        if (!producto.aplicarDescuento) {
+            producto.descuentoPorcentaje = 0;
+            producto.observacionDescuento = '';
+            producto.promocionId = undefined;
+        }
+        this.lstProductosSeleccionados._updateChangeSubscription();
+    }
+
+    validarDescuento(producto: ProductoSeleccionadosVenta): void {
+        if (producto.descuentoPorcentaje < 0) producto.descuentoPorcentaje = 0;
+        if (producto.descuentoPorcentaje > 100) producto.descuentoPorcentaje = 100;
+        this.lstProductosSeleccionados._updateChangeSubscription();
     }
 
     ngOnDestroy(): void {
@@ -423,8 +461,8 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
 
     validarPeso(producto: any): void {
 
-        // Solo aplica para productos por PESO
-        if (producto.tipoMedida !== 1) {
+        // Solo aplica para productos por PESO (kg o libras)
+        if (producto.tipoMedida < 2) {
             return;
         }
 
@@ -478,4 +516,22 @@ export class RegistroVentasPageComponent implements OnInit, OnDestroy {
         }
     }
 
+    getSemaforoVencimiento(fechaStr: string | null): { clase: string, dot: string } {
+        if (!fechaStr) return { clase: 'bg-gray-100 text-gray-800 border-gray-200', dot: 'bg-gray-400' };
+        
+        const fecha = new Date(fechaStr);
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0); // Ignorar horas para comparar solo las fechas
+        
+        const diffTime = fecha.getTime() - hoy.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 0) {
+            return { clase: 'bg-red-50 text-red-700 border-red-200', dot: 'bg-red-500' }; // Vencido
+        } else if (diffDays <= 30) {
+            return { clase: 'bg-yellow-50 text-yellow-700 border-yellow-200', dot: 'bg-yellow-500' }; // Por vencer
+        } else {
+            return { clase: 'bg-green-50 text-green-700 border-green-200', dot: 'bg-green-500' }; // Vigente
+        }
+    }
 }

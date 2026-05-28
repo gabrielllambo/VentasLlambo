@@ -11,6 +11,8 @@ import { ReporteVentasCategoriasPageComponent } from './pages/reporte-ventas-cat
 import { ReporteVentasMarcasPageComponent } from './pages/reporte-ventas-marcas-page/reporte-ventas-marcas-page.component';
 import { ReporteVentasProductosPageComponent } from './pages/reporte-ventas-productos-page/reporte-ventas-productos-page.component';
 import { ReporteGananciasPageComponent } from './pages/reporte-ganancias-page/reporte-ganancias-page.component';
+import { ReporteFlujosCajaPageComponent } from './pages/reporte-flujo-caja-page/reporte-flujo-caja-page.component';
+import { ReporteTendenciaPageComponent } from './pages/reporte-tendencia-page/reporte-tendencia-page.component';
 
 const BASE_MODULES = [CommonModule, SharedModule, VentasRoutingModule];
 
@@ -21,6 +23,8 @@ const BASE_COMPONENTS = [
   RegistroVentasPageComponent,
   HistorialVentasPageComponent,
   ReporteGananciasPageComponent,
+  ReporteFlujosCajaPageComponent,
+  ReporteTendenciaPageComponent,
 ];
 
 const DETALLE = [

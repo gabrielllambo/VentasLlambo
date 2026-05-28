@@ -165,6 +165,12 @@ export class InventarioService {
             .pipe(tap(data => data));
     }
 
+    EliminarInventarioFisicoAsync(idInventarioFisico: number): Observable<ResponseDTO> {
+        const url = `${Url.Inventario.Fisico.EliminarInventarioFisicoAsync}${idInventarioFisico}`;
+        return this.apiService.delete(url)
+            .pipe(tap(data => data));
+    }
+
     GetHistorialInventarioFisicoAsync(request: ObtenerHistorialInventarioFisicoRequest): Observable<ReportePerdidasResumenDTO> {
         return this.apiService.post(Url.Inventario.Fisico.GetHistorialInventarioFisicoAsync, request)
             .pipe(tap(data => data));

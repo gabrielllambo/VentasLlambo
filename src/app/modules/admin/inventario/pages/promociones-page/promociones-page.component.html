@@ -1,0 +1,411 @@
+<div class="flex flex-col flex-auto w-full">
+  <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+    <!-- Cabecera -->
+    <div class="flex items-center justify-between w-full mb-6">
+      <div>
+        <h2 class="text-2xl font-semibold tracking-tight leading-8">Promociones y Descuentos</h2>
+        <div class="flex items-center font-medium text-sm">
+          <a class="text-primary-500">Inventario</a>
+          <mat-icon class="icon-size-4 text-secondary" [svgIcon]="'heroicons_mini:chevron-right'"></mat-icon>
+          <span class="text-secondary">Promociones</span>
+        </div>
+      </div>
+      <!-- Resumen rápido -->
+      <div class="flex gap-3">
+        <div class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 border border-green-200">
+          <mat-icon class="icon-size-4 text-green-600" [svgIcon]="'heroicons_mini:tag'"></mat-icon>
+          <span class="text-sm font-semibold text-green-700">{{ promocionesActivas.length }} activa(s)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <mat-tab-group class="w-full" animationDuration="200ms" [selectedIndex]="tabActual" (selectedIndexChange)="onTabChange($event)">
+
+      <!-- ══════════════════════════════════════════
+           TAB 1 — NUEVA PROMOCIÓN
+      ══════════════════════════════════════════ -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="icon-size-5 mr-2"
+            [svgIcon]="modoEdicion ? 'heroicons_outline:pencil-square' : 'heroicons_outline:plus-circle'"></mat-icon>
+          {{ modoEdicion ? 'Editando Promoción' : 'Nueva Promoción' }}
+        </ng-template>
+
+        <div class="pt-6 flex justify-center">
+          <div class="w-full max-w-2xl">
+            <div class="bg-card shadow rounded-2xl p-8 dark:bg-transparent">
+
+              <!-- Encabezado del formulario -->
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                     [ngClass]="modoEdicion ? 'bg-blue-100' : 'bg-amber-100'">
+                  <mat-icon [ngClass]="modoEdicion ? 'text-blue-600' : 'text-amber-600'"
+                            [svgIcon]="modoEdicion ? 'heroicons_outline:pencil-square' : 'heroicons_outline:tag'"></mat-icon>
+                </div>
+                <div>
+                  <div class="text-lg font-semibold">{{ modoEdicion ? 'Editar Promoción' : 'Configurar Promoción' }}</div>
+                  <div class="text-sm text-secondary">
+                    {{ modoEdicion ? 'Modifica los datos y guarda los cambios' : 'Elige los productos, el descuento y el período de vigencia' }}
+                  </div>
+                </div>
+              </div>
+
+              <form [formGroup]="form" class="flex flex-col gap-5">
+
+                <!-- Motivo -->
+                <mat-form-field [appearance]="'outline'" class="w-full">
+                  <mat-label>Motivo / Nombre de la promoción</mat-label>
+                  <input matInput formControlName="motivo" placeholder="Ej: Oferta de temporada, Black Friday..." autocomplete="off">
+                  <mat-hint>Este texto se mostrará en la pantalla de ventas</mat-hint>
+                  <mat-error *ngIf="form.get('motivo').hasError('required')">El motivo es obligatorio</mat-error>
+                  <mat-error *ngIf="form.get('motivo').hasError('maxlength')">Máximo 200 caracteres</mat-error>
+                </mat-form-field>
+
+                <!-- Porcentaje de descuento -->
+                <mat-form-field [appearance]="'outline'" class="w-full">
+                  <mat-label>Porcentaje de descuento</mat-label>
+                  <input matInput type="number" formControlName="descuentoPorcentaje"
+                         min="1" max="100" placeholder="Ej: 15">
+                  <span matSuffix class="text-secondary font-medium mr-2">%</span>
+                  <mat-hint>Entre 1% y 100%</mat-hint>
+                  <mat-error *ngIf="form.get('descuentoPorcentaje').hasError('required')">El porcentaje es obligatorio</mat-error>
+                  <mat-error *ngIf="form.get('descuentoPorcentaje').hasError('min') || form.get('descuentoPorcentaje').hasError('max')">
+                    Debe estar entre 1 y 100
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Rango de fechas -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                  <mat-form-field [appearance]="'outline'" class="flex-1">
+                    <mat-label>Fecha de inicio</mat-label>
+                    <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio"
+                           [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off">
+                    <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerInicio></mat-datepicker>
+                    <mat-error>La fecha de inicio es obligatoria</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field [appearance]="'outline'" class="flex-1">
+                    <mat-label>Fecha de fin</mat-label>
+                    <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin"
+                           [min]="form.get('fechaInicio').value" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off">
+                    <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerFin></mat-datepicker>
+                    <mat-error>La fecha de fin es obligatoria</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <!-- Selección de productos -->
+                <div class="flex flex-col gap-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium">Productos en promoción</span>
+                    <span *ngIf="form.get('productos').value?.length > 0"
+                          class="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary-100 text-primary-700">
+                      {{ form.get('productos').value.length }} seleccionado(s)
+                    </span>
+                  </div>
+
+                  <!-- Buscador -->
+                  <mat-form-field [appearance]="'outline'" class="w-full fuse-mat-dense">
+                    <mat-label>Buscar producto...</mat-label>
+                    <input matInput [(ngModel)]="busquedaProducto" [ngModelOptions]="{standalone: true}"
+                           placeholder="Escribe nombre o código..." autocomplete="off">
+                    <mat-icon matSuffix class="text-secondary icon-size-4">search</mat-icon>
+                  </mat-form-field>
+
+                  <!-- Lista con checkboxes -->
+                  <div class="border rounded-xl overflow-y-auto"
+                       style="max-height: 220px"
+                       [ngClass]="{
+                         'border-red-400': form.get('productos').touched && form.get('productos').hasError('required'),
+                         'border-gray-200': !(form.get('productos').touched && form.get('productos').hasError('required'))
+                       }">
+
+                    <div *ngIf="loadingProductos" class="p-4 text-center text-secondary text-sm">
+                      Cargando productos...
+                    </div>
+
+                    <div *ngIf="!loadingProductos && productosFiltrados.length === 0"
+                         class="p-4 text-center text-secondary text-sm">
+                      No se encontraron productos
+                    </div>
+
+                    <div *ngFor="let p of productosFiltrados"
+                         class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b last:border-0 select-none"
+                         (click)="toggleProducto(p)">
+                      <mat-checkbox [checked]="isProductoSeleccionado(p)"
+                                    (click)="$event.stopPropagation()"
+                                    (change)="toggleProducto(p)"
+                                    color="primary">
+                      </mat-checkbox>
+                      <img *ngIf="p.urlFoto" [src]="p.urlFoto" class="w-8 h-8 rounded-lg object-cover flex-shrink-0" alt="">
+                      <span *ngIf="!p.urlFoto"
+                            class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-secondary flex-shrink-0">?</span>
+                      <span class="text-sm flex-1">{{ p.nombre }}</span>
+                      <span class="text-xs text-secondary">{{ p.codigo }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Error -->
+                  <div *ngIf="form.get('productos').touched && form.get('productos').hasError('required')"
+                       class="text-red-500 text-xs">
+                    Selecciona al menos un producto
+                  </div>
+                </div>
+
+                <!-- Preview del descuento (si tiene % ingresado) -->
+                <div *ngIf="form.get('descuentoPorcentaje').value > 0 && form.get('productos').value?.length > 0"
+                     class="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
+                  <mat-icon class="text-amber-600 flex-shrink-0" [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+                  <div class="text-sm text-amber-800">
+                    <strong>{{ form.get('descuentoPorcentaje').value }}% de descuento</strong>
+                    en {{ form.get('productos').value.length }} producto(s)
+                    <ng-container *ngIf="form.get('motivo').value?.trim()">
+                      — <em>{{ form.get('motivo').value }}</em>
+                    </ng-container>
+                  </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex justify-end gap-3 mt-2">
+                  <button *ngIf="modoEdicion" mat-stroked-button type="button" (click)="cancelarEdicion()">
+                    <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_mini:x-mark'"></mat-icon>
+                    Cancelar edición
+                  </button>
+                  <button *ngIf="!modoEdicion" mat-stroked-button type="button" (click)="form.reset({ motivo: '', descuentoPorcentaje: null, fechaInicio: null, fechaFin: null, productos: [] })">
+                    Limpiar
+                  </button>
+                  <button mat-flat-button [color]="modoEdicion ? 'accent' : 'primary'" type="button" (click)="guardar()" [disabled]="form.invalid">
+                    <mat-icon class="icon-size-5 mr-1"
+                              [svgIcon]="modoEdicion ? 'heroicons_solid:pencil-square' : 'heroicons_solid:check-circle'"></mat-icon>
+                    {{ modoEdicion ? 'Actualizar Promoción' : 'Guardar Promoción' }}
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- ══════════════════════════════════════════
+           TAB 2 — GESTIÓN DE PROMOCIONES
+      ══════════════════════════════════════════ -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:list-bullet'"></mat-icon>
+          Todas las Promociones
+          <span *ngIf="promociones.length > 0"
+                class="ml-2 px-1.5 py-0.5 rounded-full text-xs font-bold bg-primary-100 text-primary-700">
+            {{ promociones.length }}
+          </span>
+        </ng-template>
+
+        <div class="pt-6">
+
+          <!-- Sin datos -->
+          <div *ngIf="promociones.length === 0"
+               class="flex flex-col items-center justify-center py-16 bg-card shadow rounded-2xl dark:bg-transparent">
+            <mat-icon class="icon-size-16 text-gray-300" [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+            <div class="mt-4 text-lg font-medium text-secondary">No hay promociones registradas</div>
+            <div class="mt-1 text-sm text-secondary">Crea una nueva promoción desde la pestaña anterior</div>
+            <button mat-flat-button [color]="'primary'" class="mt-6" (click)="tabActual = 0">
+              <mat-icon class="icon-size-5 mr-1" [svgIcon]="'heroicons_solid:plus'"></mat-icon>
+              Nueva Promoción
+            </button>
+          </div>
+
+          <!-- Lista de promociones -->
+          <div class="flex flex-col gap-4">
+            <div *ngFor="let promo of promocionesHistorial; trackBy: trackById"
+                 class="bg-card shadow rounded-2xl overflow-hidden dark:bg-transparent border"
+                 [ngClass]="{
+                   'border-green-200':  getEstado(promo) === 'activa',
+                   'border-gray-200':   getEstado(promo) === 'inactiva',
+                   'border-red-200':    getEstado(promo) === 'vencida',
+                   'border-blue-200':   getEstado(promo) === 'pendiente'
+                 }">
+
+              <!-- Cabecera de la tarjeta -->
+              <div class="px-6 py-4 flex flex-wrap items-start gap-4">
+
+                <!-- Ícono de descuento -->
+                <div class="flex-shrink-0 w-16 h-16 rounded-2xl flex flex-col items-center justify-center"
+                     [ngClass]="{
+                       'bg-green-100':  getEstado(promo) === 'activa',
+                       'bg-gray-100':   getEstado(promo) === 'inactiva',
+                       'bg-red-100':    getEstado(promo) === 'vencida',
+                       'bg-blue-100':   getEstado(promo) === 'pendiente'
+                     }">
+                  <span class="text-2xl font-black leading-none"
+                        [ngClass]="{
+                          'text-green-700':  getEstado(promo) === 'activa',
+                          'text-gray-500':   getEstado(promo) === 'inactiva',
+                          'text-red-600':    getEstado(promo) === 'vencida',
+                          'text-blue-600':   getEstado(promo) === 'pendiente'
+                        }">
+                    {{ promo.descuentoPorcentaje }}%
+                  </span>
+                  <span class="text-xs font-medium"
+                        [ngClass]="{
+                          'text-green-600':  getEstado(promo) === 'activa',
+                          'text-gray-400':   getEstado(promo) === 'inactiva',
+                          'text-red-500':    getEstado(promo) === 'vencida',
+                          'text-blue-500':   getEstado(promo) === 'pendiente'
+                        }">desc.</span>
+                </div>
+
+                <!-- Info principal -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <div class="font-semibold text-base truncate">{{ promo.motivo }}</div>
+                    <!-- Estado badge -->
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold flex-shrink-0"
+                          [ngClass]="{
+                            'bg-green-100 text-green-700':  getEstado(promo) === 'activa',
+                            'bg-gray-100 text-gray-600':    getEstado(promo) === 'inactiva',
+                            'bg-red-100 text-red-700':      getEstado(promo) === 'vencida',
+                            'bg-blue-100 text-blue-700':    getEstado(promo) === 'pendiente'
+                          }">
+                      <ng-container [ngSwitch]="getEstado(promo)">
+                        <ng-container *ngSwitchCase="'activa'">● Activa</ng-container>
+                        <ng-container *ngSwitchCase="'inactiva'">○ Inactiva</ng-container>
+                        <ng-container *ngSwitchCase="'vencida'">✕ Vencida</ng-container>
+                        <ng-container *ngSwitchCase="'pendiente'">◷ Pendiente</ng-container>
+                      </ng-container>
+                    </span>
+                  </div>
+
+                  <!-- Fechas -->
+                  <div class="flex items-center gap-1.5 mt-1 text-sm text-secondary">
+                    <mat-icon class="icon-size-3.5" [svgIcon]="'heroicons_mini:calendar'"></mat-icon>
+                    <span>{{ formatFecha(promo.fechaInicio) }}</span>
+                    <span>→</span>
+                    <span>{{ formatFecha(promo.fechaFin) }}</span>
+                  </div>
+
+                  <!-- Productos -->
+                  <div class="flex flex-wrap gap-1.5 mt-2">
+                    <div *ngFor="let prod of promo.productos"
+                         class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs">
+                      <img *ngIf="prod.urlFoto" [src]="prod.urlFoto" class="w-4 h-4 rounded-full object-cover" alt="">
+                      <span>{{ prod.nombre }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                  <!-- Toggle activo/inactivo -->
+                  <button mat-stroked-button class="text-xs"
+                          [color]="promo.activo ? 'warn' : 'primary'"
+                          (click)="toggleActivo(promo, $event)"
+                          [matTooltip]="promo.activo ? 'Desactivar promoción' : 'Activar promoción'">
+                    <mat-icon class="icon-size-4 mr-1"
+                              [svgIcon]="promo.activo ? 'heroicons_mini:pause' : 'heroicons_mini:play'"></mat-icon>
+                    {{ promo.activo ? 'Desactivar' : 'Activar' }}
+                  </button>
+                  <div class="flex gap-1">
+                    <!-- Editar -->
+                    <button mat-icon-button class="text-blue-400 hover:text-blue-600"
+                            (click)="editar(promo, $event)"
+                            matTooltip="Editar promoción">
+                      <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:pencil-square'"></mat-icon>
+                    </button>
+                    <!-- Eliminar -->
+                    <button mat-icon-button class="text-red-400 hover:text-red-600"
+                            (click)="eliminar(promo, $event)"
+                            matTooltip="Eliminar promoción">
+                      <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </mat-tab>
+
+      <!-- ══════════════════════════════════════════
+           TAB 3 — PRODUCTOS CON PROMOCIÓN ACTIVA
+      ══════════════════════════════════════════ -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:shopping-bag'"></mat-icon>
+          Productos en Promo
+          <span *ngIf="promocionesActivas.length > 0"
+                class="ml-2 px-1.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
+            {{ promocionesActivas.length }}
+          </span>
+        </ng-template>
+
+        <div class="pt-6">
+
+          <!-- Sin promos activas -->
+          <div *ngIf="promocionesActivas.length === 0"
+               class="flex flex-col items-center justify-center py-16 bg-card shadow rounded-2xl dark:bg-transparent">
+            <mat-icon class="icon-size-16 text-gray-300" [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+            <div class="mt-4 text-lg font-medium text-secondary">No hay promociones activas hoy</div>
+            <div class="mt-1 text-sm text-secondary">Las promociones vigentes aparecerán aquí con sus productos</div>
+          </div>
+
+          <!-- Grid de promociones activas con sus productos -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <ng-container *ngFor="let promo of promocionesActivas; trackBy: trackById">
+              <ng-container *ngFor="let prod of promo.productos">
+                <div class="bg-card shadow rounded-2xl overflow-hidden dark:bg-transparent border border-green-200 flex flex-col">
+
+                  <!-- Banner de descuento -->
+                  <div class="relative bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-3 flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                      <span class="text-xl font-black text-white leading-none">{{ promo.descuentoPorcentaje }}%</span>
+                    </div>
+                    <div class="text-white min-w-0">
+                      <div class="font-semibold text-sm truncate">{{ promo.motivo }}</div>
+                      <div class="text-xs text-green-100">Hasta: {{ formatFecha(promo.fechaFin) }}</div>
+                    </div>
+                    <!-- Chip ACTIVO -->
+                    <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-white/30 text-white text-xs font-bold">
+                      ACTIVA
+                    </div>
+                  </div>
+
+                  <!-- Info del producto -->
+                  <div class="flex items-center gap-3 p-4">
+                    <div class="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center">
+                      <img *ngIf="prod.urlFoto" [src]="prod.urlFoto" class="w-full h-full object-cover" alt="">
+                      <mat-icon *ngIf="!prod.urlFoto" class="text-gray-400" [svgIcon]="'heroicons_outline:photo'"></mat-icon>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="font-semibold text-sm truncate">{{ prod.nombre }}</div>
+                      <div class="text-xs text-secondary mt-0.5">Código: {{ prod.codigo || '—' }}</div>
+                    </div>
+                  </div>
+
+                  <!-- Fechas vigencia -->
+                  <div class="px-4 pb-4 mt-auto">
+                    <div class="flex items-center gap-1.5 text-xs text-secondary">
+                      <mat-icon class="icon-size-3.5" [svgIcon]="'heroicons_mini:calendar'"></mat-icon>
+                      <span>{{ formatFecha(promo.fechaInicio) }}</span>
+                      <span>→</span>
+                      <span>{{ formatFecha(promo.fechaFin) }}</span>
+                    </div>
+                  </div>
+
+                </div>
+              </ng-container>
+            </ng-container>
+          </div>
+
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+
+  </div>
+</div>

@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Meta } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertType } from '@fuse/components/alert';
 import { FuseValidators } from '@fuse/validators';
@@ -12,7 +11,7 @@ import { DictionaryErrors, DictionaryWarning } from 'app/core/resource/dictionar
 import { AuthService } from 'app/core/services/auth/auth.service';
 import { ToolService } from 'app/core/services/tool/tool.service';
 import * as CustomValidator from 'app/core/util/functions';
-import { Subject, takeUntil } from 'rxjs';
+import { filter, Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'reset-password-classic',
@@ -22,7 +21,7 @@ import { Subject, takeUntil } from 'rxjs';
     standalone: false
 })
 export class ResetPasswordClassicComponent implements OnInit {
-    public token: string;
+    public token!: string;
 
     alert: { type: FuseAlertType; message: string } = {
         type: 'success',
@@ -30,12 +29,12 @@ export class ResetPasswordClassicComponent implements OnInit {
     };
     isCallingService: boolean = Flags.False;
     showAlert: boolean = false;
-    response: ResponseDTO;
-    resetPasswordForm: UntypedFormGroup;
-    public restablecerContraseniaForm: UntypedFormGroup;
+    response!: ResponseDTO;
+    resetPasswordForm!: UntypedFormGroup;
+    public restablecerContraseniaForm!: UntypedFormGroup;
     public pasosRestablecerContrasenia: string = PasosRestablecerContrasenia.VALIDAR_CODIGO_TOKEN;
     public _unsubscribeAll: Subject<any> = new Subject<any>();
-    public validateTokenDataSource: ResponseDTO;
+    public validateTokenDataSource!: ResponseDTO;
     constructor(
         private _toolService: ToolService,
         private _formBuilder: UntypedFormBuilder,
@@ -47,7 +46,10 @@ export class ResetPasswordClassicComponent implements OnInit {
     ngOnInit(): void {
         this.metaService.updateTag({ name: 'robots', content: 'noindex, nofollow' });
         this._authService.responseValidateToken$
-            .pipe(takeUntil(this._unsubscribeAll))
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                filter(response => response !== null)
+            )
             .subscribe((response: ResponseDTO) => {
 
                 this.validateTokenDataSource = response;
@@ -84,7 +86,7 @@ export class ResetPasswordClassicComponent implements OnInit {
 
         const request = new RestablecerContraseniaRequest()
         const destinationTimeZoneId = this._toolService.getTimeZone()
-        const txtConfirmarContrasenia = this.resetPasswordForm.get('txtConfirmarContrasenia').value;
+        const txtConfirmarContrasenia = this.resetPasswordForm.get('txtConfirmarContrasenia')?.value;
 
         const fullUrl = window.location.href;
         const correoSegment = fullUrl.split('reset-password/')[1];
@@ -123,26 +125,28 @@ export class ResetPasswordClassicComponent implements OnInit {
 
         this.resetPasswordForm.disable();
         this.isCallingService = Flags.True;
-        this._authService.RestablecerContraseniaAsync(request).subscribe((response: ResponseDTO) => {
-            if (response.success) {
-                this.response = response;
+        this._authService.RestablecerContraseniaAsync(request).subscribe({
+            next: (response: ResponseDTO) => {
+                if (response.success) {
+                    this.response = response;
+                    this.isCallingService = Flags.False;
+                    this.pasosRestablecerContrasenia = PasosRestablecerContrasenia.CONTRASENIA_RESTABLECIDA;
+                    return;
+                }
+                this.alert = {
+                    type: 'warning',
+                    message: response.message,
+                };
+                this.showAlert = Flags.ShowFuseAlert;
                 this.isCallingService = Flags.False;
-                this.pasosRestablecerContrasenia = PasosRestablecerContrasenia.CONTRASENIA_RESTABLECIDA;
-                return;
+                this.resetPasswordForm.enable();
+            },
+            error: (err) => {
+                this._toolService.showError(DictionaryErrors.Transaction, DictionaryErrors.Tittle);
+                this.isCallingService = Flags.False;
+                this.resetPasswordForm.enable();
+                console.log(err);
             }
-            this.alert = {
-                type: 'warning',
-                message: response.message,
-            };
-            this.showAlert = Flags.ShowFuseAlert;
-            this.isCallingService = Flags.False;
-            this.resetPasswordForm.enable();
-            return;
-        }, err => {
-            this._toolService.showError(DictionaryErrors.Transaction, DictionaryErrors.Tittle);
-            this.isCallingService = Flags.False;
-            this.resetPasswordForm.enable();
-            console.log(err);
         });
     }
 

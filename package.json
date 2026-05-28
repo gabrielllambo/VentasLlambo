@@ -83,6 +83,7 @@
     "karma-jasmine-html-reporter": "2.0.0",
     "lodash": "4.17.21",
     "postcss": "8.4.31",
+    "puppeteer": "^25.0.4",
     "tailwindcss": "3.3.5",
     "typescript": "^5.2.2"
   }

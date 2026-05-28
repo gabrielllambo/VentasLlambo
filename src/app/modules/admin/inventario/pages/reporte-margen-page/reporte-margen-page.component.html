@@ -1,0 +1,130 @@
+<div class="flex flex-col flex-auto w-full">
+    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+        <div class="flex flex-col w-full mb-6">
+            <h2 class="text-2xl font-semibold tracking-tight leading-8">Margen de Ganancia por Producto</h2>
+            <div class="font-medium tracking-tight text-secondary">Análisis de rentabilidad por producto</div>
+        </div>
+
+        <ng-container *ngIf="skeleton">
+            <div class="w-full grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                <div *ngFor="let i of [1,2,3]" class="h-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl"></div>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="!skeleton">
+            <!-- Filtros -->
+            <div class="w-full mb-6 p-4 bg-card shadow rounded-2xl flex flex-wrap gap-4 items-center">
+                <mat-form-field [appearance]="'outline'" class="flex-1 min-w-48">
+                    <mat-label>Buscar producto o categoría</mat-label>
+                    <input matInput [(ngModel)]="textoBusqueda" (ngModelChange)="aplicarFiltro()" placeholder="Buscar...">
+                    <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+                <button mat-stroked-button (click)="toggleOrden()">
+                    <mat-icon>{{ ordenDir === 'desc' ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+                    {{ ordenDir === 'desc' ? 'Mayor margen primero' : 'Menor margen primero' }}
+                </button>
+            </div>
+
+            <!-- Cards -->
+            <div class="w-full grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40">
+                            <mat-icon class="text-blue-600">analytics</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight">{{ formatPct(promedioMargen) }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Margen promedio</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40">
+                            <mat-icon class="text-green-600">trending_up</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-sm font-bold leading-none tracking-tight text-green-600" *ngIf="mejorMargen">
+                                {{ formatPct(mejorMargen.margenPct) }} — {{ mejorMargen.nombre }}
+                            </div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Mejor margen</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40">
+                            <mat-icon class="text-red-600">trending_down</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-sm font-bold leading-none tracking-tight text-red-600" *ngIf="peorMargen">
+                                {{ formatPct(peorMargen.margenPct) }} — {{ peorMargen.nombre }}
+                            </div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Menor margen</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="w-full p-6 bg-card shadow rounded-2xl mb-6">
+                <div class="text-lg font-semibold mb-2">Top 10 por Margen (%)</div>
+                <apx-chart
+                    [series]="chartTop10.series"
+                    [chart]="chartTop10.chart"
+                    [plotOptions]="chartTop10.plotOptions"
+                    [colors]="chartTop10.colors"
+                    [dataLabels]="chartTop10.dataLabels"
+                    [xaxis]="chartTop10.xaxis"
+                    [tooltip]="chartTop10.tooltip"
+                    [noData]="chartTop10.noData">
+                </apx-chart>
+            </div>
+
+            <!-- Tabla -->
+            <div class="w-full bg-card shadow rounded-2xl overflow-hidden">
+                <div class="flex items-center px-6 py-4 border-b">
+                    <mat-icon class="text-blue-600 mr-2">table_chart</mat-icon>
+                    <span class="font-semibold text-lg">Detalle de Márgenes</span>
+                    <span class="ml-2 text-secondary text-sm">({{ productosFiltrados.length }} productos)</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table mat-table [dataSource]="productosFiltrados" class="w-full">
+                        <ng-container matColumnDef="nombre">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Producto</th>
+                            <td mat-cell *matCellDef="let p" class="font-medium">{{ p.nombre }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="categoria">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Categoría</th>
+                            <td mat-cell *matCellDef="let p">{{ p.categoria?.nombre ?? '—' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="precioCompra">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">P. Compra</th>
+                            <td mat-cell *matCellDef="let p" class="text-right">{{ formatCurrency(p.precioCompra ?? 0) }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="precioVenta">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">P. Venta</th>
+                            <td mat-cell *matCellDef="let p" class="text-right">{{ formatCurrency(p.precioVenta) }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="gananciaUnitaria">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Ganancia/u</th>
+                            <td mat-cell *matCellDef="let p" class="text-right font-medium">{{ formatCurrency(p.gananciaUnitaria) }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="margenPct">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Margen %</th>
+                            <td mat-cell *matCellDef="let p" class="text-right">
+                                <span class="font-bold" [ngClass]="getMargenClass(p.margenPct)">{{ formatPct(p.margenPct) }}</span>
+                            </td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="columnas; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell text-center py-8 text-secondary" [attr.colspan]="columnas.length">Sin resultados</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</div>

@@ -1,0 +1,972 @@
+<div class="flex flex-auto h-full" style="min-height: calc(100vh - 64px)">
+
+    <!-- ══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+    <aside class="w-64 shrink-0 flex flex-col border-r bg-card overflow-y-auto">
+        <div class="px-4 pt-6 pb-3">
+            <div class="text-xs font-semibold uppercase tracking-widest text-secondary">Dashboard</div>
+        </div>
+
+        <nav class="flex-auto pb-6">
+            <ng-container *ngFor="let grupo of GRUPOS">
+                <div class="px-4 pt-4 pb-1">
+                    <span class="text-xs font-semibold uppercase tracking-widest text-secondary opacity-60">{{ grupo }}</span>
+                </div>
+                <button
+                    *ngFor="let rep of getReportesPorGrupo(grupo)"
+                    (click)="seleccionarReporte(rep.id)"
+                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors rounded-none text-left"
+                    [ngClass]="reporteActivo === rep.id
+                        ? 'bg-primary text-on-primary'
+                        : 'text-secondary hover:bg-hover'">
+                    <mat-icon class="icon-size-5 shrink-0" [svgIcon]="rep.icon"></mat-icon>
+                    <span class="leading-tight">{{ rep.label }}</span>
+                </button>
+            </ng-container>
+        </nav>
+    </aside>
+
+    <!-- ══ CONTENT ══════════════════════════════════════════════════════════ -->
+    <div class="flex flex-col flex-auto overflow-y-auto">
+
+        <!-- Header -->
+        <div class="flex flex-wrap items-center gap-4 px-6 py-4 border-b bg-card sticky top-0 z-10">
+            <div class="flex-auto">
+                <h2 class="text-xl font-semibold tracking-tight leading-7">{{ reporteActual.label }}</h2>
+            </div>
+
+            <!-- Selector de fechas (solo para reportes que lo necesitan) -->
+            <ng-container *ngIf="reporteActual.needsDate">
+                <form [formGroup]="filtroForm" class="flex flex-wrap items-center gap-3">
+                    <mat-form-field appearance="outline" class="w-40" style="margin-bottom:-1.25rem">
+                        <mat-label>Desde</mat-label>
+                        <input matInput [matDatepicker]="dpInicio" formControlName="fechaInicio" [min]="minDate" [max]="maxDate" readonly>
+                        <mat-datepicker-toggle matSuffix [for]="dpInicio"></mat-datepicker-toggle>
+                        <mat-datepicker #dpInicio></mat-datepicker>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="w-40" style="margin-bottom:-1.25rem">
+                        <mat-label>Hasta</mat-label>
+                        <input matInput [matDatepicker]="dpFin" formControlName="fechaFin" [min]="minDate" [max]="maxDate" readonly>
+                        <mat-datepicker-toggle matSuffix [for]="dpFin"></mat-datepicker-toggle>
+                        <mat-datepicker #dpFin></mat-datepicker>
+                    </mat-form-field>
+                    <button mat-flat-button color="primary" (click)="buscar()" [disabled]="disabledBuscar || filtroForm.invalid">
+                        <mat-icon class="mr-1">search</mat-icon>
+                        Buscar
+                    </button>
+                </form>
+            </ng-container>
+        </div>
+
+        <!-- Skeleton loader -->
+        <ng-container *ngIf="skeleton">
+            <div class="p-6">
+                <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div *ngFor="let i of [1,2,3,4]" class="h-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl"></div>
+                </div>
+                <div class="w-full h-72 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl mb-6"></div>
+                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl"></div>
+            </div>
+        </ng-container>
+
+        <!-- ── Contenido por reporte ──────────────────────────────────────── -->
+        <div class="flex-auto p-6" *ngIf="!skeleton" [ngSwitch]="reporteActivo">
+
+            <!-- ══ FLUJO DE CAJA ════════════════════════════════════════════ -->
+            <ng-container *ngSwitchCase="'flujo-caja'">
+                <p class="text-sm text-secondary mb-4" *ngIf="fc_rangoFecha">{{ fc_rangoFecha }}</p>
+
+                <!-- Tarjetas -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40">
+                                <mat-icon class="text-green-600">trending_up</mat-icon>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-lg font-bold leading-none">{{ formatCurrency(fc_totalIngresos) }}</div>
+                                <div class="mt-1 text-sm text-secondary">Ingresos (Ventas)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40">
+                                <mat-icon class="text-red-600">trending_down</mat-icon>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-lg font-bold leading-none">{{ formatCurrency(fc_totalEgresos) }}</div>
+                                <div class="mt-1 text-sm text-secondary">Egresos (Compras)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full"
+                                [ngClass]="fc_saldoNeto >= 0 ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-red-100 dark:bg-red-900/40'">
+                                <mat-icon [ngClass]="fc_saldoNeto >= 0 ? 'text-blue-600' : 'text-red-600'">account_balance</mat-icon>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-lg font-bold leading-none" [ngClass]="fc_saldoNeto >= 0 ? 'text-blue-700' : 'text-red-600'">{{ formatCurrency(fc_saldoNeto) }}</div>
+                                <div class="mt-1 text-sm text-secondary">Saldo Neto</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40">
+                                <mat-icon class="text-purple-600">percent</mat-icon>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-2xl font-bold leading-none">{{ formatPct(fc_margenPct) }}</div>
+                                <div class="mt-1 text-sm text-secondary">Margen neto</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico -->
+                <div class="bg-card shadow rounded-2xl p-6">
+                    <div class="text-lg font-semibold mb-4">Evolución Flujo de Caja</div>
+                    <apx-chart
+                        [series]="fc_chart.series" [chart]="fc_chart.chart" [colors]="fc_chart.colors"
+                        [stroke]="fc_chart.stroke" [dataLabels]="fc_chart.dataLabels"
+                        [xaxis]="fc_chart.xaxis" [yaxis]="fc_chart.yaxis"
+                        [tooltip]="fc_chart.tooltip" [legend]="fc_chart.legend" [noData]="fc_chart.noData">
+                    </apx-chart>
+                </div>
+            </ng-container>
+
+            <!-- ══ TENDENCIA ════════════════════════════════════════════════ -->
+            <ng-container *ngSwitchCase="'tendencia'">
+                <p class="text-sm text-secondary mb-4" *ngIf="td_rangoFecha">{{ td_rangoFecha }}</p>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40">
+                                <mat-icon class="text-blue-600">receipt_long</mat-icon>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-2xl font-bold">{{ td_totalVentas }}</div>
+                                <div class="mt-1 text-sm text-secondary">Ventas totales</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40">
+                                <mat-icon class="text-purple-600">schedule</mat-icon>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-lg font-bold">{{ td_horaPico }}</div>
+                                <div class="mt-1 text-sm text-secondary">Hora pico</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/40">
+                                <mat-icon class="text-amber-600">calendar_today</mat-icon>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-lg font-bold">{{ td_diaPico }}</div>
+                                <div class="mt-1 text-sm text-secondary">Día más activo</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40">
+                                <mat-icon class="text-green-600">attach_money</mat-icon>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-lg font-bold">{{ formatCurrency(td_ticketPromedio) }}</div>
+                                <div class="mt-1 text-sm text-secondary">Ticket promedio</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-card shadow rounded-2xl p-6">
+                        <div class="text-lg font-semibold mb-4">Ventas por Hora del Día</div>
+                        <apx-chart [series]="td_chartHora.series" [chart]="td_chartHora.chart" [colors]="td_chartHora.colors"
+                            [plotOptions]="td_chartHora.plotOptions" [dataLabels]="td_chartHora.dataLabels"
+                            [xaxis]="td_chartHora.xaxis" [yaxis]="td_chartHora.yaxis"
+                            [tooltip]="td_chartHora.tooltip" [legend]="td_chartHora.legend" [noData]="td_chartHora.noData">
+                        </apx-chart>
+                    </div>
+                    <div class="bg-card shadow rounded-2xl p-6">
+                        <div class="text-lg font-semibold mb-4">Ventas por Día de la Semana</div>
+                        <apx-chart [series]="td_chartDia.series" [chart]="td_chartDia.chart" [colors]="td_chartDia.colors"
+                            [plotOptions]="td_chartDia.plotOptions" [dataLabels]="td_chartDia.dataLabels"
+                            [xaxis]="td_chartDia.xaxis" [yaxis]="td_chartDia.yaxis"
+                            [tooltip]="td_chartDia.tooltip" [legend]="td_chartDia.legend" [noData]="td_chartDia.noData">
+                        </apx-chart>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- ══ STOCK ════════════════════════════════════════════════════ -->
+            <ng-container *ngSwitchCase="'stock'">
+
+                <!-- Filtros -->
+                <div class="bg-card shadow rounded-2xl p-4 mb-6">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <mat-form-field appearance="outline" class="flex-auto min-w-40" style="margin-bottom:-1.25rem">
+                            <mat-label>Nombre o Código</mat-label>
+                            <input matInput [(ngModel)]="sk_texto" (ngModelChange)="skFiltrar()" placeholder="Buscar...">
+                            <mat-icon matSuffix>search</mat-icon>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="w-52" style="margin-bottom:-1.25rem">
+                            <mat-label>Categoría</mat-label>
+                            <mat-select [(ngModel)]="sk_categoriaSel" (ngModelChange)="skFiltrar()">
+                                <mat-option value="">Todas</mat-option>
+                                <mat-option *ngFor="let cat of sk_categorias" [value]="cat">{{ cat }}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-slide-toggle [(ngModel)]="sk_soloSinStock" (change)="skFiltrar()" color="warn">Sin stock</mat-slide-toggle>
+                    </div>
+                </div>
+
+                <!-- Tarjetas -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40"><mat-icon class="text-blue-600">inventory_2</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold">{{ sk_totalProductos }}</div><div class="mt-1 text-sm text-secondary">Productos</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/40"><mat-icon class="text-indigo-600">format_list_numbered</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold">{{ sk_totalUnidades }}</div><div class="mt-1 text-sm text-secondary">Unidades en stock</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40"><mat-icon class="text-green-600">attach_money</mat-icon></div>
+                            <div class="ml-4"><div class="text-lg font-bold">{{ formatCurrency(sk_valorizacion) }}</div><div class="mt-1 text-sm text-secondary">Valorización total</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40"><mat-icon class="text-red-600">remove_shopping_cart</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold">{{ sk_sinStock }}</div><div class="mt-1 text-sm text-secondary">Sin stock</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficos -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6" *ngIf="sk_filtrados.length > 0">
+                    <div class="bg-card shadow rounded-2xl p-6">
+                        <div class="text-lg font-semibold mb-4">Valorización por Categoría</div>
+                        <apx-chart [series]="sk_chartCat.series" [chart]="sk_chartCat.chart" [labels]="sk_chartCat.labels"
+                            [colors]="sk_chartCat.colors" [tooltip]="sk_chartCat.tooltip" [dataLabels]="sk_chartCat.dataLabels"
+                            [plotOptions]="sk_chartCat.plotOptions" [legend]="sk_chartCat.legend" [noData]="sk_chartCat.noData">
+                        </apx-chart>
+                    </div>
+                    <div class="bg-card shadow rounded-2xl p-6">
+                        <div class="text-lg font-semibold mb-4">Top 10 por Valorización</div>
+                        <apx-chart [series]="sk_chartTop.series" [chart]="sk_chartTop.chart" [plotOptions]="sk_chartTop.plotOptions"
+                            [colors]="sk_chartTop.colors" [dataLabels]="sk_chartTop.dataLabels"
+                            [xaxis]="sk_chartTop.xaxis" [legend]="sk_chartTop.legend" [tooltip]="sk_chartTop.tooltip" [noData]="sk_chartTop.noData">
+                        </apx-chart>
+                    </div>
+                </div>
+
+                <!-- Tabla -->
+                <div class="bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center px-6 py-4 border-b">
+                        <mat-icon class="text-blue-600 mr-2">table_chart</mat-icon>
+                        <span class="font-semibold text-lg">Detalle de Productos</span>
+                        <span class="ml-2 text-secondary text-sm">({{ sk_filtrados.length }} resultados)</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table mat-table [dataSource]="sk_filtrados" class="w-full">
+                            <ng-container matColumnDef="codigo">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Código</th>
+                                <td mat-cell *matCellDef="let p">{{ p.codigo }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="nombre">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Producto</th>
+                                <td mat-cell *matCellDef="let p" class="font-medium">{{ p.nombre }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="categoria">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Categoría</th>
+                                <td mat-cell *matCellDef="let p">{{ p.categoria?.nombre ?? '—' }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="marca">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Marca</th>
+                                <td mat-cell *matCellDef="let p">{{ p.marca?.nombre ?? '—' }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="stock">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Stock</th>
+                                <td mat-cell *matCellDef="let p" class="text-right">
+                                    <span [ngClass]="(p.stock ?? 0) === 0 ? 'text-red-600 font-bold' : ''">{{ p.stock ?? 0 }}</span>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="precioCompra">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Precio Compra</th>
+                                <td mat-cell *matCellDef="let p" class="text-right">{{ p.precioCompra != null ? formatCurrency(p.precioCompra) : '—' }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="valorTotal">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Valor Total</th>
+                                <td mat-cell *matCellDef="let p" class="text-right font-medium text-blue-700 dark:text-blue-400">{{ formatCurrency((p.stock ?? 0) * (p.precioCompra ?? 0)) }}</td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="sk_columnas; sticky: true"></tr>
+                            <tr mat-row *matRowDef="let row; columns: sk_columnas;" [ngClass]="(row.stock ?? 0) === 0 ? 'bg-red-50 dark:bg-red-900/10' : ''"></tr>
+                            <tr class="mat-row" *matNoDataRow>
+                                <td class="mat-cell text-center py-8 text-secondary" [attr.colspan]="sk_columnas.length">Sin resultados</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- ══ VENCIMIENTOS ═════════════════════════════════════════════ -->
+            <ng-container *ngSwitchCase="'vencimientos'">
+
+                <!-- Tarjetas clickeables -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl cursor-pointer ring-2 transition-all"
+                        [ngClass]="vc_filtroEstado === 'vencido' ? 'ring-red-500' : 'ring-transparent hover:ring-red-300'"
+                        (click)="vcSetFiltro(vc_filtroEstado === 'vencido' ? 'todos' : 'vencido')">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40"><mat-icon class="text-red-600">cancel</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold text-red-600">{{ vc_totalVencidos }}</div><div class="mt-1 text-sm text-secondary">Vencidos</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl cursor-pointer ring-2 transition-all"
+                        [ngClass]="vc_filtroEstado === 'critico' ? 'ring-orange-500' : 'ring-transparent hover:ring-orange-300'"
+                        (click)="vcSetFiltro(vc_filtroEstado === 'critico' ? 'todos' : 'critico')">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/40"><mat-icon class="text-orange-600">warning</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold text-orange-600">{{ vc_totalCriticos }}</div><div class="mt-1 text-sm text-secondary">Críticos (≤5d)</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl cursor-pointer ring-2 transition-all"
+                        [ngClass]="vc_filtroEstado === 'alerta' ? 'ring-yellow-500' : 'ring-transparent hover:ring-yellow-300'"
+                        (click)="vcSetFiltro(vc_filtroEstado === 'alerta' ? 'todos' : 'alerta')">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/40"><mat-icon class="text-yellow-600">schedule</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold text-yellow-600">{{ vc_totalAlerta }}</div><div class="mt-1 text-sm text-secondary">Alerta (6–15d)</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl cursor-pointer ring-2 transition-all"
+                        [ngClass]="vc_filtroEstado === 'vigente' ? 'ring-green-500' : 'ring-transparent hover:ring-green-300'"
+                        (click)="vcSetFiltro(vc_filtroEstado === 'vigente' ? 'todos' : 'vigente')">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40"><mat-icon class="text-green-600">check_circle</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold text-green-600">{{ vc_totalVigentes }}</div><div class="mt-1 text-sm text-secondary">Vigentes (>15d)</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros de texto y fecha -->
+                <div class="bg-card shadow rounded-2xl p-4 mb-6">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <mat-form-field appearance="outline" class="flex-auto min-w-40" style="margin-bottom:-1.25rem">
+                            <mat-label>Buscar producto</mat-label>
+                            <input matInput [(ngModel)]="vc_texto" (ngModelChange)="vcFiltrar()" placeholder="Nombre del producto...">
+                            <mat-icon matSuffix>search</mat-icon>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="w-44" style="margin-bottom:-1.25rem">
+                            <mat-label>Vence desde</mat-label>
+                            <input matInput [matDatepicker]="dpVcDesde" [(ngModel)]="vc_fechaInicio" (ngModelChange)="vcFiltrar()" readonly>
+                            <mat-datepicker-toggle matSuffix [for]="dpVcDesde"></mat-datepicker-toggle>
+                            <mat-datepicker #dpVcDesde></mat-datepicker>
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="w-44" style="margin-bottom:-1.25rem">
+                            <mat-label>Vence hasta</mat-label>
+                            <input matInput [matDatepicker]="dpVcHasta" [(ngModel)]="vc_fechaFin" (ngModelChange)="vcFiltrar()" readonly>
+                            <mat-datepicker-toggle matSuffix [for]="dpVcHasta"></mat-datepicker-toggle>
+                            <mat-datepicker #dpVcHasta></mat-datepicker>
+                        </mat-form-field>
+                        <button mat-stroked-button (click)="vcLimpiarFiltros()" *ngIf="vc_texto || vc_fechaInicio || vc_fechaFin">
+                            <mat-icon class="mr-1">clear</mat-icon>
+                            Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chip de filtro activo -->
+                <div class="mb-4 flex items-center gap-2" *ngIf="vc_filtroEstado !== 'todos'">
+                    <span class="text-sm text-secondary">Filtrado por:</span>
+                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium" [ngClass]="vcGetBadgeClass(vc_filtroEstado)">
+                        {{ vcGetBadgeLabel(vc_filtroEstado) }}
+                        <mat-icon class="cursor-pointer" style="font-size:16px;width:16px;height:16px" (click)="vcSetFiltro('todos')">close</mat-icon>
+                    </span>
+                    <span class="text-sm text-secondary ml-1">— {{ vc_filtrados.length }} lotes</span>
+                </div>
+
+                <!-- Tabla -->
+                <div class="bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center px-6 py-4 border-b">
+                        <mat-icon class="text-indigo-600 mr-2">date_range</mat-icon>
+                        <span class="font-semibold text-lg">Lotes de Inventario</span>
+                        <span class="ml-2 text-secondary text-sm">({{ vc_filtrados.length }} lotes)</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table mat-table [dataSource]="vc_filtrados" class="w-full">
+                            <ng-container matColumnDef="producto">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Producto</th>
+                                <td mat-cell *matCellDef="let l" class="font-medium">{{ l.nombreProducto }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="proveedor">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Proveedor</th>
+                                <td mat-cell *matCellDef="let l">{{ l.nombreProveedor || '—' }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="lote">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Lote #</th>
+                                <td mat-cell *matCellDef="let l">{{ l.id }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="fechaVencimiento">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Vencimiento</th>
+                                <td mat-cell *matCellDef="let l">{{ formatFecha(l.fechaCaducidad) }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="diasParaVencer">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Días restantes</th>
+                                <td mat-cell *matCellDef="let l" class="text-center">
+                                    <ng-container *ngIf="l.diasParaVencer !== null">
+                                        <span [ngClass]="{
+                                            'text-red-600 font-bold': l.estado === 'vencido',
+                                            'text-orange-600 font-semibold': l.estado === 'critico',
+                                            'text-yellow-600': l.estado === 'alerta',
+                                            'text-green-600': l.estado === 'vigente'
+                                        }">
+                                            {{ l.diasParaVencer < 0 ? 'Vencido hace ' + (l.diasParaVencer * -1) + 'd' : l.diasParaVencer + ' días' }}
+                                        </span>
+                                    </ng-container>
+                                    <ng-container *ngIf="l.diasParaVencer === null">—</ng-container>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="stock">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Stock</th>
+                                <td mat-cell *matCellDef="let l" class="text-right">{{ l.cantidadDisponible }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="estado">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Estado</th>
+                                <td mat-cell *matCellDef="let l" class="text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" [ngClass]="vcGetBadgeClass(l.estado)">{{ vcGetBadgeLabel(l.estado) }}</span>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="acciones">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Devolución</th>
+                                <td mat-cell *matCellDef="let l" class="text-center">
+                                    <button
+                                        *ngIf="l.estado === 'vencido' && l.cantidadDisponible > 0"
+                                        mat-stroked-button
+                                        color="warn"
+                                        class="text-xs px-2 py-0"
+                                        (click)="abrirDevolucion(l)"
+                                        matTooltip="Registrar devolución de este lote vencido">
+                                        <mat-icon class="icon-size-4 mr-1">assignment_return</mat-icon>
+                                        Devolver
+                                    </button>
+                                    <span *ngIf="l.estado !== 'vencido' || l.cantidadDisponible === 0" class="text-secondary text-xs">—</span>
+                                </td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="vc_columnas; sticky: true"></tr>
+                            <tr mat-row *matRowDef="let row; columns: vc_columnas;" [ngClass]="vcGetRowClass(row.estado)"></tr>
+                            <tr class="mat-row" *matNoDataRow>
+                                <td class="mat-cell text-center py-8 text-secondary" [attr.colspan]="vc_columnas.length">Sin lotes con el estado seleccionado</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- ══ MARGEN ═══════════════════════════════════════════════════ -->
+            <ng-container *ngSwitchCase="'margen'">
+
+                <!-- Tarjetas -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40"><mat-icon class="text-blue-600">percent</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold">{{ formatPct(mg_promedio) }}</div><div class="mt-1 text-sm text-secondary">Margen promedio</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40"><mat-icon class="text-green-600">emoji_events</mat-icon></div>
+                            <div class="ml-4">
+                                <div class="text-sm font-bold text-green-600 truncate" [title]="mg_mejor?.nombre">{{ mg_mejor?.nombre ?? '—' }}</div>
+                                <div class="text-lg font-bold">{{ mg_mejor ? formatPct(mg_mejor.margenPct) : '—' }}</div>
+                                <div class="mt-1 text-sm text-secondary">Mejor margen</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40"><mat-icon class="text-red-600">trending_down</mat-icon></div>
+                            <div class="ml-4">
+                                <div class="text-sm font-bold text-red-600 truncate" [title]="mg_peor?.nombre">{{ mg_peor?.nombre ?? '—' }}</div>
+                                <div class="text-lg font-bold">{{ mg_peor ? formatPct(mg_peor.margenPct) : '—' }}</div>
+                                <div class="mt-1 text-sm text-secondary">Menor margen</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40"><mat-icon class="text-purple-600">inventory_2</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold">{{ mg_filtrados.length }}</div><div class="mt-1 text-sm text-secondary">Productos</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros y gráfico -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-card shadow rounded-2xl p-6">
+                        <div class="text-lg font-semibold mb-4">Top 10 por Margen</div>
+                        <apx-chart [series]="mg_chart.series" [chart]="mg_chart.chart" [plotOptions]="mg_chart.plotOptions"
+                            [colors]="mg_chart.colors" [dataLabels]="mg_chart.dataLabels"
+                            [xaxis]="mg_chart.xaxis" [legend]="mg_chart.legend" [tooltip]="mg_chart.tooltip" [noData]="mg_chart.noData">
+                        </apx-chart>
+                    </div>
+                    <div class="bg-card shadow rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="text-lg font-semibold">Filtrar tabla</div>
+                            <button mat-stroked-button (click)="mgToggleOrden()" class="text-sm">
+                                <mat-icon class="mr-1 text-sm">swap_vert</mat-icon>
+                                {{ mg_ordenDir === 'desc' ? 'Mayor → Menor' : 'Menor → Mayor' }}
+                            </button>
+                        </div>
+                        <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Buscar producto o categoría</mat-label>
+                            <input matInput [(ngModel)]="mg_texto" (ngModelChange)="mgFiltrar()" placeholder="Ej: lácteos...">
+                            <mat-icon matSuffix>search</mat-icon>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Tabla -->
+                <div class="bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center px-6 py-4 border-b">
+                        <mat-icon class="text-green-600 mr-2">table_chart</mat-icon>
+                        <span class="font-semibold text-lg">Margen por Producto</span>
+                        <span class="ml-2 text-secondary text-sm">({{ mg_filtrados.length }})</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table mat-table [dataSource]="mg_filtrados" class="w-full">
+                            <ng-container matColumnDef="nombre">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Producto</th>
+                                <td mat-cell *matCellDef="let p" class="font-medium">{{ p.nombre }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="categoria">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Categoría</th>
+                                <td mat-cell *matCellDef="let p">{{ p.categoria?.nombre ?? '—' }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="precioCompra">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">P. Compra</th>
+                                <td mat-cell *matCellDef="let p" class="text-right">{{ formatCurrency(p.precioCompra ?? 0) }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="precioVenta">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">P. Venta</th>
+                                <td mat-cell *matCellDef="let p" class="text-right">{{ formatCurrency(p.precioVenta ?? 0) }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="gananciaUnitaria">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Ganancia unit.</th>
+                                <td mat-cell *matCellDef="let p" class="text-right">{{ formatCurrency(p.gananciaUnitaria) }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="margenPct">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Margen</th>
+                                <td mat-cell *matCellDef="let p" class="text-right font-semibold" [ngClass]="mgGetMargenClass(p.margenPct)">{{ formatPct(p.margenPct) }}</td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="mg_columnas; sticky: true"></tr>
+                            <tr mat-row *matRowDef="let row; columns: mg_columnas;"></tr>
+                            <tr class="mat-row" *matNoDataRow>
+                                <td class="mat-cell text-center py-8 text-secondary" [attr.colspan]="mg_columnas.length">Sin resultados</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- ══ ROTACIÓN ═════════════════════════════════════════════════ -->
+            <ng-container *ngSwitchCase="'rotacion'">
+                <p class="text-sm text-secondary mb-4" *ngIf="rt_rangoFecha">{{ rt_rangoFecha }}</p>
+
+                <!-- Tarjetas clickeables por clasificación -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl cursor-pointer ring-2 transition-all"
+                        [ngClass]="rt_filtroClasif === 'alta' ? 'ring-green-500' : 'ring-transparent hover:ring-green-300'"
+                        (click)="rtSetFiltroClasif(rt_filtroClasif === 'alta' ? 'todos' : 'alta')">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40"><mat-icon class="text-green-600">rocket_launch</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold text-green-600">{{ rt_totalAlta }}</div><div class="mt-1 text-sm text-secondary">Alta rotación</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl cursor-pointer ring-2 transition-all"
+                        [ngClass]="rt_filtroClasif === 'media' ? 'ring-blue-500' : 'ring-transparent hover:ring-blue-300'"
+                        (click)="rtSetFiltroClasif(rt_filtroClasif === 'media' ? 'todos' : 'media')">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40"><mat-icon class="text-blue-600">trending_flat</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold text-blue-600">{{ rt_totalMedia }}</div><div class="mt-1 text-sm text-secondary">Media rotación</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl cursor-pointer ring-2 transition-all"
+                        [ngClass]="rt_filtroClasif === 'baja' ? 'ring-yellow-500' : 'ring-transparent hover:ring-yellow-300'"
+                        (click)="rtSetFiltroClasif(rt_filtroClasif === 'baja' ? 'todos' : 'baja')">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/40"><mat-icon class="text-yellow-600">hourglass_bottom</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold text-yellow-600">{{ rt_totalBaja }}</div><div class="mt-1 text-sm text-secondary">Baja rotación</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl cursor-pointer ring-2 transition-all"
+                        [ngClass]="rt_filtroClasif === 'muerto' ? 'ring-red-500' : 'ring-transparent hover:ring-red-300'"
+                        (click)="rtSetFiltroClasif(rt_filtroClasif === 'muerto' ? 'todos' : 'muerto')">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40"><mat-icon class="text-red-600">block</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold text-red-600">{{ rt_totalMuerto }}</div><div class="mt-1 text-sm text-secondary">Sin movimiento</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico -->
+                <div class="bg-card shadow rounded-2xl p-6 mb-6">
+                    <div class="text-lg font-semibold mb-4">Top 10 — Mayor Rotación</div>
+                    <apx-chart [series]="rt_chart.series" [chart]="rt_chart.chart" [plotOptions]="rt_chart.plotOptions"
+                        [colors]="rt_chart.colors" [dataLabels]="rt_chart.dataLabels"
+                        [xaxis]="rt_chart.xaxis" [legend]="rt_chart.legend" [tooltip]="rt_chart.tooltip" [noData]="rt_chart.noData">
+                    </apx-chart>
+                </div>
+
+                <!-- Tabla -->
+                <div class="bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center px-6 py-4 border-b">
+                        <mat-icon class="text-green-600 mr-2">table_chart</mat-icon>
+                        <span class="font-semibold text-lg">Rotación por Producto</span>
+                        <span class="ml-2 text-secondary text-sm">({{ rt_filtrados.length }})</span>
+                        <span *ngIf="rt_filtroClasif !== 'todos'" class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium" [ngClass]="rtGetClasifBadge(rt_filtroClasif)">{{ rtGetClasifLabel(rt_filtroClasif) }}</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table mat-table [dataSource]="rt_filtrados" class="w-full">
+                            <ng-container matColumnDef="nombre">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Producto</th>
+                                <td mat-cell *matCellDef="let p" class="font-medium">{{ p.nombre }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="categoria">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Categoría</th>
+                                <td mat-cell *matCellDef="let p">{{ p.categoria }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="stockActual">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Stock</th>
+                                <td mat-cell *matCellDef="let p" class="text-right">{{ p.stockActual }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="totalVendido">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Total Vendido</th>
+                                <td mat-cell *matCellDef="let p" class="text-right">{{ formatCurrency(p.totalVendido) }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="rotacion">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Rotación</th>
+                                <td mat-cell *matCellDef="let p" class="text-right font-semibold">{{ p.rotacion.toFixed(2) }}x</td>
+                            </ng-container>
+                            <ng-container matColumnDef="clasificacion">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Clasificación</th>
+                                <td mat-cell *matCellDef="let p" class="text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" [ngClass]="rtGetClasifBadge(p.clasificacion)">{{ rtGetClasifLabel(p.clasificacion) }}</span>
+                                </td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="rt_columnas; sticky: true"></tr>
+                            <tr mat-row *matRowDef="let row; columns: rt_columnas;"></tr>
+                            <tr class="mat-row" *matNoDataRow>
+                                <td class="mat-cell text-center py-8 text-secondary" [attr.colspan]="rt_columnas.length">Sin resultados</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- ══ SIN MOVIMIENTO ═══════════════════════════════════════════ -->
+            <ng-container *ngSwitchCase="'sin-movimiento'">
+                <p class="text-sm text-secondary mb-4" *ngIf="sm_rangoFecha">{{ sm_rangoFecha }}</p>
+
+                <!-- Tarjetas -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40"><mat-icon class="text-red-600">archive</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold text-red-600">{{ sm_totalSin }}</div><div class="mt-1 text-sm text-secondary">Productos sin ventas</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/40"><mat-icon class="text-amber-600">inventory</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold">{{ sm_stockInmovilizado }}</div><div class="mt-1 text-sm text-secondary">Unidades inmovilizadas</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/40"><mat-icon class="text-orange-600">money_off</mat-icon></div>
+                            <div class="ml-4"><div class="text-lg font-bold">{{ formatCurrency(sm_valorInmovilizado) }}</div><div class="mt-1 text-sm text-secondary">Valor inmovilizado</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtro -->
+                <div class="bg-card shadow rounded-2xl p-4 mb-6">
+                    <mat-form-field appearance="outline" class="w-full sm:w-80" style="margin-bottom:-1.25rem">
+                        <mat-label>Buscar producto o categoría</mat-label>
+                        <input matInput [(ngModel)]="sm_texto" (ngModelChange)="smFiltrar()" placeholder="Buscar...">
+                        <mat-icon matSuffix>search</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <!-- Tabla -->
+                <div class="bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center px-6 py-4 border-b">
+                        <mat-icon class="text-red-600 mr-2">table_chart</mat-icon>
+                        <span class="font-semibold text-lg">Productos Sin Movimiento</span>
+                        <span class="ml-2 text-secondary text-sm">({{ sm_filtrados.length }})</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table mat-table [dataSource]="sm_filtrados" class="w-full">
+                            <ng-container matColumnDef="nombre">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Producto</th>
+                                <td mat-cell *matCellDef="let p" class="font-medium">{{ p.nombre }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="categoria">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Categoría</th>
+                                <td mat-cell *matCellDef="let p">{{ p.categoria?.nombre ?? '—' }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="marca">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Marca</th>
+                                <td mat-cell *matCellDef="let p">{{ p.marca?.nombre ?? '—' }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="stock">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Stock</th>
+                                <td mat-cell *matCellDef="let p" class="text-right">{{ p.stock ?? 0 }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="precioVenta">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">P. Venta</th>
+                                <td mat-cell *matCellDef="let p" class="text-right">{{ formatCurrency(p.precioVenta ?? 0) }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="valorInmovilizado">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Valor inmovilizado</th>
+                                <td mat-cell *matCellDef="let p" class="text-right font-semibold text-orange-600">{{ formatCurrency(p.valorInmovilizado) }}</td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="sm_columnas; sticky: true"></tr>
+                            <tr mat-row *matRowDef="let row; columns: sm_columnas;"></tr>
+                            <tr class="mat-row" *matNoDataRow>
+                                <td class="mat-cell text-center py-8 text-secondary" [attr.colspan]="sm_columnas.length">Sin productos sin movimiento en el período</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- ══ DESCUENTOS ═══════════════════════════════════════════════ -->
+            <ng-container *ngSwitchCase="'descuentos'">
+
+                <!-- Tarjetas -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40"><mat-icon class="text-purple-600">local_offer</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold">{{ dc_totalPromos }}</div><div class="mt-1 text-sm text-secondary">Total promociones</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40"><mat-icon class="text-green-600">verified</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold text-green-600">{{ dc_activasHoy }}</div><div class="mt-1 text-sm text-secondary">Activas hoy</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-pink-100 dark:bg-pink-900/40"><mat-icon class="text-pink-600">percent</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold">{{ formatPct(dc_descuentoPromedio) }}</div><div class="mt-1 text-sm text-secondary">Descuento promedio</div></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40"><mat-icon class="text-blue-600">shopping_bag</mat-icon></div>
+                            <div class="ml-4"><div class="text-2xl font-bold">{{ dc_totalProductosEnPromo }}</div><div class="mt-1 text-sm text-secondary">Productos en promo</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico -->
+                <div class="bg-card shadow rounded-2xl p-6 mb-6" *ngIf="dc_promos.length > 0">
+                    <div class="text-lg font-semibold mb-4">Porcentaje de Descuento por Promoción</div>
+                    <apx-chart [series]="dc_chart.series" [chart]="dc_chart.chart" [plotOptions]="dc_chart.plotOptions"
+                        [colors]="dc_chart.colors" [dataLabels]="dc_chart.dataLabels"
+                        [xaxis]="dc_chart.xaxis" [legend]="dc_chart.legend" [tooltip]="dc_chart.tooltip" [noData]="dc_chart.noData">
+                    </apx-chart>
+                </div>
+
+                <!-- Filtros de estado -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button *ngFor="let e of ['todos','activa','pendiente','vencida','inactiva']"
+                        (click)="dcSetFiltro(e)"
+                        class="px-3 py-1 rounded-full text-sm font-medium transition-colors border"
+                        [ngClass]="dc_filtroEstado === e ? 'bg-primary text-on-primary border-primary' : 'border-gray-300 text-secondary hover:bg-hover'">
+                        {{ e === 'todos' ? 'Todas' : (e | titlecase) }}
+                    </button>
+                </div>
+
+                <!-- Lista de promociones expandibles -->
+                <div class="space-y-3">
+                    <div *ngFor="let p of dc_filtradas" class="bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="flex items-center px-6 py-4 cursor-pointer hover:bg-hover transition-colors" (click)="dcToggleExpand(p.id)">
+                            <div class="flex-auto">
+                                <div class="flex items-center gap-3">
+                                    <span class="font-semibold text-base">{{ p.motivo }}</span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" [ngClass]="dcGetEstadoBadge(p.estado)">{{ dcGetEstadoLabel(p.estado) }}</span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700">{{ p.descuentoPorcentaje }}% OFF</span>
+                                </div>
+                                <div class="text-sm text-secondary mt-1">
+                                    {{ formatFecha(p.fechaInicio) }} → {{ formatFecha(p.fechaFin) }}
+                                    &nbsp;·&nbsp; {{ p.productos.length }} producto(s)
+                                </div>
+                            </div>
+                            <mat-icon class="ml-4 transition-transform" [ngClass]="dc_expandedId === p.id ? 'rotate-180' : ''">expand_more</mat-icon>
+                        </div>
+
+                        <!-- Detalle expandido -->
+                        <div *ngIf="dc_expandedId === p.id" class="border-t px-6 py-4 bg-gray-50 dark:bg-gray-900/20">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <div *ngFor="let pr of p.productosConPrecio" class="flex items-center justify-between p-3 bg-card rounded-xl shadow-sm">
+                                    <span class="text-sm font-medium">{{ pr.nombre }}</span>
+                                    <div class="text-right">
+                                        <div class="text-xs text-secondary line-through">{{ formatCurrency(pr.precioOriginal) }}</div>
+                                        <div class="text-sm font-bold text-green-600">{{ formatCurrency(pr.precioConDescuento) }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-sm text-secondary">
+                                Ahorro estimado por unidad: <span class="font-semibold text-orange-600">{{ formatCurrency(p.ahorroEstimado) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="dc_filtradas.length === 0" class="text-center py-12 text-secondary bg-card shadow rounded-2xl">
+                        No hay promociones con el estado seleccionado
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- ══ DEVOLUCIONES ════════════════════════════════════════════ -->
+            <ng-container *ngSwitchCase="'devoluciones'">
+                <p class="text-sm text-secondary mb-4" *ngIf="dv_rangoFecha">{{ dv_rangoFecha }}</p>
+
+                <!-- Tarjetas -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40">
+                                <mat-icon class="text-red-600">assignment_return</mat-icon>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-2xl font-bold text-red-600">{{ dv_totalDevoluciones }}</div>
+                                <div class="mt-1 text-sm text-secondary">Devoluciones</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/40">
+                                <mat-icon class="text-orange-600">production_quantity_limits</mat-icon>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-2xl font-bold">{{ dv_totalUnidades }}</div>
+                                <div class="mt-1 text-sm text-secondary">Unidades devueltas</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/40">
+                                <mat-icon class="text-amber-600">money_off</mat-icon>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-lg font-bold">{{ formatCurrency(dv_totalValor) }}</div>
+                                <div class="mt-1 text-sm text-secondary">Valor devuelto</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl">
+                        <div class="flex items-center">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/40">
+                                <mat-icon class="text-purple-600">label</mat-icon>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-lg font-bold truncate" [title]="dv_motivoFrecuente">{{ dvGetMotivoLabel(dv_motivoFrecuente) }}</div>
+                                <div class="mt-1 text-sm text-secondary">Motivo frecuente</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtro -->
+                <div class="bg-card shadow rounded-2xl p-4 mb-6">
+                    <mat-form-field appearance="outline" class="w-full sm:w-96" style="margin-bottom:-1.25rem">
+                        <mat-label>Buscar producto, lote, motivo o usuario</mat-label>
+                        <input matInput [(ngModel)]="dv_texto" (ngModelChange)="dvFiltrar()" placeholder="Buscar...">
+                        <mat-icon matSuffix>search</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <!-- Tabla -->
+                <div class="bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center px-6 py-4 border-b">
+                        <mat-icon class="text-red-600 mr-2">table_chart</mat-icon>
+                        <span class="font-semibold text-lg">Historial de Devoluciones</span>
+                        <span class="ml-2 text-secondary text-sm">({{ dv_filtrados.length }} registros)</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table mat-table [dataSource]="dv_filtrados" class="w-full">
+                            <ng-container matColumnDef="fecha">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Fecha</th>
+                                <td mat-cell *matCellDef="let d">{{ formatFecha(d.fechaDevolucion) }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="producto">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Producto</th>
+                                <td mat-cell *matCellDef="let d" class="font-medium">{{ d.nombreProducto }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="lote">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Lote</th>
+                                <td mat-cell *matCellDef="let d" class="text-secondary text-sm">{{ d.codigoLote || '#' + d.idLote }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="cantidad">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Cantidad</th>
+                                <td mat-cell *matCellDef="let d" class="text-right font-semibold text-red-600">{{ d.cantidadDevuelta }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="motivo">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Motivo</th>
+                                <td mat-cell *matCellDef="let d" class="text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                        [ngClass]="dvGetMotivoBadge(d.motivo)">{{ dvGetMotivoLabel(d.motivo) }}</span>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="observacion">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Observación</th>
+                                <td mat-cell *matCellDef="let d" class="text-secondary text-sm max-w-xs truncate" [title]="d.observacion">
+                                    {{ d.observacion || '—' }}
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="usuario">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold">Usuario</th>
+                                <td mat-cell *matCellDef="let d" class="text-sm">{{ d.nombreUsuario }}</td>
+                            </ng-container>
+                            <ng-container matColumnDef="valor">
+                                <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Valor devuelto</th>
+                                <td mat-cell *matCellDef="let d" class="text-right font-semibold text-amber-600">{{ formatCurrency(d.valorDevuelto) }}</td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="dv_columnas; sticky: true"></tr>
+                            <tr mat-row *matRowDef="let row; columns: dv_columnas;" class="hover:bg-gray-50 dark:hover:bg-gray-800/30"></tr>
+                            <tr class="mat-row" *matNoDataRow>
+                                <td class="mat-cell text-center py-8 text-secondary" [attr.colspan]="dv_columnas.length">
+                                    No hay devoluciones registradas en el período seleccionado
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </ng-container>
+
+        </div><!-- /content switch -->
+    </div><!-- /flex-auto -->
+</div>

@@ -303,6 +303,13 @@
                                                     [disabled]="disabledAcciones">
                                                     <mat-icon svgIcon="feather:edit-2"></mat-icon>
                                                 </button>
+                                                <button mat-icon-button
+                                                    (click)="resetearContrasenia(element)" class="p-1"
+                                                    [disabled]="disabledAcciones"
+                                                    matTooltip="Restablecer contraseña"
+                                                    style="color: #f59e0b">
+                                                    <mat-icon svgIcon="feather:key"></mat-icon>
+                                                </button>
                                                 <button mat-icon-button color="warn" (click)="DeleteAsync(element)"
                                                     class="p-1" [disabled]="disabledAcciones">
                                                     <mat-icon svgIcon="feather:trash-2"></mat-icon>

@@ -18,5 +18,6 @@ export class ProductoDTO {
     marca: MarcaDTO;
     cantidad: number;
     fechaCaducidad: Date | null;
+    fechaCaducidadProxima: Date | null;
     tipoMedida: number;
 }

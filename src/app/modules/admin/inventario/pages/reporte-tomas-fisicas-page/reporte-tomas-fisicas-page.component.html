@@ -1,0 +1,228 @@
+<div class="flex flex-col flex-auto w-full">
+    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+        <!-- Encabezado -->
+        <div class="flex flex-col w-full mb-6">
+            <h2 class="text-2xl font-semibold tracking-tight leading-8">Reporte de Tomas Físicas</h2>
+            <div class="font-medium tracking-tight text-secondary" *ngIf="filtroRangoFecha">{{ filtroRangoFecha }}</div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="w-full mb-6 p-6 bg-card shadow rounded-2xl">
+            <form [formGroup]="filtroForm">
+                <div class="flex flex-wrap gap-4 items-end">
+
+                    <mat-form-field [appearance]="'outline'" class="flex-1 min-w-48">
+                        <mat-label>Fecha Inicio</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerInicio.open()" autocomplete="off"
+                            matInput [matDatepicker]="pickerInicio" [formControlName]="'fechaInicio'">
+                        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerInicio></mat-datepicker>
+                        <mat-error *ngIf="filtroForm.get('fechaInicio').hasError('required')">Requerido</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field [appearance]="'outline'" class="flex-1 min-w-48">
+                        <mat-label>Fecha Fin</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerFin.open()" autocomplete="off"
+                            matInput [matDatepicker]="pickerFin" [formControlName]="'fechaFin'">
+                        <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerFin></mat-datepicker>
+                        <mat-error *ngIf="filtroForm.get('fechaFin').hasError('required')">Requerido</mat-error>
+                    </mat-form-field>
+
+                    <div class="flex items-center pb-5">
+                        <button mat-flat-button [color]="'primary'" (click)="getReporte()"
+                            [disabled]="filtroForm.invalid || disabledBuscar" class="h-12 px-8">
+                            <mat-icon *ngIf="!disabledBuscar" [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                            <span class="ml-2" *ngIf="!disabledBuscar">Buscar</span>
+                            <mat-progress-spinner *ngIf="disabledBuscar" [diameter]="24"
+                                [mode]="'indeterminate'"></mat-progress-spinner>
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        <!-- Skeleton -->
+        <ngx-skeleton-loader class="w-full"
+            count="20" [theme]="{ 'border-radius': '0', height: '40px' }"
+            *ngIf="skeleton"></ngx-skeleton-loader>
+
+        <ng-container *ngIf="!skeleton">
+
+            <!-- Sin datos -->
+            <div class="w-full" *ngIf="!tieneRegistros()">
+                <div class="flex flex-col items-center mt-8">
+                    <img [src]="imgNoDataHome" alt="Sin datos" class="w-72 object-cover" />
+                    <div class="mt-4 text-2xl font-semibold text-center">{{ textoResultado }}</div>
+                    <p class="mt-2 text-gray-500 text-center">Aplique otros filtros de búsqueda</p>
+                </div>
+            </div>
+
+            <ng-container *ngIf="tieneRegistros()">
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full mb-6">
+
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="flex items-center gap-3">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100">
+                                <mat-icon class="text-indigo-600"
+                                    [svgIcon]="'heroicons_outline:clipboard-document-list'"></mat-icon>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold leading-none">{{ totalRegistros }}</div>
+                                <div class="mt-1 text-sm font-medium text-secondary">Registros</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="flex items-center gap-3">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-blue-100">
+                                <mat-icon class="text-blue-600"
+                                    [svgIcon]="'heroicons_outline:squares-2x2'"></mat-icon>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold leading-none">{{ totalProductos }}</div>
+                                <div class="mt-1 text-sm font-medium text-secondary">Productos contados</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="flex items-center gap-3">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100">
+                                <mat-icon class="text-green-600"
+                                    [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold leading-none text-green-600">{{ totalAjustados }}</div>
+                                <div class="mt-1 text-sm font-medium text-secondary">Ajustados</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="flex items-center gap-3">
+                            <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-orange-100">
+                                <mat-icon class="text-orange-600"
+                                    [svgIcon]="'heroicons_outline:banknotes'"></mat-icon>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold leading-none text-orange-600">
+                                    {{ currencyNumberFormat.format(totalValorPerdido) }}
+                                </div>
+                                <div class="mt-1 text-sm font-medium text-secondary">Valor perdido</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Charts en dos columnas -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+
+                    <!-- Chart 1: Registros -->
+                    <div class="flex flex-col p-6 bg-card shadow rounded-2xl overflow-hidden">
+                        <div class="text-base font-semibold mb-1">Registros Realizados</div>
+                        <div class="text-xs text-secondary mb-4">
+                            Haz clic en un registro para ver sus productos →
+                        </div>
+
+                        <div class="overflow-y-auto">
+                            <apx-chart
+                                [series]="chartRegistros.series"
+                                [chart]="chartRegistros.chart"
+                                [colors]="chartRegistros.colors"
+                                [plotOptions]="chartRegistros.plotOptions"
+                                [dataLabels]="chartRegistros.dataLabels"
+                                [stroke]="chartRegistros.stroke"
+                                [xaxis]="chartRegistros.xaxis"
+                                [tooltip]="chartRegistros.tooltip"
+                                [legend]="chartRegistros.legend"
+                                [states]="chartRegistros.states"
+                                [noData]="chartRegistros.noData"></apx-chart>
+                        </div>
+
+                        <!-- Leyenda de colores -->
+                        <div class="flex items-center gap-4 mt-3 text-xs text-secondary flex-wrap">
+                            <span class="flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>Todos ajustados
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>Parcialmente ajustados
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded-full bg-gray-400 inline-block"></span>Sin ajustar
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Productos del registro seleccionado -->
+                    <div class="flex flex-col p-6 bg-card shadow rounded-2xl overflow-hidden">
+
+                        <!-- Estado vacío -->
+                        <ng-container *ngIf="!registroSeleccionado">
+                            <div class="flex flex-col items-center justify-center flex-auto min-h-64">
+                                <mat-icon class="text-gray-300 icon-size-16"
+                                    [svgIcon]="'heroicons_outline:cursor-arrow-rays'"></mat-icon>
+                                <p class="mt-4 text-gray-400 text-center text-sm">
+                                    Selecciona un registro del gráfico para ver sus productos
+                                </p>
+                            </div>
+                        </ng-container>
+
+                        <!-- Con registro seleccionado -->
+                        <ng-container *ngIf="registroSeleccionado">
+
+                            <!-- Header del registro -->
+                            <div class="flex items-start justify-between mb-4">
+                                <div>
+                                    <div class="text-base font-semibold">{{ registroSeleccionado.nombre }}</div>
+                                    <div class="text-xs text-secondary mt-0.5">
+                                        {{ registroSeleccionado.fecha }} &nbsp;·&nbsp;
+                                        {{ registroSeleccionado.totalProductos }} productos &nbsp;·&nbsp;
+                                        <span class="text-green-600 font-medium">{{ registroSeleccionado.totalAjustados }} ajustados</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Leyenda diferencias -->
+                            <div class="flex items-center gap-4 mb-3 text-xs text-secondary flex-wrap">
+                                <span class="flex items-center gap-1.5">
+                                    <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>Pérdida
+                                </span>
+                                <span class="flex items-center gap-1.5">
+                                    <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>Sobrante
+                                </span>
+                                <span class="flex items-center gap-1.5">
+                                    <span class="w-3 h-3 rounded-full bg-gray-400 inline-block"></span>Exacto
+                                </span>
+                            </div>
+
+                            <div class="overflow-y-auto">
+                                <apx-chart
+                                    [series]="chartProductosRegistro.series"
+                                    [chart]="chartProductosRegistro.chart"
+                                    [colors]="chartProductosRegistro.colors"
+                                    [plotOptions]="chartProductosRegistro.plotOptions"
+                                    [dataLabels]="chartProductosRegistro.dataLabels"
+                                    [stroke]="chartProductosRegistro.stroke"
+                                    [xaxis]="chartProductosRegistro.xaxis"
+                                    [tooltip]="chartProductosRegistro.tooltip"
+                                    [legend]="chartProductosRegistro.legend"
+                                    [noData]="chartProductosRegistro.noData"></apx-chart>
+                            </div>
+
+                        </ng-container>
+                    </div>
+
+                </div>
+
+            </ng-container>
+        </ng-container>
+
+    </div>
+</div>

@@ -1,0 +1,126 @@
+<div class="flex flex-col flex-auto w-full">
+    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+        <div class="flex flex-col w-full mb-6">
+            <h2 class="text-2xl font-semibold tracking-tight leading-8">Productos Sin Movimiento</h2>
+            <div class="font-medium tracking-tight text-secondary" *ngIf="filtroRangoFecha">Sin ventas registradas: {{ filtroRangoFecha }}</div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="w-full mb-6 p-6 bg-card shadow rounded-2xl">
+            <form [formGroup]="filtroForm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <mat-form-field [appearance]="'outline'">
+                        <mat-label>Fecha Inicio</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerI.open()" autocomplete="off"
+                            matInput [matDatepicker]="pickerI" formControlName="fechaInicio">
+                        <mat-datepicker-toggle matSuffix [for]="pickerI"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerI></mat-datepicker>
+                    </mat-form-field>
+                    <mat-form-field [appearance]="'outline'">
+                        <mat-label>Fecha Fin</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerF.open()" autocomplete="off"
+                            matInput [matDatepicker]="pickerF" formControlName="fechaFin">
+                        <mat-datepicker-toggle matSuffix [for]="pickerF"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerF></mat-datepicker>
+                    </mat-form-field>
+                    <button mat-flat-button color="primary" [disabled]="disabledBuscar" (click)="buscar()">
+                        <mat-icon class="mr-1">search</mat-icon> Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <ng-container *ngIf="skeleton">
+            <div class="w-full grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div *ngFor="let i of [1,2,3]" class="h-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl"></div>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="!skeleton">
+            <!-- Cards -->
+            <div class="w-full grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40">
+                            <mat-icon class="text-red-600">inventory</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight text-red-600">{{ totalSinMovimiento }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Productos sin ventas</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/40">
+                            <mat-icon class="text-orange-600">warehouse</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight">{{ stockInmovilizado }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Unidades inmovilizadas</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/40">
+                            <mat-icon class="text-yellow-600">money_off</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-lg font-bold leading-none tracking-tight">{{ formatCurrency(valorInmovilizado) }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Valor inmovilizado</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Búsqueda y tabla -->
+            <div class="w-full bg-card shadow rounded-2xl overflow-hidden">
+                <div class="flex items-center px-6 py-4 border-b gap-4">
+                    <mat-icon class="text-red-600 mr-1">block</mat-icon>
+                    <span class="font-semibold text-lg">Productos sin ventas en el período</span>
+                    <mat-form-field [appearance]="'outline'" class="ml-auto" style="margin-bottom:-1.25em">
+                        <input matInput [(ngModel)]="textoBusqueda" (ngModelChange)="filtrar()" placeholder="Filtrar...">
+                        <mat-icon matSuffix>search</mat-icon>
+                    </mat-form-field>
+                </div>
+                <div class="overflow-x-auto">
+                    <table mat-table [dataSource]="productosFiltrados" class="w-full">
+                        <ng-container matColumnDef="nombre">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Producto</th>
+                            <td mat-cell *matCellDef="let p" class="font-medium">{{ p.nombre }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="categoria">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Categoría</th>
+                            <td mat-cell *matCellDef="let p">{{ p.categoria?.nombre ?? '—' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="marca">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Marca</th>
+                            <td mat-cell *matCellDef="let p">{{ p.marca?.nombre ?? '—' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="stock">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Stock</th>
+                            <td mat-cell *matCellDef="let p" class="text-right">{{ p.stock ?? 0 }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="precioVenta">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">P. Venta</th>
+                            <td mat-cell *matCellDef="let p" class="text-right">{{ formatCurrency(p.precioVenta) }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="valorInmovilizado">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Valor inmovilizado</th>
+                            <td mat-cell *matCellDef="let p" class="text-right font-bold text-orange-600">{{ formatCurrency(p.valorInmovilizado) }}</td>
+                        </ng-container>
+                        <tr mat-header-row *matHeaderRowDef="columnas; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: columnas;" class="bg-red-50/30 dark:bg-red-900/10"></tr>
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell text-center py-8 text-secondary" [attr.colspan]="columnas.length">
+                                No hay productos sin movimiento en el período — ¡buen trabajo!
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</div>

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"C:\\\\Users\\\\Equipo de Danny\\\\.claude\\\\projects\\\\c--Users-Equipo-de-Danny-OneDrive---UNIVERSIDAD-T-CNICA-DE-AMBATO-Escritorio-Nueva-carpeta-App-2-0-Frontend-VentasLlambo\\\\memory\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\Equipo de Danny\\.claude\\projects\\c--Users-Equipo-de-Danny-OneDrive---UNIVERSIDAD-T-CNICA-DE-AMBATO-Escritorio-Nueva-carpeta-App-2-0-Frontend-VentasLlambo\\memory"
+    ]
+  }
+}

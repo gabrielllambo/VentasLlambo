@@ -1,0 +1,191 @@
+<div class="flex flex-col flex-auto w-full">
+    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+        <!-- Encabezado -->
+        <div class="flex flex-col w-full mb-6">
+            <h2 class="text-2xl font-semibold tracking-tight leading-8">
+                Reporte de Vencimientos — Lotes
+            </h2>
+            <div class="font-medium tracking-tight text-secondary">
+                Estado de vencimiento de los lotes de inventario
+            </div>
+        </div>
+
+        <!-- Skeleton -->
+        <ng-container *ngIf="skeleton">
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div *ngFor="let i of [1,2,3,4]" class="h-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl"></div>
+            </div>
+            <div class="w-full h-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl"></div>
+        </ng-container>
+
+        <ng-container *ngIf="!skeleton">
+
+            <!-- Tarjetas resumen -->
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+
+                <!-- Vencidos -->
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden cursor-pointer ring-2 transition-all"
+                    [ngClass]="filtroEstado === 'vencido' ? 'ring-red-500' : 'ring-transparent hover:ring-red-300'"
+                    (click)="setFiltro(filtroEstado === 'vencido' ? 'todos' : 'vencido')">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40">
+                            <mat-icon class="text-red-600 dark:text-red-400">cancel</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight text-red-600 dark:text-red-400">{{ totalVencidos }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Vencidos</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Críticos -->
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden cursor-pointer ring-2 transition-all"
+                    [ngClass]="filtroEstado === 'critico' ? 'ring-orange-500' : 'ring-transparent hover:ring-orange-300'"
+                    (click)="setFiltro(filtroEstado === 'critico' ? 'todos' : 'critico')">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/40">
+                            <mat-icon class="text-orange-600 dark:text-orange-400">warning</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight text-orange-600 dark:text-orange-400">{{ totalCriticos }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Críticos (≤ 5 días)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerta -->
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden cursor-pointer ring-2 transition-all"
+                    [ngClass]="filtroEstado === 'alerta' ? 'ring-yellow-500' : 'ring-transparent hover:ring-yellow-300'"
+                    (click)="setFiltro(filtroEstado === 'alerta' ? 'todos' : 'alerta')">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/40">
+                            <mat-icon class="text-yellow-600 dark:text-yellow-400">schedule</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight text-yellow-600 dark:text-yellow-400">{{ totalAlerta }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">En alerta (6–15 días)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vigentes -->
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden cursor-pointer ring-2 transition-all"
+                    [ngClass]="filtroEstado === 'vigente' ? 'ring-green-500' : 'ring-transparent hover:ring-green-300'"
+                    (click)="setFiltro(filtroEstado === 'vigente' ? 'todos' : 'vigente')">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40">
+                            <mat-icon class="text-green-600 dark:text-green-400">check_circle</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight text-green-600 dark:text-green-400">{{ totalVigentes }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Vigentes (> 15 días)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chip filtro activo -->
+            <div class="w-full mb-4 flex items-center gap-2" *ngIf="filtroEstado !== 'todos'">
+                <span class="text-sm text-secondary">Filtrado por:</span>
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium"
+                    [ngClass]="getBadgeClass(filtroEstado)">
+                    {{ getBadgeLabel(filtroEstado) }}
+                    <mat-icon class="text-xs cursor-pointer" style="font-size:16px;width:16px;height:16px"
+                        (click)="setFiltro('todos')">close</mat-icon>
+                </span>
+                <span class="text-sm text-secondary ml-1">— {{ lotesFiltrados.length }} lotes</span>
+            </div>
+
+            <!-- Tabla -->
+            <div class="w-full bg-card shadow rounded-2xl overflow-hidden">
+                <div class="flex items-center px-6 py-4 border-b">
+                    <mat-icon class="text-indigo-600 mr-2">date_range</mat-icon>
+                    <span class="font-semibold text-lg">Lotes de Inventario</span>
+                    <span class="ml-2 text-secondary text-sm">({{ lotesFiltrados.length }} lotes)</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table mat-table [dataSource]="lotesFiltrados" class="w-full">
+
+                        <ng-container matColumnDef="producto">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Producto</th>
+                            <td mat-cell *matCellDef="let l" class="font-medium">{{ l.nombreProducto }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="proveedor">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Proveedor</th>
+                            <td mat-cell *matCellDef="let l">{{ l.nombreProveedor || '—' }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="lote">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Lote #</th>
+                            <td mat-cell *matCellDef="let l">{{ l.id }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="fechaVencimiento">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold">Vencimiento</th>
+                            <td mat-cell *matCellDef="let l">{{ formatFecha(l.fechaCaducidad) }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="diasParaVencer">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Días restantes</th>
+                            <td mat-cell *matCellDef="let l" class="text-center">
+                                <ng-container *ngIf="l.diasParaVencer !== null">
+                                    <span [ngClass]="{
+                                        'text-red-600 font-bold': l.estado === 'vencido',
+                                        'text-orange-600 font-semibold': l.estado === 'critico',
+                                        'text-yellow-600': l.estado === 'alerta',
+                                        'text-green-600': l.estado === 'vigente'
+                                    }">
+                                        {{ l.diasParaVencer < 0 ? 'Vencido hace ' + (l.diasParaVencer * -1) + 'd' : l.diasParaVencer + ' días' }}
+                                    </span>
+                                </ng-container>
+                                <ng-container *ngIf="l.diasParaVencer === null">—</ng-container>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="stock">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-right">Stock</th>
+                            <td mat-cell *matCellDef="let l" class="text-right">{{ l.cantidadDisponible }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="estado">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Estado</th>
+                            <td mat-cell *matCellDef="let l" class="text-center">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                    [ngClass]="getBadgeClass(l.estado)">
+                                    {{ getBadgeLabel(l.estado) }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="acciones">
+                            <th mat-header-cell *matHeaderCellDef class="font-semibold text-center">Devolución</th>
+                            <td mat-cell *matCellDef="let l" class="text-center">
+                                <button mat-icon-button color="warn"
+                                    [disabled]="l.cantidadDisponible <= 0"
+                                    [matTooltip]="l.cantidadDisponible <= 0 ? 'Sin stock' : 'Registrar devolución'"
+                                    (click)="abrirDevolucion(l)">
+                                    <mat-icon>assignment_return</mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="columnas; sticky: true"></tr>
+                        <tr mat-row *matRowDef="let row; columns: columnas;"
+                            [ngClass]="getRowClass(row.estado)">
+                        </tr>
+
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell text-center py-8 text-secondary" [attr.colspan]="columnas.length">
+                                No hay lotes con el estado seleccionado
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+        </ng-container>
+    </div>
+</div>

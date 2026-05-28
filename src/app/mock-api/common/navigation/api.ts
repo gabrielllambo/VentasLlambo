@@ -55,6 +55,13 @@ export class NavigationMockApi {
                         icon: 'heroicons_outline:currency-dollar',
                         link: '/admin/ventas/reporte-ganancias',
                     },
+                    {
+                        id: 'reportes.hub-ventas',
+                        title: 'Dashboard',
+                        type: 'basic',
+                        icon: 'heroicons_outline:chart-bar',
+                        link: '/admin/inventario/reportes-hub',
+                    },
                 ],
             },
             {
@@ -99,6 +106,20 @@ export class NavigationMockApi {
                         icon: 'heroicons_outline:exclamation-triangle',
                         link: '/admin/inventario/reporte-perdidas',
                     },
+                    {
+                        id: 'reportes.tomas-fisicas',
+                        title: 'Tomas Físicas',
+                        type: 'basic',
+                        icon: 'heroicons_outline:clipboard-document-check',
+                        link: '/admin/inventario/reporte-tomas',
+                    },
+                    {
+                        id: 'reportes.hub',
+                        title: 'Dashboard',
+                        type: 'basic',
+                        icon: 'heroicons_outline:chart-bar',
+                        link: '/admin/inventario/reportes-hub',
+                    },
                 ],
             },
         ],
@@ -137,6 +158,36 @@ export class NavigationMockApi {
                                 target: parentMenu.flgEnlaceExterno == true ? '_blank' : ''
                             };
                         });
+
+                    // Inyecta Promociones en el grupo Inventario buscando por links de hijos ya construidos
+                    const inventarioParent = dbItems.find(item =>
+                        Array.isArray(item.children) &&
+                        item.children.some(c => typeof c.link === 'string' && c.link.toLowerCase().includes('/inventario'))
+                    );
+                    if (inventarioParent && Array.isArray(inventarioParent.children)) {
+                        const yaExiste = inventarioParent.children.some(c => c.link === '/admin/inventario/promociones');
+                        if (!yaExiste) {
+                            inventarioParent.children.push({
+                                id: 'inventario.promociones',
+                                title: 'Promociones',
+                                type: 'basic',
+                                icon: 'heroicons_outline:tag',
+                                link: '/admin/inventario/promociones',
+                                externalLink: false,
+                            });
+                        }
+                        const yaExisteVencimientos = inventarioParent.children.some(c => c.link === '/admin/inventario/reporte-vencimientos');
+                        if (!yaExisteVencimientos) {
+                            inventarioParent.children.push({
+                                id: 'inventario.vencimientos',
+                                title: 'Vencimientos',
+                                type: 'basic',
+                                icon: 'heroicons_outline:calendar',
+                                link: '/admin/inventario/reporte-vencimientos',
+                                externalLink: false,
+                            });
+                        }
+                    }
 
                     return [...dbItems, this.reportesNav];
                 };

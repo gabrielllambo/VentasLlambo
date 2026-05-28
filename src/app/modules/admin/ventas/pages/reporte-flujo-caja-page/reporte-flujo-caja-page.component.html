@@ -1,0 +1,110 @@
+<div class="flex flex-col flex-auto w-full">
+    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+        <div class="flex flex-col w-full mb-6">
+            <h2 class="text-2xl font-semibold tracking-tight leading-8">Flujo de Caja</h2>
+            <div class="font-medium tracking-tight text-secondary" *ngIf="filtroRangoFecha">{{ filtroRangoFecha }}</div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="w-full mb-6 p-6 bg-card shadow rounded-2xl">
+            <form [formGroup]="filtroForm">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <mat-form-field [appearance]="'outline'">
+                        <mat-label>Fecha Inicio</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerI.open()" autocomplete="off"
+                            matInput [matDatepicker]="pickerI" formControlName="fechaInicio">
+                        <mat-datepicker-toggle matSuffix [for]="pickerI"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerI></mat-datepicker>
+                    </mat-form-field>
+                    <mat-form-field [appearance]="'outline'">
+                        <mat-label>Fecha Fin</mat-label>
+                        <input [min]="minDate" [max]="maxDate" (click)="pickerF.open()" autocomplete="off"
+                            matInput [matDatepicker]="pickerF" formControlName="fechaFin">
+                        <mat-datepicker-toggle matSuffix [for]="pickerF"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerF></mat-datepicker>
+                    </mat-form-field>
+                    <button mat-flat-button color="primary" [disabled]="disabledBuscar" (click)="buscar()">
+                        <mat-icon class="mr-1">search</mat-icon> Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <ng-container *ngIf="skeleton">
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div *ngFor="let i of [1,2,3,4]" class="h-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl"></div>
+            </div>
+            <div class="w-full h-96 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-2xl"></div>
+        </ng-container>
+
+        <ng-container *ngIf="!skeleton">
+            <!-- Cards -->
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/40">
+                            <mat-icon class="text-green-600">arrow_downward</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-lg font-bold leading-none tracking-tight">{{ formatCurrency(totalIngresos) }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Ingresos (Ventas)</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40">
+                            <mat-icon class="text-red-600">arrow_upward</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-lg font-bold leading-none tracking-tight">{{ formatCurrency(totalEgresos) }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Egresos (Compras)</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full"
+                            [ngClass]="saldoNeto >= 0 ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-orange-100 dark:bg-orange-900/40'">
+                            <mat-icon [ngClass]="saldoNeto >= 0 ? 'text-blue-600' : 'text-orange-600'">account_balance</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-lg font-bold leading-none tracking-tight"
+                                [ngClass]="saldoNeto >= 0 ? 'text-blue-600' : 'text-orange-600'">{{ formatCurrency(saldoNeto) }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Saldo Neto</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="flex-0 flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/40">
+                            <mat-icon class="text-indigo-600">percent</mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-2xl font-bold leading-none tracking-tight">{{ formatPct(margenPct) }}</div>
+                            <div class="mt-1 text-sm font-medium text-secondary">Margen sobre ventas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico -->
+            <div class="w-full p-6 bg-card shadow rounded-2xl">
+                <div class="text-lg font-semibold mb-4">Evolución de Ingresos vs Egresos</div>
+                <apx-chart
+                    [series]="chartFlujoCaja.series"
+                    [chart]="chartFlujoCaja.chart"
+                    [colors]="chartFlujoCaja.colors"
+                    [stroke]="chartFlujoCaja.stroke"
+                    [dataLabels]="chartFlujoCaja.dataLabels"
+                    [xaxis]="chartFlujoCaja.xaxis"
+                    [yaxis]="chartFlujoCaja.yaxis"
+                    [tooltip]="chartFlujoCaja.tooltip"
+                    [legend]="chartFlujoCaja.legend"
+                    [noData]="chartFlujoCaja.noData">
+                </apx-chart>
+            </div>
+        </ng-container>
+    </div>
+</div>

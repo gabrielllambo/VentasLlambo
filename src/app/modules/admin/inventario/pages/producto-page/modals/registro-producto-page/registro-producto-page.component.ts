@@ -75,7 +75,7 @@ export class RegistroProductoPageComponent implements OnInit {
     const txtDescripcion = this.registroProductoForm.get('descripcion').value;
     const txtPrecioCompra = 0;
     const txtPrecioVenta = this.registroProductoForm.get('precioVenta').value;
-    const txtStock = 0;
+    const txtStock = Number(this.registroProductoForm.get('stock').value) || 0;
     const txtTipoMedida = this.registroProductoForm.get('tipoMedida').value;
 
     if (FuseValidators.isEmptyInputValue(destinationTimeZoneId)) {

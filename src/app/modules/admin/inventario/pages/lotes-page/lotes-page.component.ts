@@ -66,7 +66,7 @@ export class LotesPageComponent implements OnInit, AfterViewInit, OnDestroy {
     public maxDate: Date = this._toolService.getMaxDateFIlter();
 
     public pageSlice: MatTableDataSource<LoteDTO> = new MatTableDataSource();
-    public allUsuarioSource: UsuarioDTO[];
+    public allUsuarioSource: UsuarioDTO[] = [];
     public allHistorialLoteDataSource: MatTableDataSource<LoteDTO> = new MatTableDataSource();
     public lotesTableColumns: string[] = [
         'codigoLote',
@@ -117,10 +117,11 @@ export class LotesPageComponent implements OnInit, AfterViewInit, OnDestroy {
         this.decodeToken = this.obtenerInfouserInfoLogueado();
         this.filtroLoteForm = this._formBuilder.group({
             usuarios: [''],
+            nombreProducto: [''],
             numeroLote: [''],
 
-            fechaLoteInicio: [this._toolService.getStartDateOfMonth()],
-            fechaLoteFin: [this._toolService.getStartDateOfMonth()],
+            fechaLoteInicio: [null],
+            fechaLoteFin: [null],
 
             montoLoteInicio: [''],
             montoLoteFin: ['']
@@ -132,7 +133,7 @@ export class LotesPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
         const request: any = {
             idUsuario: (this.decodeToken?.idUsuario || '').toString(),
-            nombre: ''
+            nombre: formValue.nombreProducto || ''
         };
 
         if (formValue.numeroLote) {
@@ -165,11 +166,8 @@ export class LotesPageComponent implements OnInit, AfterViewInit, OnDestroy {
             dataLotes: this._inventarioService.GetAllLotesByFilterAsync(request), // <-- Llamada al servicio correcto
         }).subscribe({
             next: (response: any) => {
-                this.allUsuarioSource = response.dataUsuarios;
                 this.allHistorialLoteDataSource.data = response.dataLotes;
                 this.pageSlice.data = [];
-
-                this.filtroLoteForm.get('usuarios')?.setValue(this.allUsuarioSource);
 
                 if (this.allHistorialLoteDataSource.data.length > 0) {
                     this.disabledExportar = Flags.False;
@@ -469,5 +467,26 @@ export class LotesPageComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     isMobilSize(): boolean {
         return this._toolService.isMobilSize();
+    }
+
+    getSemaforoVencimiento(fechaStr: string | null): { clase: string, dot: string } {
+        if (!fechaStr) return { clase: 'bg-gray-100 text-gray-800 border-gray-200', dot: 'bg-gray-400' };
+        
+        const fecha = new Date(fechaStr);
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0); // Ignorar horas para comparar solo las fechas
+        
+        const diffTime = fecha.getTime() - hoy.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 0) {
+            return { clase: 'bg-red-50 text-red-700 border-red-200', dot: 'bg-red-500' }; // Vencido
+        } else if (diffDays <= 5) {
+            return { clase: 'bg-orange-50 text-orange-700 border-orange-200', dot: 'bg-orange-500' }; // Crítico (≤5d)
+        } else if (diffDays <= 15) {
+            return { clase: 'bg-yellow-50 text-yellow-700 border-yellow-200', dot: 'bg-yellow-500' }; // Alerta (6–15d)
+        } else {
+            return { clase: 'bg-green-50 text-green-700 border-green-200', dot: 'bg-green-500' }; // Vigente (>15d)
+        }
     }
 }
