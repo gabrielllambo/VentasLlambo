@@ -53,6 +53,21 @@
     <!-- Estilos iniciales -->
     <style>@-webkit-keyframes fuse-bouncedelay{0%,80%,100%{-webkit-transform:scale(0)}40%{-webkit-transform:scale(1.0)}}body:not(.fuse-splash-screen-hidden){overflow:hidden}</style><link href="assets/styles/splash-screen.css" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="assets/styles/splash-screen.css"></noscript>
 
+    <!-- Redirect handler para GitHub Pages SPA routing -->
+    <script>
+      (function(l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&');
+          });
+          window.history.replaceState(null, null,
+            l.pathname.slice(0, -1) + decoded[0] +
+            (decoded[1] || '') + l.hash
+          );
+        }
+      }(window.location));
+    </script>
+
     <!-- Google Analytics o GTM (opcional) -->
     <script>
         window.dataLayer = window.dataLayer || [];
